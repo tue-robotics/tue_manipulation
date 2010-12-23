@@ -9,7 +9,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/amigo_arm_navigation</url>
   <depend package="roscpp"/>
-
+  <depend package="planning_environment"/>
+  <depend package="robot_self_filter"/>
 </package>
 
 
