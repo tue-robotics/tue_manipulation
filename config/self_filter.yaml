@@ -1,69 +1,55 @@
 self_see_links:
-  - name: l_upper_arm_link
+  - name: upper_arm_left
     padding: .04
-  - name: l_upper_arm_roll_link
+  - name: shoulder_block_left
     padding: .01
-  - name: l_elbow_flex_link
+  - name: shoulder_sphere_left
     padding: .01
-  - name: l_forearm_link
+  - name: fore_arm_left
     padding: .04
-  - name: l_forearm_roll_link
-    padding: .04
-  - name: l_forearm_cam_frame
+  - name: elbow_block_left
     padding: .01
-  - name: l_wrist_flex_link
+  - name: wrist1_block_left
     padding: .01
-  - name: l_wrist_roll_link
+  - name: hand_left
     padding: .04
-  - name: l_gripper_palm_link
+  - name: finger1_left
     padding: .04
-  - name: l_gripper_l_finger_link
+  - name: finger2_left
     padding: .04
-  - name: l_gripper_l_finger_tip_link
+  - name: grippoint_left
     padding: .04
-  - name: l_gripper_r_finger_link
+  - name: upper_arm_right
     padding: .04
-  - name: l_gripper_r_finger_tip_link
-    padding: .04
-  - name: l_shoulder_pan_link
-    padding: .04
-  - name: l_shoulder_lift_link
+  - name: shoulder_block_right
     padding: .01
-  - name: r_upper_arm_link
-    padding: .04
-  - name: r_upper_arm_roll_link
+  - name: shoulder_sphere_right
     padding: .01
-  - name: r_elbow_flex_link
+  - name: fore_arm_right
+    padding: .04
+  - name: elbow_block_right
     padding: .01
-  - name: r_forearm_link
-    padding: .04
-  - name: r_forearm_roll_link
-    padding: .04
-  - name: r_forearm_cam_frame
+  - name: wrist1_block_right
     padding: .01
-  - name: r_wrist_flex_link
+  - name: hand_right
+    padding: .04
+  - name: finger1_right
+    padding: .04
+  - name: finger2_right
+    padding: .04
+  - name: grippoint_right
+    padding: .04
+  - name: torso
     padding: .01
-  - name: r_wrist_roll_link
-    padding: .04
-  - name: r_gripper_palm_link
-    padding: .04
-  - name: r_gripper_l_finger_link
-    padding: .04
-  - name: r_gripper_l_finger_tip_link
-    padding: .04
-  - name: r_gripper_r_finger_link
-    padding: .04
-  - name: r_gripper_r_finger_tip_link
-    padding: .04
-  - name: r_shoulder_pan_link
-    padding: .04
-  - name: r_shoulder_lift_link
+  - name: base
     padding: .01
-  - name: base_laser_link
+  - name: neck
     padding: .01
-  - name: base_link
+  - name: head
     padding: .01
+  - name: top_laser
+    padding: .01
+  - name: base_laser
+    padding: .01    
 
-    
-
-  
+               
