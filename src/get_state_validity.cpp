@@ -17,11 +17,17 @@ int main(int argc, char **argv){
   req.robot_state.joint_state.name.push_back("elbow_pitch_joint_right");
   req.robot_state.joint_state.name.push_back("elbow_roll_joint_right");
   req.robot_state.joint_state.name.push_back("wrist_pitch_joint_right");
-  req.robot_state.joint_state.name.push_back("wrist_roll_joint_right");
+  req.robot_state.joint_state.name.push_back("wrist_yaw_joint_right");
   req.robot_state.joint_state.position.resize(7,0.0);
 
   //these set whatever non-zero joint angle values are desired
-  req.robot_state.joint_state.position[0] = 0.0;
+  req.robot_state.joint_state.position[0] = -1.57;
+  req.robot_state.joint_state.position[1] = 0.0;
+  req.robot_state.joint_state.position[2] = 0.0;
+  req.robot_state.joint_state.position[3] = 1.5708;
+  req.robot_state.joint_state.position[4] = 0.0;
+  req.robot_state.joint_state.position[5] = -1.5708;
+  req.robot_state.joint_state.position[6] = 0.0;
  
   req.robot_state.joint_state.header.stamp = ros::Time::now();
   req.check_collisions = true;
