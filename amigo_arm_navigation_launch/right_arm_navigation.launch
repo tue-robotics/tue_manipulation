@@ -1,0 +1,20 @@
+<launch>
+
+  <include file="$(find amigo_arm_navigation_perception)/launch/laser-perception.launch"/>
+  
+  <include file="$(find amigo_arm_navigation_planning)/launch/ompl_planning.launch"/>
+
+  <include file="$(find amigo_arm_navigation_actions)/launch/environment_server_right_arm.launch"/>
+  
+  <!--
+  <include file="$(find pr2_arm_navigation_actions)/launch/move_right_arm.launch"/>
+
+
+
+  <include file="$(find pr2_arm_navigation_filtering)/launch/trajectory_filter.launch"/>
+
+
+
+  <include file="$(find pr2_arm_navigation_kinematics)/launch/right_arm_collision_free_ik.launch"/>
+-->
+</launch>
