@@ -63,12 +63,12 @@ planner_configs:
   
   KPIECEkConfig2l:
     type: kinematic::KPIECE
-    projection: link l_wrist_roll_link
+    projection: link hand_left 
     celldim: 0.1 0.1 0.1
 
   KPIECEkConfig2r:
     type: kinematic::KPIECE
-    projection: link r_wrist_roll_link
+    projection: link hand_right 
     celldim: 0.1 0.1 0.1
 
   LBKPIECEkConfig1:
@@ -78,12 +78,12 @@ planner_configs:
 
   LBKPIECEkConfig2r:
     type: kinematic::LBKPIECE
-    projection: link r_wrist_roll_link
+    projection: link hand_right
     celldim: 0.1 0.1 0.1
 
   LBKPIECEkConfig2l:
     type: kinematic::LBKPIECE
-    projection: link l_wrist_roll_link
+    projection: link hand_left
     celldim: 0.1 0.1 0.1
 
 ## the definition of the planners that go in each group
