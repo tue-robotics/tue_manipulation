@@ -9,6 +9,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/amigo_arm_navigation_launch</url>
 
+  <depend package="amigo_joint_trajectory_action"/>
+
 </package>
 
 
