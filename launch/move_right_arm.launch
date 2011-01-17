@@ -1,0 +1,30 @@
+<launch>
+
+ <!-- load planning -->
+  <include file="$(find pr2_arm_navigation_planning)/launch/ompl_planning.launch"/>
+
+<!-- load perception -->
+  <include file="$(find amigo_laser_filter)/start_filter.launch"/>
+
+</launch>
+
+
+<launch>
+  <!-- load perception -->
+  <include file="$(find pr2_arm_navigation_perception)/launch/laser-perception.launch"/>
+  <!-- load planning -->
+  <include file="$(find pr2_arm_navigation_planning)/launch/ompl_planning.launch"/>
+
+  <!-- load move_arm -->
+  <include file="$(find pr2_arm_navigation_actions)/launch/move_right_arm.launch"/>
+
+  <!-- load planning_environment -->
+  <include file="$(find pr2_arm_navigation_actions)/launch/environment_server_right_arm.launch"/>
+
+  <!-- load controllers -->
+  <include file="$(find pr2_arm_navigation_filtering)/launch/trajectory_filter.launch"/>
+
+  <!-- load ik -->
+  <include file="$(find pr2_arm_navigation_kinematics)/launch/right_arm_collision_free_ik.launch"/>
+
+</launch>
