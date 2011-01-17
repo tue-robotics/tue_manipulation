@@ -1,0 +1,118 @@
+## This file should be loaded under <robot description>_collision
+
+default_collision_operations:
+  - object1: robot_body
+    object2: arms
+    operation: enable
+
+  - object1: robot_body
+    object2: l_end_effector
+    operation: enable
+
+  - object1: robot_body
+    object2: r_end_effector
+    operation: enable
+
+  - object1: left_arm
+    object2: right_arm
+    operation: enable
+
+  - object1: l_end_effector
+    object2: right_arm
+    operation: enable
+
+  - object1: l_end_effector
+    object2: left_arm
+    operation: enable
+
+  - object1: r_end_effector
+    object2: left_arm
+    operation: enable
+##aangepast:
+  - object1: r_end_effector
+    object2: right_arm
+    operation: disable 
+##
+  - object1: l_end_effector
+    object2: r_end_effector
+    operation: enable
+
+  - object1: upper_arm_right
+    object2: elbow_block_right
+    operation: disable
+
+  - object1: upper_arm_right
+    object2: shoulder_block_right
+    operation: disable
+
+  - object1: upper_arm_right
+    object2: shoulder_sphere_right
+    operation: disable
+
+  - object1: upper_arm_right
+    object2: torso
+    operation: disable
+    
+  - object1: fore_arm_right
+    object2: torso
+    operation: enable
+
+  - object1: fore_arm_right
+    object2: wrist1_block_right
+    operation: disable
+
+  - object1: fore_arm_right
+    object2: elbow_block_right
+    operation: disable   
+    
+  - object1: wrist1_block_right
+    object2: r_end_effector
+    operation: disable  
+    
+  - object1: hand_right
+    object2: wrist1_block_right
+    operation: disable  
+    
+  - object1: upper_arm_left
+    object2: elbow_block_left
+    operation: disable
+
+  - object1: upper_arm_left
+    object2: shoulder_block_left
+    operation: disable
+
+  - object1: upper_arm_left
+    object2: shoulder_sphere_left
+    operation: disable
+
+  - object1: upper_arm_left
+    object2: torso
+    operation: disable
+    
+  - object1: fore_arm_left
+    object2: torso
+    operation: enable
+
+  - object1: fore_arm_left
+    object2: wrist1_block_left
+    operation: disable
+
+  - object1: fore_arm_left
+    object2: elbow_block_left
+    operation: disable   
+    
+  - object1: wrist1_block_left
+    object2: r_end_effector
+    operation: disable     
+
+  - object1: shoulder_block_left
+    object2: shoulder_block_right
+    operation: disable
+
+  - object1: shoulder_block_right
+    object2: robot_body
+    operation: disable
+
+  - object1: shoulder_sphere_right
+    object2: robot_body
+    operation: disable
