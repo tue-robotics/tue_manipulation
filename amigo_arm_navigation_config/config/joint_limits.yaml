@@ -62,7 +62,6 @@ joint_limits:
     has_acceleration_limits: true
     max_acceleration: 1.0
     angle_wraparound: true
-    joint_limits:
     
     
   shoulder_yaw_joint_left:
