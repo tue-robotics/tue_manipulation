@@ -1,0 +1,6 @@
+<launch>
+
+  <include file="$(find amigo_kinematics_constraint_aware)/start_collision_free.launch"/>
+
+
+</launch>
