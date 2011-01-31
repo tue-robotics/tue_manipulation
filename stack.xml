@@ -10,5 +10,8 @@
   <depend stack="motion_planning_environment" /> <!-- planning_environment, planning_environment_msgs -->
   <depend stack="pr2_arm_navigation" /> <!-- pr2_arm_navigation_perception, pr2_arm_navigation_planning -->
   <depend stack="ros" /> <!-- roscpp -->
-
+  <depend stack="amigo_controllers" />
+  <depend stack="amigo_kinematics_constraint_aware" />
+  <depend stack="actionlib" />
+  <depend stack="move_arm_msgs" />
 </stack>
