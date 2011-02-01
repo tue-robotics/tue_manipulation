@@ -22,8 +22,8 @@ int main(int argc, char **argv){
   desired_pose.header.frame_id = "base_link";
   desired_pose.link_name = "grippoint_right";
   desired_pose.pose.position.x = 0.6;
-  desired_pose.pose.position.y = -0.2;
-  desired_pose.pose.position.z = 0.4;
+  desired_pose.pose.position.y = -0.35;
+  desired_pose.pose.position.z = 0.5;
 
   desired_pose.pose.orientation.x = 0.0;
   desired_pose.pose.orientation.y = 0.0;
