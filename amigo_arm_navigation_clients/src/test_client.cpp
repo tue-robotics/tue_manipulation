@@ -13,7 +13,7 @@ int main(int argc, char **argv){
   move_arm_msgs::MoveArmGoal goalA;
 
   goalA.motion_plan_request.group_name = "right_arm";
-  goalA.motion_plan_request.num_planning_attempts = 1;
+  goalA.motion_plan_request.num_planning_attempts = 10;
   goalA.motion_plan_request.planner_id = std::string("");
   goalA.planner_service_name = std::string("ompl_planning/plan_kinematic_path");
   goalA.motion_plan_request.allowed_planning_time = ros::Duration(5.0);
@@ -22,7 +22,7 @@ int main(int argc, char **argv){
   desired_pose.header.frame_id = "base_link";
   desired_pose.link_name = "grippoint_right";
   desired_pose.pose.position.x = 0.6;
-  desired_pose.pose.position.y = -0.35;
+  desired_pose.pose.position.y = -0.40;
   desired_pose.pose.position.z = 0.5;
 
   desired_pose.pose.orientation.x = 0.0;
