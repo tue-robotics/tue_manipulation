@@ -1,5 +1,4 @@
 %joint velocity limits
-
 lim_q1 = 0.3;
 lim_q2 = 0.2;
 lim_q3 = 0.4;
@@ -8,8 +7,8 @@ lim_q5 = 0.25;
 lim_q6 = 0.6;
 lim_q7 = 0.45;
 
+%import data
 points = 371;
-
 seq = [0 :points]
 q1 = pos(:,1).'
 q2 = pos(:,2).'
@@ -19,11 +18,7 @@ q5 = pos(:,5).'
 q6 = pos(:,6).'
 q7 = pos(:,7).'
 
-
-
-
-
-
+%compute gradient
 dq1 = diff(q1)
 dq2 = diff(q2)
 dq3 = diff(q3)
@@ -32,10 +27,7 @@ dq5 = diff(q5)
 dq6 = diff(q6)
 dq7 = diff(q7)
 
-
-
-
-
+%compute max gradient
 max_dq1 = max(abs(dq1));
 max_dq2 = max(abs(dq2));
 max_dq3 = max(abs(dq3));
@@ -44,7 +36,7 @@ max_dq5 = max(abs(dq5));
 max_dq6 = max(abs(dq6));
 max_dq7 = max(abs(dq7));
 
-
+%compute scaling factors
 r1 = lim_q1/max_dq1;
 r2 = lim_q2/max_dq2;
 r3 = lim_q3/max_dq3;
@@ -53,13 +45,13 @@ r5 = lim_q5/max_dq5;
 r6 = lim_q6/max_dq6;
 r7 = lim_q7/max_dq7;
 
-
+%compute max scaling
 scale = abs(min([r1, r2, r3, r4, r5, r6, r7]))
 
+%rescale time
 time = seq/scale;
 
-
-
+%scale gradients -> veloctiy
 dq1_sc = scale * diff(q1);
 dq2_sc = scale * diff(q2);
 dq3_sc = scale * diff(q3);
@@ -68,7 +60,14 @@ dq5_sc = scale * diff(q5);
 dq6_sc = scale * diff(q6);
 dq7_sc = scale * diff(q7);
 
-
+%compute accelerations
+ddq1_sc = diff(dq1_sc);
+ddq2_sc = diff(dq2_sc);
+ddq3_sc = diff(dq3_sc);
+ddq4_sc = diff(dq4_sc);
+ddq5_sc = diff(dq5_sc);
+ddq6_sc = diff(dq6_sc);
+ddq7_sc = diff(dq7_sc);
 
 %% plotting
 
@@ -136,4 +135,16 @@ plot(time,lim_q4*ones(1,points+1),'g--')
 plot(time,lim_q5*ones(1,points+1),'m--')
 plot(time,lim_q6*ones(1,points+1),'c--')
 plot(time,lim_q7*ones(1,points+1),'y--')
+xlabel('time [s]')
+
+figure
+plot(time,[0 0 ddq1_sc],'b')
+hold
+plot(time,[0 0 ddq2_sc],'r')
+plot(time,[0 0 ddq3_sc],'k')
+plot(time,[0 0 ddq4_sc],'g')
+plot(time,[0 0 ddq5_sc],'m')
+plot(time,[0 0 ddq6_sc],'c')
+plot(time,[0 0 ddq7_sc],'y')
+title('accelerations')
 xlabel('time [s]')
