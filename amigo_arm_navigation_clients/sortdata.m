@@ -32,7 +32,7 @@ plot(time, pos(:,5),'m')
 plot(time, pos(:,6),'c')
 plot(time, pos(:,7),'y')
 title('Unfiltered trajectory');
-xlabel('time [s]')
+xlabel('seq')
 ylabel('joint angles [rad]')
 
 %% FILTERED
