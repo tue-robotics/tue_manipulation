@@ -23,9 +23,9 @@ int main(int argc, char **argv){
   goalA.motion_plan_request.goal_constraints.position_constraints[0].header.frame_id = "base_link";
     
   goalA.motion_plan_request.goal_constraints.position_constraints[0].link_name = "grippoint_right";
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.x = 0.4;
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.y = -0.4;
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.z = 0.5;
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.x = 0.2;
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.y = -0.2;
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.z = 0.3;
     
   goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.type = geometric_shapes_msgs::Shape::BOX;
   goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.dimensions.push_back(0.02);
@@ -72,14 +72,14 @@ int main(int argc, char **argv){
   }
 
   ros::Duration(1.0).sleep();
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.x = 0.60;
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.y = -0.288;
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.z = 0;
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.x = 0.6;
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.y = -0.4;
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.z = 0.5;
 
   goalA.motion_plan_request.path_constraints.orientation_constraints.resize(1);
-  goalA.motion_plan_request.path_constraints.orientation_constraints[0].header.frame_id = "torso_lift_link";
+  goalA.motion_plan_request.path_constraints.orientation_constraints[0].header.frame_id = "base_link";
   goalA.motion_plan_request.path_constraints.orientation_constraints[0].header.stamp = ros::Time::now();
-  goalA.motion_plan_request.path_constraints.orientation_constraints[0].link_name = "r_wrist_roll_link";
+  goalA.motion_plan_request.path_constraints.orientation_constraints[0].link_name = "grippoint_right";
    
   goalA.motion_plan_request.path_constraints.orientation_constraints[0].orientation.x = 0.0;
   goalA.motion_plan_request.path_constraints.orientation_constraints[0].orientation.y = 0.0;
