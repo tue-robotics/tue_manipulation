@@ -12,7 +12,7 @@
   <depend package="pr2_arm_navigation_config"/>
   <depend package="planning_environment"/>
   <depend package="trajectory_filter_server"/>
-  <depend package="move_arm"/>
+  <depend package="move_arm_HACK"/>
   <depend package="pr2_controller_manager" />
   <depend package="joint_trajectory_action" />
   <depend package="pr2_msgs" />
