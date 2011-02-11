@@ -10,7 +10,7 @@
 
   <include file="$(find amigo_arm_navigation_kinematics)/launch/right_arm_collision_free_ik.launch"/>
 
-
+  <include file="$(find amigo_arm_navigation_objects)/launch/display_planner_collision_model.launch"/>
 
 
 

@@ -70,9 +70,10 @@ Laser\ Scan2..IntensityMin\ ColorB=0
 Laser\ Scan2..IntensityMin\ Intensity=101
 Markers.Enabled=1
 Markers.Marker\ Topic=/kinematics_collisions
-Markers.fore_arm_right\+points=1
 Markers2.Enabled=1
 Markers2.Marker\ Topic=/environment_server_contact_markers
+Markers3.Enabled=1
+Markers3.Marker\ Topic=/collision_model_markers/environment_server_right_arm
 Planning\ Robot\ Planning3\ Link\ baseShow\ Axes=0
 Planning\ Robot\ Planning3\ Link\ baseShow\ Trail=0
 Planning\ Robot\ Planning3\ Link\ base_laserShow\ Axes=0
@@ -509,8 +510,8 @@ Transforms.Update\ Interval=1
 Tool\ 2D\ Nav\ GoalTopic=move_base_simple/goal
 Tool\ 2D\ Pose\ EstimateTopic=initialpose
 Camera\ Type=rviz::OrbitViewController
-Camera\ Config=0.896 4.89177 1.69758 0.19798 0.275647 -0.10472
-Property\ Grid\ State=selection=;expanded=Transforms.Enabled.Transforms.StatusTopStatus,Transforms.Enabled.Transforms.Tree,Laser Scan.Enabled.Laser Scan.StatusTopStatus,Laser Scan2.Enabled.Laser Scan2.StatusTopStatus,Point Cloud.Enabled.Point Cloud.StatusTopStatus,Point Cloud2.Enabled.Point Cloud2.StatusTopStatus,Point Cloud3.Enabled.Point Cloud3.StatusTopStatus,CollisionMap.Enabled.CollisionMap.StatusTopStatus,Planning.Enabled.Planning.StatusTopStatus,Planning.Enabled.Planning Robot PlanningLinks,Markers.Enabled.Markers.Namespaces,Planning2.Enabled.Planning2.StatusTopStatus,Planning2.Enabled.Planning Robot Planning2Links,Planning3.Enabled,Planning3.Enabled.Planning3.StatusTopStatus,Markers2.Enabled.Markers2.Namespaces;scrollpos=0,0;splitterpos=242,501;ispageselected=1
+Camera\ Config=0.176 5.34675 2.36795 0.19798 0.275647 -0.10472
+Property\ Grid\ State=selection=;expanded=Transforms.Enabled.Transforms.StatusTopStatus,Transforms.Enabled.Transforms.Tree,Laser Scan.Enabled.Laser Scan.StatusTopStatus,Laser Scan2.Enabled.Laser Scan2.StatusTopStatus,Point Cloud.Enabled.Point Cloud.StatusTopStatus,Point Cloud2.Enabled.Point Cloud2.StatusTopStatus,Point Cloud3.Enabled.Point Cloud3.StatusTopStatus,CollisionMap.Enabled.CollisionMap.StatusTopStatus,Planning.Enabled.Planning.StatusTopStatus,Planning.Enabled.Planning Robot PlanningLinks,Markers.Enabled.Markers.Namespaces,Planning2.Enabled.Planning2.StatusTopStatus,Planning2.Enabled.Planning Robot Planning2Links,Planning3.Enabled,Planning3.Enabled.Planning3.StatusTopStatus,Markers2.Enabled.Markers2.Namespaces,Markers3.Enabled,Markers3.Enabled.Markers3.Namespaces;scrollpos=0,0;splitterpos=332,680;ispageselected=1
 [Display0]
 Name=Grid
 Package=rviz
@@ -567,3 +568,9 @@ ClassName=motion_planning_rviz_plugin::PlanningDisplay
 Name=Markers2
 Package=rviz
 ClassName=rviz::MarkerDisplay
+[Display14]
+Name=Markers3
+Package=rviz
+ClassName=rviz::MarkerDisplay
+[Markers3.]
+environment_server_right_arm---pole=1
