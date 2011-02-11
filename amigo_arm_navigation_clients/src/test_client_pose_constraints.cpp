@@ -13,7 +13,7 @@ int main(int argc, char **argv){
   move_arm_msgs::MoveArmGoal goalA;
 
   goalA.motion_plan_request.group_name = "right_arm";
-  goalA.motion_plan_request.num_planning_attempts = 10;
+  goalA.motion_plan_request.num_planning_attempts = 5;
   goalA.motion_plan_request.allowed_planning_time = ros::Duration(5.0);
 
   nh.param<std::string>("planner_id",goalA.motion_plan_request.planner_id,std::string(""));
@@ -28,9 +28,9 @@ int main(int argc, char **argv){
   goalA.motion_plan_request.goal_constraints.position_constraints[0].position.z = 0.5;
     
   goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.type = geometric_shapes_msgs::Shape::BOX;
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.dimensions.push_back(0.02);
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.dimensions.push_back(0.02);
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.dimensions.push_back(0.02);
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.dimensions.push_back(0.05);
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.dimensions.push_back(0.05);
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_shape.dimensions.push_back(0.05);
 
   goalA.motion_plan_request.goal_constraints.position_constraints[0].constraint_region_orientation.w = 1.0;
   goalA.motion_plan_request.goal_constraints.position_constraints[0].weight = 1.0;
@@ -44,9 +44,9 @@ int main(int argc, char **argv){
   goalA.motion_plan_request.goal_constraints.orientation_constraints[0].orientation.z = 0.0;
   goalA.motion_plan_request.goal_constraints.orientation_constraints[0].orientation.w = 1.0;
     
-  goalA.motion_plan_request.goal_constraints.orientation_constraints[0].absolute_roll_tolerance = 0.04;
-  goalA.motion_plan_request.goal_constraints.orientation_constraints[0].absolute_pitch_tolerance = 0.04;
-  goalA.motion_plan_request.goal_constraints.orientation_constraints[0].absolute_yaw_tolerance = 0.04;
+  goalA.motion_plan_request.goal_constraints.orientation_constraints[0].absolute_roll_tolerance = 0.1;
+  goalA.motion_plan_request.goal_constraints.orientation_constraints[0].absolute_pitch_tolerance = 0.1;
+  goalA.motion_plan_request.goal_constraints.orientation_constraints[0].absolute_yaw_tolerance = 0.1;
 
   goalA.motion_plan_request.goal_constraints.orientation_constraints[0].weight = 1.0;
 
