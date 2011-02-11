@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
   mapping_msgs::CollisionObject cylinder_object;
   cylinder_object.id = "pole";
   cylinder_object.operation.operation = mapping_msgs::CollisionObjectOperation::ADD;
-  cylinder_object.header.frame_id = "base_link";
+  cylinder_object.header.frame_id = "/base_link";
   cylinder_object.header.stamp = ros::Time::now();
   geometric_shapes_msgs::Shape object;
   object.type = geometric_shapes_msgs::Shape::CYLINDER;
