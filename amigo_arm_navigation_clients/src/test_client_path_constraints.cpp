@@ -50,6 +50,7 @@ int main(int argc, char **argv){
 
   goalA.motion_plan_request.goal_constraints.orientation_constraints[0].weight = 1.0;
 
+  for (int i = 0; i < 50 ; i++){
   if (nh.ok())
   {
     bool finished_within_time = false;
@@ -64,16 +65,20 @@ int main(int argc, char **argv){
     {
       actionlib::SimpleClientGoalState state = move_arm.getState();
       bool success = (state == actionlib::SimpleClientGoalState::SUCCEEDED);
-      if(success)
+      if(success){
         ROS_INFO("Action finished: %s",state.toString().c_str());
+        break;
+	  }
       else
         ROS_INFO("Action failed: %s",state.toString().c_str());
     }
   }
-
-  ros::Duration(1.0).sleep();
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.x = 0.6;
-  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.y = -0.45;
+  }
+  
+  for (int i = 0; i < 50 ; i++){
+  ///ros::Duration(1.0).sleep();
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.x = 0.31;
+  goalA.motion_plan_request.goal_constraints.position_constraints[0].position.y = -0.3;
   goalA.motion_plan_request.goal_constraints.position_constraints[0].position.z = 0.5;
 
   goalA.motion_plan_request.path_constraints.orientation_constraints.resize(1);
@@ -105,11 +110,14 @@ int main(int argc, char **argv){
     {
       actionlib::SimpleClientGoalState state = move_arm.getState();
       bool success = (state == actionlib::SimpleClientGoalState::SUCCEEDED);
-      if(success)
+      if(success){
         ROS_INFO("Action finished: %s",state.toString().c_str());
+        break;
+	  }
       else
         ROS_INFO("Action failed: %s",state.toString().c_str());
     }
   }
+}
   ros::shutdown();
 }
