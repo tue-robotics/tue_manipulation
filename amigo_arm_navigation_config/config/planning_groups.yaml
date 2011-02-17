@@ -31,7 +31,6 @@ groups:
       hand_left
       finger1_left
       finger2_left
-      grippoint_left
 
   - name: right_arm
     joints:
@@ -52,7 +51,6 @@ groups:
       hand_right
       finger1_right
       finger2_right
-      grippoint_right
       
   - name: arms
     joints: 
@@ -80,7 +78,6 @@ groups:
       hand_left
       finger1_left
       finger2_left
-      grippoint_left
       shoulder_block_right
       shoulder_sphere_right
       upper_arm_right
@@ -90,7 +87,6 @@ groups:
       hand_right
       finger1_right
       finger2_right
-      grippoint_right
     
     planner_configs:
       RRTkConfig2 SBLkConfig2 
@@ -100,11 +96,11 @@ groups:
       hand_left
       finger1_left
       finger2_left
-      grippoint_left
+
 
   - name: r_end_effector
     links: 
       hand_right
       finger1_right
       finger2_right
-      grippoint_right
+
