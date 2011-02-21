@@ -18,7 +18,7 @@ int main(int argc, char **argv){
   usleep(4000000);
   
   goalA.motion_plan_request.group_name = "right_arm";
-  goalA.motion_plan_request.num_planning_attempts = 5;
+  goalA.motion_plan_request.num_planning_attempts = 1;
   goalA.motion_plan_request.allowed_planning_time = ros::Duration(5.0);
 
   nh.param<std::string>("planner_id",goalA.motion_plan_request.planner_id,std::string(""));
