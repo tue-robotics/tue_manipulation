@@ -5,8 +5,11 @@
 
 
  <!-- send object urdf to param server -->
+  <!--
   <param name="object_description" command="$(find xacro)/xacro.py $(find amigo_kinematics_constraint_aware)/object.urdf" />
   <node name="spawn_object" pkg="gazebo_tools" type="gazebo_model" args="-p object_description -x -4.69 -y 2.65 -z 0.8  -R 0 -P 0 -Y 0 spawn object_description" respawn="false" output="screen" />
+-->
+
 
   <!-- start controller manager (rviz) -->
   <include file="$(find pr2_controller_manager)/controller_manager.launch"/>
