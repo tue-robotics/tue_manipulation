@@ -96,6 +96,7 @@ groups:
       hand_left
       finger1_left
       finger2_left
+      grippoint_left
 
 
   - name: r_end_effector
@@ -103,4 +104,5 @@ groups:
       hand_right
       finger1_right
       finger2_right
+      grippoint_right
 

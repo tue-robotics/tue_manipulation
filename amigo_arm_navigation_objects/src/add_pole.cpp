@@ -23,11 +23,11 @@ int main(int argc, char** argv) {
   geometric_shapes_msgs::Shape object;
   object.type = geometric_shapes_msgs::Shape::CYLINDER;
   object.dimensions.resize(2);
-  object.dimensions[0] = .013;
+  object.dimensions[0] = .008;
   object.dimensions[1] = .75;
   geometry_msgs::Pose pose;
   pose.position.x = .35;
-  pose.position.y = -.3;
+  pose.position.y = -.32;
   pose.position.z = .375;
   pose.orientation.x = 0;
   pose.orientation.y = 0;

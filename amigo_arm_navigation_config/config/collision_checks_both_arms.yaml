@@ -116,3 +116,11 @@ default_collision_operations:
   - object1: shoulder_sphere_right
     object2: robot_body
     operation: disable
+    
+  - object1: grippoint_right
+    object2: r_end_effector
+    operation: disable
+    
+  - object1: grippoint_left
+    object2: l_end_effector
+    operation: disable
