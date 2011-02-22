@@ -17,7 +17,7 @@
   <include file="$(find amigo_controllers)/controllers.launch"/>
 
   <!-- load robot -->
-  <param name="robot_description" textfile="$(find amigo_simulation_model)/robot.urdf" />
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find amigo_simulation_model)/robot.urdf.xacro' " />
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="spawn_single_link" pkg="gazebo_tools" type="gazebo_model" args="-p robot_description spawn  -x -3 -y 2.3 -z 0.1 -Y 1.57" respawn="false" />
