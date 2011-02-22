@@ -22,5 +22,12 @@ link_padding:
     padding: .0000
   - link: grippoint_left
     padding: .0000
+  - link: fore_arm_left
+    padding: .01
+  - link: fore_arm_right
+    padding: .01
+    
+    
+    
   - link: attached
     padding: .001

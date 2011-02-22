@@ -30,5 +30,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(test_client src/test_client.cpp)
+rosbuild_add_executable(test_client_move_right src/test_client_move_right.cpp)
+rosbuild_add_executable(test_client_move_left src/test_client_move_left.cpp)
 rosbuild_add_executable(test_client_pose_constraints src/test_client_pose_constraints.cpp)
 rosbuild_add_executable(test_client_path_constraints src/test_client_path_constraints.cpp)

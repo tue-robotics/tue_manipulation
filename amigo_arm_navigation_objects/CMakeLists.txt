@@ -30,3 +30,4 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(add_pole src/add_pole.cpp)
+rosbuild_add_executable(attach_obj src/attach_obj.cpp)
