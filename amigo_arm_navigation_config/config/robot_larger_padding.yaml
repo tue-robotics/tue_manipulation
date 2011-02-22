@@ -7,16 +7,16 @@ link_padding:
   - link: right_arm 
     padding: .02
   - link: r_end_effector
-    padding: .02
+    padding: .005
   - link: l_end_effector
-    padding: .02
+    padding: .005
   - link: finger1_left
-    padding: .01
+    padding: .001
   - link: finger2_left
-    padding: .01
+    padding: .001
   - link: finger1_right
-    padding: .01
+    padding: .001
   - link: finger2_right
-    padding: .01
+    padding: .001
   - link: attached
     padding: .01

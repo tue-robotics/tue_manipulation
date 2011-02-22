@@ -18,5 +18,9 @@ link_padding:
     padding: .001
   - link: finger2_right
     padding: .001
+  - link: grippoint_right
+    padding: .0000
+  - link: grippoint_left
+    padding: .0000
   - link: attached
     padding: .001
