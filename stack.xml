@@ -4,14 +4,18 @@
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/amigo_arm_navigation</url>
-  <depend stack="collision_environment" /> <!-- collision_map -->
-  <depend stack="laser_pipeline" /> <!-- laser_assembler -->
-  <depend stack="motion_planning_common" /> <!-- robot_self_filter -->
-  <depend stack="motion_planning_environment" /> <!-- planning_environment, planning_environment_msgs -->
-  <depend stack="pr2_arm_navigation" /> <!-- pr2_arm_navigation_perception, pr2_arm_navigation_planning -->
-  <depend stack="ros" /> <!-- roscpp -->
-  <depend stack="amigo_controllers" />
-  <depend stack="amigo_kinematics_constraint_aware" />
-  <depend stack="actionlib" />
-  <depend stack="move_arm_msgs" />
+  <depend stack="arm_navigation" /> <!-- collision_free_arm_trajectory_controller, move_arm_msgs -->
+  <depend stack="common" /> <!-- actionlib -->
+  <depend stack="common_msgs" /> <!-- geometry_msgs -->
+  <depend stack="geometry" /> <!-- tf -->
+  <depend stack="motion_planning_common" /> <!-- geometric_shapes_msgs, planning_environment, mapping_msgs, collision_environment_msgs -->
+  <depend stack="pr2_arm_navigation" /> <!-- pr2_arm_navigation_config -->
+  <depend stack="pr2_common" /> <!-- pr2_msgs -->
+  <depend stack="pr2_controllers" /> <!-- joint_trajectory_action -->
+  <depend stack="pr2_mechanism" /> <!-- pr2_controller_manager -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- pr2_controller_manager, move_arm_HACK, actionlib, geometric_shapes_msgs, collision_environment_msgs, geometry_msgs, pr2_msgs, tf, mapping_msgs, move_arm_msgs, roscpp -->
+  <depend stack="trajectory_filters" /> <!-- trajectory_filter_server -->
+  <depend stack="trunk" /> <!-- amigo_joint_trajectory_action, move_arm_HACK -->
+
 </stack>
