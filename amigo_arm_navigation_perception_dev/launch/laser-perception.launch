@@ -1,5 +1,0 @@
-<launch>
-
-  <include file="$(find amigo_laser_filter)/start_filter.launch" />
-  
-</launch>
