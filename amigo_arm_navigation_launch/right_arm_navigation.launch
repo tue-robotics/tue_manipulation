@@ -20,7 +20,7 @@
   <include file="$(find amigo_trajectory_filter)/start.launch"/> <!--done-->
   
   <include file="$(find amigo_joint_trajectory_publisher)/start.launch"/> <!--done-->
-
+  
 
 
 </launch>
