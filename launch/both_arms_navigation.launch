@@ -14,8 +14,8 @@
   <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_publisher_start_right.launch"/>
    
   <!-- load l_joint_trajecory_action and publisher actionlib -->
-  <include file="$(find amigo_arm_navigation)/joint_trajectory_action_start_start_left.launch"/>
-  <include file="$(find amigo_arm_navigation)/joint_trajectory_publisher_start_left.launch"/>  
+  <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_action_start_left.launch"/>
+  <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_publisher_start_left.launch"/>  
 
 
   <include file="$(find planning_environment)/launch/environment_server.launch">
