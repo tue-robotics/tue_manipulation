@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="move_arm" type="move_arm_simple_action" name="amigo_move_r_end_effector">
+        <param name="group" type="string" value="r_end_effector" />
+        <remap from="arm_ik" to="amigo_r_end_effector_kinematics/get_constraint_aware_ik" />
+        <param name="controller_action_name" type="string" value="r_end_effector_controller/follow_joint_trajectory" />
+    </node>
+</launch>

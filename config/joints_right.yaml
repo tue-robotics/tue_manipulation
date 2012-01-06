@@ -1,0 +1,13 @@
+r_joint_trajectory_action:
+  joints:
+    - shoulder_yaw_joint_right
+    - shoulder_pitch_joint_right
+    - shoulder_roll_joint_right
+    - elbow_pitch_joint_right
+    - elbow_roll_joint_right
+    - wrist_pitch_joint_right
+    - wrist_yaw_joint_right
+    
+  root_frame: base_link
+  tip_frame: grippoint_right  
+##constraints weggehaald

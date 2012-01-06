@@ -1,0 +1,35 @@
+<launch>
+
+  <!-- load perception -->
+<!--  <include file="$(find pr2_arm_navigation_perception)/launch/laser-perception.launch"/> -->
+ 
+  <include file="$(find amigo_arm_navigation)/launch/amigo_planning_environment.launch"/> 
+  
+    <!-- load move_arm -->
+  <include file="$(find amigo_arm_navigation)/launch/move_left_arm.launch"/> 
+  <include file="$(find amigo_arm_navigation)/launch/move_right_arm.launch"/>
+ 
+  <!-- load r_joint_trajecory_action and publisher actionlib -->
+  <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_action_start_right.launch"/>
+  <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_publisher_start_right.launch"/>
+   
+  <!-- load l_joint_trajecory_action and publisher actionlib -->
+  <include file="$(find amigo_arm_navigation)/joint_trajectory_action_start_start_left.launch"/>
+  <include file="$(find amigo_arm_navigation)/joint_trajectory_publisher_start_left.launch"/>  
+
+
+  <include file="$(find planning_environment)/launch/environment_server.launch"/>
+   <arg name="use_monitor" value="true" />
+    <arg name="use_collision_map" value="false" />
+  </include> 
+
+  <!-- load planning -->
+  <include file="$(find amigo_arm_navigation)/launch/ompl_planning.launch" />
+
+  <!-- load ik -->
+ <include file="$(find amigo_arm_navigation)/launch/constraint_aware_kinematics.launch" />
+ 
+   <!-- load filters -->
+ <include file="$(find amigo_arm_navigation)/launch/trajectory_filter_server.launch" />
+
+</launch>
