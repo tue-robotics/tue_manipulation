@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="move_arm" type="move_arm_simple_action" output="screen" name="move_right_arm">    
+  <node pkg="move_arm" type="move_arm_simple_action" name="move_right_arm">    
    
     <remap from="robot_description" to="robot_description" />
     <remap from="joint_state" to="joint_states" />

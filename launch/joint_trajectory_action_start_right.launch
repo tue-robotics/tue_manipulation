@@ -3,7 +3,7 @@
     <rosparam file="$(find amigo_arm_navigation)/config/joints_right.yaml" command="load" />
     <rosparam file="$(find amigo_arm_navigation)/config/tolerances_right.yaml" command="load" /> 
 
-   <node pkg="amigo_arm_navigation" type="joint_trajectory_action" respawn="false" name="r_joint_trajectory_action" output="screen">
+   <node pkg="amigo_arm_navigation" type="joint_trajectory_action" respawn="false" name="r_joint_trajectory_action">
     <remap from = "controller_command" to = "arm_right_controller/controller_command"/>
     <remap from = "get_fk" to = "/amigo_right_arm_kinematics/get_fk"/> 
    <remap from = "measured_tip_position" to = "ik_collision_free_right/grippoint_right/measured_tip_position"/>
