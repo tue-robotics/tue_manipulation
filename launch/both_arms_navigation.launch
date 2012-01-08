@@ -1,7 +1,4 @@
 <launch>
-
-  <!-- load perception -->
-<!--  <include file="$(find pr2_arm_navigation_perception)/launch/laser-perception.launch"/> -->
  
   <include file="$(find amigo_arm_navigation)/launch/amigo_planning_environment.launch"/> 
   
