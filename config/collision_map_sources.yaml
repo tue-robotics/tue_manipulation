@@ -1,0 +1,5 @@
+cloud_sources:
+  - name: base_scan_cloud
+    frame_subsample: 1
+    point_subsample: 1
+    sensor_frame: scan_to_cloud_filter_chain_tilt_laser
