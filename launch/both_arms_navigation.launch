@@ -28,13 +28,21 @@
  
    <!-- load filters -->
  <include file="$(find amigo_arm_navigation)/launch/trajectory_filter_server.launch" />
+  <!-- Self filter -->
+   <node pkg="robot_self_filter" type="self_filter" respawn="true" name="laser_self_filter" output="screen">
+     <remap from="cloud_in" to="/camera/depth/points" />
+     <remap from="cloud_out" to="/camera/depth/points_self_filtered" />
+     <param name="sensor_frame" type="string" value="/openni_depth_optical_frame" />        
+     <param name="subsample_value" type="double" value=".01"/>
+     <rosparam command="load" file="$(find amigo_arm_navigation)/config/self_filter_amigo.yaml" />
+  </node>
 
   <!-- Collision map -->
   <node name="collision_map_self_occ_node" pkg="collision_map" type="collision_map_self_occ_node" output="screen"/>
 
   <!-- Full collider node -->
   <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen">
-     <param name="fixed_frame" type="string" value="base_link" />
+     <param name="fixed_frame" type="string" value="/base_link" />
      <param name="resolution" type="double" value="0.025" />
      <param name="max_range" type="double" value="2.5" />
      <param name="publish_static_over_dynamic_map" value="true" />
@@ -46,9 +54,10 @@
      <remap from="collision_map_out" to="collision_map_occ" />
      <remap from="point_cloud_out" to="octomap_point_cloud" />
 
-     <!--<rosparam command="load" file="$(find pr2_arm_navigation_perception)/config/collision_map_sources.yaml"/> -->
-
      <rosparam command="load" file="$(find amigo_arm_navigation)/config/collision_map_sources.yaml" />
+
+     <!--<rosparam command="load" file="$(find amigo_arm_navigation)/config/self_filter_amigo.yaml" />-->
+
    </node>
 
 </launch>

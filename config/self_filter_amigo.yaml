@@ -2,9 +2,40 @@ min_sensor_dist: .05
 self_see_default_padding: .01
 self_see_default_scale: 1.0
 self_see_links:
-  - name: base_link
-    padding: .04
-  - name: torso
-    padding: .04  
-  - name: torso_slider
-    padding: .04  
+  - name: hand_left
+    padding: .06
+  - name: finger1_left
+    padding: .06  
+  - name: finger2_left
+    padding: .06 
+  - name: elbow_link4_left
+    padding: .06 
+  - name: fore_arm_left
+    padding: .06 
+  - name: shoulder_link1_left
+    padding: .06 
+  - name: shoulder_link2_left
+    padding: .06 
+  - name: upper_arm_left
+    padding: .06 
+  - name: wrist_link6_left
+    padding: .06 
+  - name: hand_right
+    padding: .06
+  - name: finger1_right
+    padding: .06  
+  - name: finger2_right
+    padding: .06 
+  - name: elbow_link4_right
+    padding: .06 
+  - name: fore_arm_right
+    padding: .06 
+  - name: shoulder_link1_right
+    padding: .06 
+  - name: shoulder_link2_right
+    padding: .06 
+  - name: upper_arm_right
+    padding: .06 
+  - name: wrist_link6_right
+    padding: .06 
+

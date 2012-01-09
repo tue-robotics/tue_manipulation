@@ -78,24 +78,24 @@ if __name__ == '__main__':
 	desired_pose.header.frame_id = "base_link"
 	desired_pose.link_name = "grippoint_" + side;
 	
-	#desired_pose.pose.position.x = -0.2;
-	#desired_pose.pose.position.y =  0.05;
-	#desired_pose.pose.position.z = 0.30;
-
-	#desired_pose.pose.orientation.x = 0.0;
-	#desired_pose.pose.orientation.y = 0.6;
-	#desired_pose.pose.orientation.z = 0.0;
-	#desired_pose.pose.orientation.w = 1.0;
-	
-	
-	desired_pose.pose.position.x = 0.5;
+	desired_pose.pose.position.x = -0.2;
 	desired_pose.pose.position.y =  0.05;
 	desired_pose.pose.position.z = 0.30;
 
 	desired_pose.pose.orientation.x = 0.0;
-	desired_pose.pose.orientation.y = 0.1;
+	desired_pose.pose.orientation.y = 0.6;
 	desired_pose.pose.orientation.z = 0.0;
-	desired_pose.pose.orientation.w = 0.9;
+	desired_pose.pose.orientation.w = 1.0;
+	
+	
+	#desired_pose.pose.position.x = 0.4;
+	#desired_pose.pose.position.y =  0.05;
+	#desired_pose.pose.position.z = 0.30;
+
+	#desired_pose.pose.orientation.x = 0.0;
+	#desired_pose.pose.orientation.y = 0.1;
+	#desired_pose.pose.orientation.z = 0.0;
+	#desired_pose.pose.orientation.w = 0.9;
 
 	desired_pose.absolute_position_tolerance.x = 0.02;
 	desired_pose.absolute_position_tolerance.y = 0.02;
