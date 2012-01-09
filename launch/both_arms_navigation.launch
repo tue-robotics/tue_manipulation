@@ -17,7 +17,7 @@
 
   <include file="$(find planning_environment)/launch/environment_server.launch">
    <arg name="use_monitor" value="true" />
-    <arg name="use_collision_map" value="false" />
+    <arg name="use_collision_map" value="true" />
   </include> 
 
   <!-- load planning -->
@@ -30,10 +30,10 @@
  <include file="$(find amigo_arm_navigation)/launch/trajectory_filter_server.launch" />
 
   <!-- Collision map -->
-  <node name="collision_map_ground_plane_test" pkg="collision_map" type="collision_map_ground_plane_test" output="screen"/>
+  <node name="collision_map_self_occ_node" pkg="collision_map" type="collision_map_self_occ_node" output="screen"/>
 
   <!-- Full collider node -->
-  <!--  <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen">
+  <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen">
      <param name="fixed_frame" type="string" value="base_link" />
      <param name="resolution" type="double" value="0.025" />
      <param name="max_range" type="double" value="2.5" />
@@ -46,9 +46,9 @@
      <remap from="collision_map_out" to="collision_map_occ" />
      <remap from="point_cloud_out" to="octomap_point_cloud" />
 
-     <rosparam command="load" file="$(find pr2_arm_navigation_perception)/config/collision_map_sources.yaml"/>
+     <!--<rosparam command="load" file="$(find pr2_arm_navigation_perception)/config/collision_map_sources.yaml"/> -->
 
-     <rosparam command="load" file="$(find pr2_arm_navigation_perception)/config/self_filter_$(arg arm_config).yaml" />
-   </node>-->
+     <rosparam command="load" file="$(find amigo_arm_navigation)/config/collision_map_sources.yaml" />
+   </node>
 
 </launch>
