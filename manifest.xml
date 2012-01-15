@@ -8,7 +8,8 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/amigo_arm_navigation</url>
-   <depend package="std_msgs"/>
+  
+  <depend package="std_msgs"/>
   <depend package="rospy"/>
   <depend package="roscpp"/>
   <depend package="arm_navigation_msgs"/>
