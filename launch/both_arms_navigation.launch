@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+
 <launch>
  
   <include file="$(find amigo_arm_navigation)/launch/amigo_planning_environment.launch"/> 
