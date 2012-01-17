@@ -1,37 +1,31 @@
+// Author: Stuart Glaser && Erik van Meijl
+
 #include <ros/ros.h>
 #include <actionlib/server/action_server.h>
 
-#include <trajectory_msgs/JointTrajectory.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <pr2_controllers_msgs/JointTrajectoryAction.h>
 #include <pr2_controllers_msgs/JointTrajectoryControllerState.h>
-#include <amigo_msgs/tip_ref.h>
-#include <geometry_msgs/Quaternion.h>
-#include <kinematics_msgs/GetPositionFK.h>
-#include <tf/transform_datatypes.h>
-
 
 const double DEFAULT_GOAL_THRESHOLD = 0.1;
 
 class JointTrajectoryExecuter
 {
 private:
-
   typedef actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction> JTAS;
   typedef JTAS::GoalHandle GoalHandle;
-  
 public:
-
   JointTrajectoryExecuter(ros::NodeHandle &n) :
     node_(n),
     action_server_(node_, ros::this_node::getName(),
                    boost::bind(&JointTrajectoryExecuter::goalCB, this, _1),
                    boost::bind(&JointTrajectoryExecuter::cancelCB, this, _1),
                    false),
-    has_active_goal_(false), goal_nr(0), fk_computed(false)
+    has_active_goal_(false)
   {
     using namespace XmlRpc;
     ros::NodeHandle pn("~");
-
     // Gets all of the joints
     XmlRpc::XmlRpcValue joint_names;
     if (!pn.getParam("joints", joint_names))
@@ -56,44 +50,51 @@ public:
 
       joint_names_.push_back((std::string)name_value);
     }
+    pn.param("constraints/goal_time", goal_time_constraint_, 0.0);
 
-	if(!pn.getParam("tol_x",tol_x))
-	  ROS_ERROR("Load x tolerance parameters on parameter server");
-	if(!pn.getParam("tol_y",tol_y))
-	  ROS_ERROR("Load y tolerance parameters on parameter server");
-	if(!pn.getParam("tol_z",tol_z))
-	  ROS_ERROR("Load z tolerance parameters on parameter server");
-	if(!pn.getParam("tol_roll",tol_roll))
-	  ROS_ERROR("Load roll tolerance parameters on parameter server");
-	if(!pn.getParam("tol_pitch",tol_pitch))
-	  ROS_ERROR("Load pitch tolerance parameters on parameter server");
-	if(!pn.getParam("tol_yaw",tol_yaw))
-	  ROS_ERROR("Load yaw tolerance parameters on parameter server");
-	if(!pn.getParam("root_frame",root_frame))
-	  ROS_ERROR("Load root_frame on parameter server");
-	if(!pn.getParam("tip_frame",tip_frame))
-	  ROS_ERROR("Load tip_frame on parameter server");
-	  
-	
-    //set topics/srvs
-    pub_controller_command_ = node_.advertise<trajectory_msgs::JointTrajectory>("controller_command", 1);
-    tip_sub = node_.subscribe("measured_tip_position", 1, &JointTrajectoryExecuter::getTipPosition, this);
-    fk_client = node_.serviceClient<kinematics_msgs::GetPositionFK>("get_fk");
+    // Gets the constraints for each joint.
+    for (size_t i = 0; i < joint_names_.size(); ++i)
+    {
+      std::string ns = std::string("constraints/") + joint_names_[i];
+      double g, t;
+      pn.param(ns + "/goal", g, -1.0);
+      pn.param(ns + "/trajectory", t, -1.0);
+      goal_constraints_[joint_names_[i]] = g;
+      trajectory_constraints_[joint_names_[i]] = t;
+    }
+    pn.param("constraints/stopped_velocity_tolerance", stopped_velocity_tolerance_, 0.01);
 
+    pub_controller_command_ =
+      node_.advertise<trajectory_msgs::JointTrajectory>("command", 1);
+    //sub_controller_state_ =
+    //  node_.subscribe("state", 1, &JointTrajectoryExecuter::controllerStateCB, this);
+
+    //watchdog_timer_ = node_.createTimer(ros::Duration(1.0), &JointTrajectoryExecuter::watchdog, this);
+
+    ros::Time started_waiting_for_controller = ros::Time::now();
+    //while (ros::ok() && !last_controller_state_)
+    //{
+    //  ros::spinOnce();
+    //  if (started_waiting_for_controller != ros::Time(0) &&
+    //      ros::Time::now() > started_waiting_for_controller + ros::Duration(30.0))
+    //  {
+    //    ROS_WARN("Waited for the controller for 30 seconds, but it never showed up.");
+    //    started_waiting_for_controller = ros::Time(0);
+    //  }
+    //  ros::Duration(0.1).sleep();
+   // }
     action_server_.start();
-    
-
-    
   }
 
   ~JointTrajectoryExecuter()
   {
     pub_controller_command_.shutdown();
+    sub_controller_state_.shutdown();
+    //watchdog_timer_.stop();
   }
 
 private:
-  
-  
+
   static bool setsEqual(const std::vector<std::string> &a, const std::vector<std::string> &b)
   {
     if (a.size() != b.size())
@@ -113,24 +114,43 @@ private:
     return true;
   }
 
+ /* void watchdog(const ros::TimerEvent &e)
+  {
+    ros::Time now = ros::Time::now();
+
+    // Aborts the active goal if the controller does not appear to be active.
+    if (has_active_goal_)
+    {
+      bool should_abort = false;
+      if (!last_controller_state_)
+      {
+        should_abort = true;
+        ROS_WARN("Aborting goal because we have never heard a controller state message.");
+      }
+      else if ((now - last_controller_state_->header.stamp) > ros::Duration(5.0))
+      {
+        should_abort = true;
+        ROS_WARN("Aborting goal because we haven't heard from the controller in %.3lf seconds",
+                 (now - last_controller_state_->header.stamp).toSec());
+      }
+
+      if (should_abort)
+      {
+        // Stops the controller.
+        trajectory_msgs::JointTrajectory empty;
+        empty.joint_names = joint_names_;
+        pub_controller_command_.publish(empty);
+
+        // Marks the current goal as aborted.
+        active_goal_.setAborted();
+        has_active_goal_ = false;
+      }
+    }
+  }*/
 
   void goalCB(GoalHandle gh)
-  { goal_nr++;
-	double now = ros::Time::now().toSec();  
-
-	ROS_INFO("Amigo_joint_trajectory action: Received goal number %d at time %f",goal_nr, now);
+  {
     // Ensures that the joints in the goal match the joints we are commanding.
-	ROS_INFO_STREAM("number of joints is  " << joint_names_.size());
-	for (uint i = 0; i < joint_names_.size(); ++i){
-	ROS_INFO_STREAM("The joint names are " << joint_names_[i]);
-	}
-
-	ROS_INFO_STREAM("number of goal joints is  " << gh.getGoal()->trajectory.joint_names.size());
-	for (uint i = 0; i < gh.getGoal()->trajectory.joint_names.size(); ++i){
-	ROS_INFO_STREAM("The incoming goal joint names are " << gh.getGoal()->trajectory.joint_names[i]);
-	}
-
-
     if (!setsEqual(joint_names_, gh.getGoal()->trajectory.joint_names))
     {
       ROS_ERROR("Joints on incoming goal don't match our joints");
@@ -154,24 +174,14 @@ private:
     gh.setAccepted();
     active_goal_ = gh;
     has_active_goal_ = true;
-    
-    // get trajectory
+
+    // Sends the trajectory along to the controller
     current_traj_ = active_goal_.getGoal()->trajectory;
-    
-    //get FK
-    //fk_computed = false;
-    //fk_computed = getForwardKinematics(current_traj_, fk_response);
-   // if (fk_computed){
-	  //publish trajectory 	
-      pub_controller_command_.publish(current_traj_);
-   // }
-    
+    pub_controller_command_.publish(current_traj_);
   }
 
   void cancelCB(GoalHandle gh)
   {
-	double now = ros::Time::now().toSec(); 
-	ROS_WARN("Amigo_joint_trajectory action: Goal number %d is cancelled at time %f",goal_nr,now);   
     if (active_goal_ == gh)
     {
       // Stops the controller.
@@ -186,161 +196,105 @@ private:
   }
 
 
-  void getTipPosition(const amigo_msgs::tip_refConstPtr &msg){
-    
-    if (!has_active_goal_)
-      return;
-      
-    if (!fk_computed)
-      return;
-    
-    std::vector<int> status_tip;
-    status_tip.resize(6);
-    
-    int reached = 0;
-    
-    //populate feedback msg
-    ///feedback_.position = *msg;
-  
-    //publish feedback
-    ///as_.publishFeedback(feedback_);
-
-    //convert quat to rpy
-	geometry_msgs::Quaternion quat_msg;
-	quat_msg.x = fk_coords[3];
-	quat_msg.y = fk_coords[4];
-	quat_msg.z = fk_coords[5];
-	quat_msg.w = fk_coords[6];
-
-    tf::Quaternion quat;
-	tf::quaternionMsgToTF(quat_msg,quat);
-    double fk_response_roll, fk_response_pitch, fk_response_yaw;
-    btMatrix3x3(quat).getRPY(fk_response_roll, fk_response_pitch, fk_response_yaw);
-
-
-    //determine if current position is within tolerance
-    if (msg->x <= (fk_coords[0] + tol_x/2) && msg->x >= (fk_coords[0] - tol_x/2))
-      status_tip[0] = 1;
-    if (msg->y <= (fk_coords[1] + tol_y/2) && msg->y >= (fk_coords[1] - tol_y/2))
-      status_tip[1] = 1;  
-    if (msg->z <= (fk_coords[2] + tol_z/2) && msg->z >= (fk_coords[2] - tol_z/2))
-      status_tip[2] = 1;
-    if (msg->roll <= (fk_response_roll + tol_roll/2) && msg->roll >= (fk_response_roll - tol_roll/2))
-      status_tip[3] = 1;
-    if (msg->pitch <= (fk_response_pitch + tol_pitch/2) && msg->pitch >= (fk_response_pitch - tol_pitch/2))
-      status_tip[4] = 1;
-    if (msg->yaw <= (fk_response_yaw + tol_yaw/2) && msg->yaw >= (fk_response_yaw - tol_yaw/2))
-      status_tip[5] = 1;
-
-	///ROS_INFO("curr: %f, %f, %f, %f, %f, %f",msg->x,msg->y,msg->z,msg->roll,msg->pitch,msg->yaw);
-	///ROS_INFO("req : %f, %f, %f, %f, %f, %f",fk_coords[0],fk_coords[1],fk_coords[2],
-	///fk_response_roll,fk_response_pitch,fk_response_yaw);
-	
-
-	
-	for (int i=0;i<6;i++)
-      reached += status_tip[i];  
-
-    ///ROS_INFO("status tip: %d %d %d %d %d %d",status_tip[0],status_tip[1],status_tip[2]
-       ///                                     ,status_tip[3],status_tip[4],status_tip[5]);
-
-    //if position reached  
-    if (reached == 6){
-      ///result_.position = feedback_.position;
-      ///ROS_INFO("%s: Succeeded", action_name_.c_str());
-      ROS_INFO("joint trajectory action succeeded");
-      // set the action state to succeeded
-      active_goal_.setSucceeded();
-      has_active_goal_ = false;
-    }
-  }
-  
-  bool getForwardKinematics(trajectory_msgs::JointTrajectory& traj, kinematics_msgs::GetPositionFK::Response fk_response){
-    
-    ROS_INFO("Requesting forward kinematics");
-    int num_points = traj.points.size();
-    int num_joints = traj.joint_names.size();
-    
-    //create fk request and response
-    kinematics_msgs::GetPositionFK::Request  fk_request;
-    
-    //populate request
-    fk_request.header.frame_id = root_frame;
-    fk_request.fk_link_names.resize(1);
-    fk_request.fk_link_names[0] = tip_frame;
-    
-    fk_request.robot_state.joint_state.position.resize(num_joints);
-    fk_request.robot_state.joint_state.name = traj.joint_names;
-    
-    for (int i =0 ; i < num_joints ;i++)
-      fk_request.robot_state.joint_state.position[i] = traj.points[num_points-1].positions[i];
-      
-    //wait for fk server connection
-    ros::service::waitForService("get_fk");
-      
-    if(fk_client.call(fk_request, fk_response)){
-  
-      if(fk_response.error_code.val == fk_response.error_code.SUCCESS){
-        
-        for(unsigned int i=0; i < fk_response.pose_stamped.size(); i ++){
-	      /*
-	      ROS_INFO("Forward kinematics:");
-          ROS_INFO_STREAM("Link    : " << fk_response.fk_link_names[i].c_str());
-          ROS_INFO_STREAM("Desired Position: " << 
-          fk_response.pose_stamped[i].pose.position.x << "," <<  
-          fk_response.pose_stamped[i].pose.position.y << "," << 
-          fk_response.pose_stamped[i].pose.position.z);
-          ROS_INFO("Desired Orientation: %f %f %f %f",
-          fk_response.pose_stamped[i].pose.orientation.x,
-          fk_response.pose_stamped[i].pose.orientation.y,
-          fk_response.pose_stamped[i].pose.orientation.z,
-          fk_response.pose_stamped[i].pose.orientation.w);
-          */ 
-          fk_coords[0] = fk_response.pose_stamped[i].pose.position.x;
-          fk_coords[1] = fk_response.pose_stamped[i].pose.position.y;
-          fk_coords[2] = fk_response.pose_stamped[i].pose.position.z;
-          fk_coords[3] = fk_response.pose_stamped[i].pose.orientation.x;
-          fk_coords[4] = fk_response.pose_stamped[i].pose.orientation.y;
-          fk_coords[5] = fk_response.pose_stamped[i].pose.orientation.z;
-          fk_coords[6] = fk_response.pose_stamped[i].pose.orientation.w;
-        } 
-        
-      }
-      else{
-        ROS_ERROR("Forward kinematics failed");
-        return false;
-	  }
-    
-    }
-    else{
-      ROS_ERROR("Forward kinematics service call failed");
-      return false;
-    }
-	fk_computed = true;
-    return true;
-  }
-  
-  
-  
-  int goal_nr;
-  bool fk_computed;
   ros::NodeHandle node_;
   JTAS action_server_;
   ros::Publisher pub_controller_command_;
-  ros::Subscriber tip_sub;
-  ros::ServiceClient fk_client;
-  std::string root_frame;
-  std::string tip_frame;
+  ros::Subscriber sub_controller_state_;
+  //ros::Timer watchdog_timer_;
 
-  double fk_coords[7];
-  double tol_x, tol_y, tol_z, tol_roll, tol_pitch, tol_yaw;
   bool has_active_goal_;
   GoalHandle active_goal_;
   trajectory_msgs::JointTrajectory current_traj_;
 
-  kinematics_msgs::GetPositionFK::Response fk_response;
+
   std::vector<std::string> joint_names_;
-  
+  std::map<std::string,double> goal_constraints_;
+  std::map<std::string,double> trajectory_constraints_;
+  double goal_time_constraint_;
+  double stopped_velocity_tolerance_;
+
+  pr2_controllers_msgs::JointTrajectoryControllerStateConstPtr last_controller_state_;
+  void controllerStateCB(const pr2_controllers_msgs::JointTrajectoryControllerStateConstPtr &msg)
+  {
+    last_controller_state_ = msg;
+    ros::Time now = ros::Time::now();
+
+    if (!has_active_goal_)
+      return;
+    if (current_traj_.points.empty())
+      return;
+    if (now < current_traj_.header.stamp + current_traj_.points[0].time_from_start)
+      return;
+
+    if (!setsEqual(joint_names_, msg->joint_names))
+    {
+      ROS_ERROR("Joint names from the controller don't match our joint names.");
+      return;
+    }
+
+    int last = current_traj_.points.size() - 1;
+    ros::Time end_time = current_traj_.header.stamp + current_traj_.points[last].time_from_start;
+
+    // Verifies that the controller has stayed within the trajectory constraints.
+
+    if (now < end_time)
+    {
+      // Checks that the controller is inside the trajectory constraints.
+      for (size_t i = 0; i < msg->joint_names.size(); ++i)
+      {
+        double abs_error = fabs(msg->error.positions[i]);
+        double constraint = trajectory_constraints_[msg->joint_names[i]];
+        if (constraint >= 0 && abs_error > constraint)
+        {
+          // Stops the controller.
+          trajectory_msgs::JointTrajectory empty;
+          empty.joint_names = joint_names_;
+          pub_controller_command_.publish(empty);
+
+          active_goal_.setAborted();
+          has_active_goal_ = false;
+          ROS_WARN("Aborting because we would up outside the trajectory constraints");
+          return;
+        }
+      }
+    }
+    else
+    {
+      // Checks that we have ended inside the goal constraints
+      bool inside_goal_constraints = true;
+      for (size_t i = 0; i < msg->joint_names.size() && inside_goal_constraints; ++i)
+      {
+        double abs_error = fabs(msg->error.positions[i]);
+        double goal_constraint = goal_constraints_[msg->joint_names[i]];
+        if (goal_constraint >= 0 && abs_error > goal_constraint)
+          inside_goal_constraints = false;
+
+        // It's important to be stopped if that's desired.
+        if (fabs(msg->desired.velocities[i]) < 1e-6)
+        {
+          if (fabs(msg->actual.velocities[i]) > stopped_velocity_tolerance_)
+            inside_goal_constraints = false;
+        }
+      }
+
+      if (inside_goal_constraints)
+      {
+        active_goal_.setSucceeded();
+        has_active_goal_ = false;
+      }
+      else if (now < end_time + ros::Duration(goal_time_constraint_))
+      {
+        // Still have some time left to make it.
+      }
+      else
+      {
+        ROS_WARN("Aborting because we wound up outside the goal constraints");
+        active_goal_.setAborted();
+        has_active_goal_ = false;
+      }
+
+    }
+  }
 };
 
 
