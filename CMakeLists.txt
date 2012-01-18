@@ -40,3 +40,5 @@ rosbuild_add_executable(joint_trajectory_publisher src/joint_trajectory_publishe
 
 rosbuild_add_executable(joint_trajectory_action src/joint_trajectory_action.cpp)
 rosbuild_add_executable(simple_trajectory src/simple_trajectory.cpp)
+
+rosbuild_add_executable(dummy_joint_publisher src/dummy_joint_publisher.cpp)
