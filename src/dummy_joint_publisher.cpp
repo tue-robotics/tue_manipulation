@@ -19,16 +19,17 @@ int main(int argc, char **argv) {
 
 	int num_joints = 7;
 
-	if (argc != (3 + num_joints * 3)) {
-		ROS_ERROR("Args: TOPIC TIME POS_1 ... POS_7 VEL_1 ... VEL_7 ACC_1 ... ACC_7");
+	if (argc != (num_joints + 1)) {
+		ROS_ERROR("Args: POS_1 ... POS_7");
 		return -1;
 	}
 
 	amigo_msgs::arm_joints joints;
 
-	joints.time.data =  atof(argv[2]);
-
-	int i_arg = 3;
+	//joints.time.data =  atof(argv[2]);
+    joints.time.data =  0.0;
+    
+	int i_arg = 1;
 	for(int i = 0; i < num_joints; ++i) {
 		std_msgs::Float64 f;
 		f.data = atof(argv[i_arg++]);
@@ -37,25 +38,29 @@ int main(int argc, char **argv) {
 
 	for(int i = 0; i < num_joints; ++i) {
 		std_msgs::Float64 f;
-		f.data = atof(argv[i_arg++]);
+		//f.data = atof(argv[i_arg++]);
+		f.data = 0.0;
 		joints.vel[i] = f;
 	}
 
 	for(int i = 0; i < num_joints; ++i) {
 		std_msgs::Float64 f;
-		f.data = atof(argv[i_arg++]);
+		//f.data = atof(argv[i_arg++]);
+		f.data = 0.0;
 		joints.acc[i] = f;
 	}
 
 	// Publisher
-	ros::Publisher pub = n.advertise<amigo_msgs::arm_joints>(argv[1], 100);
-
+	ros::Publisher pub_left  = n.advertise<amigo_msgs::arm_joints>("/arm_left_controller/joint_coordinates", 100);
+    ros::Publisher pub_right = n.advertise<amigo_msgs::arm_joints>("/arm_right_controller/joint_coordinates", 100);
+    
 	// Loop 20 Hz
 	int rate = 1;
 	ros::Rate r(rate);
 
 	while(n.ok()) {
-		pub.publish(joints);
+		pub_left.publish(joints);
+		pub_right.publish(joints);
 		r.sleep();
 	}
 	//ros::spin();
