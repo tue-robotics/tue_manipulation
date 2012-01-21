@@ -6,6 +6,8 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <amigo_msgs/arm_joints.h>
 
+using namespace std;
+
 class JointTrajectoryExecuter
 {
 private:
@@ -131,18 +133,18 @@ private:
   double goal_time_constraint_;
 
   void controllerCB(const amigo_msgs::arm_jointsConstPtr &joint_meas)
-  {
-	    ros::Time now;
-	    unsigned int i=0,j=0,converged=0;
-	    float abs_error=0.0;
-	    
+  {		 
 		if (!has_active_goal_)
 		return;
 		
+	    ros::Time now;
+	    unsigned int i=0,j=0,converged=0;
+	    float abs_error=0.0;
+		
 		new_active_goal_ = true;
-    
-    	  // Go over each point
-		while (ros::ok() && j < active_goal_.getGoal()->trajectory.points.size() && new_active_goal_)
+		   
+    	// Go over each point
+		/*while (ros::ok() && j < active_goal_.getGoal()->trajectory.points.size() && new_active_goal_)
 		{
 			for (i = 0; i < joint_names_.size(); ++i)
 			{
@@ -182,9 +184,9 @@ private:
 				}
 			}
 			j = j + 1;			
-		}  
+		}  */
 		active_goal_.setSucceeded();
-		has_active_goal_ = false;  
+		has_active_goal_ = false;
   }
 };
 
