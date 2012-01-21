@@ -1,5 +1,4 @@
 <launch>
-    <include file="$(find amigo_arm_navigation)/launch/amigo_planning_environment.launch" />
     <include file="$(find planning_environment)/launch/planning_environment_visualization_prerequisites.launch" />
     <include file="$(find amigo_arm_navigation)/launch/constraint_aware_kinematics.launch" />
     <include file="$(find amigo_arm_navigation)/launch/ompl_planning.launch" />

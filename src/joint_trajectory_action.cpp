@@ -63,7 +63,7 @@ public:
     }
 
     // Here we start sending the references
-    pub = node_.advertise<trajectory_msgs::JointTrajectory>("joint_references", 1);
+    pub = node_.advertise<amigo_msgs::arm_joints>("joint_references", 1);
     // Here we start listening for the measured positions
     sub = node_.subscribe("joint_measurements", 1, &JointTrajectoryExecuter::controllerCB, this);
 
