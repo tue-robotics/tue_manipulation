@@ -11,7 +11,7 @@
     <include file="$(find amigo_simulation_controllers)/controllers.launch"/>
 
     <!-- load robot -->
-    <param name="robot_description" textfile="$(find amigo_robot_model)/robot.urdf" />
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find amigo_robot_model)/robot.urdf.xacro' " />
     <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml" />
 
     <!-- push robot_description to factory and spawn robot in gazebo -->
