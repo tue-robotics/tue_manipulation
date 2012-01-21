@@ -26,7 +26,7 @@ public:
 
     // Gets all of the joints
     XmlRpc::XmlRpcValue joint_names;
-    if (!pn.getParam("joints", joint_names))
+    if (!pn.getParam("joint_names", joint_names))
     {
       ROS_FATAL("No joints given. (namespace: %s)", pn.getNamespace().c_str());
       exit(1);

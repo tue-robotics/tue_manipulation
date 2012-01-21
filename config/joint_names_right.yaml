@@ -1,0 +1,8 @@
+joint_names:
+  - shoulder_yaw_joint_right
+  - shoulder_pitch_joint_right
+  - shoulder_roll_joint_right
+  - elbow_pitch_joint_right
+  - elbow_roll_joint_right
+  - wrist_pitch_joint_right
+  - wrist_yaw_joint_right
