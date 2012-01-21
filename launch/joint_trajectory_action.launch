@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="amigo_arm_navigation" type="joint_trajectory_action" name="joint_trajectory_action_left">
+        <remap from="arm_ik" to="amigo_left_arm_kinematics/get_constraint_aware_ik" />
+    </node>
+</launch>
