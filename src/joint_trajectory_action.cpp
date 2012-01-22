@@ -57,10 +57,12 @@ public:
     for (size_t i = 0; i < joint_names_.size(); ++i)
     {
       std::string ns = std::string("constraints/") + joint_names_[i];
-      double g, t;
-      pn.param(ns + "/goal", g, -1.0);
+      double ig, fg,t;
+      pn.param(ns + "/intermediate_goal", ig, -1.0);
+      pn.param(ns + "/final_goal", fg, -1.0);
       pn.param(ns + "/trajectory", t, -1.0);
-      goal_constraints_[joint_names_[i]] = g;
+      intermediate_goal_constraints_[joint_names_[i]] = ig;
+      final_goal_constraints_[joint_names_[i]] = fg;
       trajectory_constraints_[joint_names_[i]] = t;
     }
 
@@ -129,7 +131,8 @@ private:
   GoalHandle active_goal_;
 
   std::vector<std::string> joint_names_;
-  std::map<std::string,double> goal_constraints_;
+  std::map<std::string,double> intermediate_goal_constraints_;
+  std::map<std::string,double> final_goal_constraints_;
   std::map<std::string,double> trajectory_constraints_;
   double goal_time_constraint_;
 
@@ -170,9 +173,19 @@ private:
 			  return;
 		  }
 		  // Check if this joint has converged
-		  if(abs_error < goal_constraints_[joint_names_[i]])
+		  if(current_point < (int)active_goal_.getGoal()->trajectory.points.size())
 		  {
-			  converged_joints = converged_joints + 1;
+		  	if(abs_error < intermediate_goal_constraints_[joint_names_[i]])
+		  	{
+				  converged_joints = converged_joints + 1;
+		  	}
+ 		  } 
+		  else
+		  {
+			  	if(abs_error < final_goal_constraints_[joint_names_[i]])
+			  	{
+					  converged_joints = converged_joints + 1;
+			  	}
 		  }
 	  }
 
