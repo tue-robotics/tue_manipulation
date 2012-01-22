@@ -79,7 +79,7 @@ if __name__ == '__main__':
 	desired_pose.link_name = "grippoint_" + side;	
 	
         
-	if 0:
+	if 1:
 		# Backwards pose
 		desired_pose.pose.position.x = -0.2;
 		desired_pose.pose.position.y =  0.05;
