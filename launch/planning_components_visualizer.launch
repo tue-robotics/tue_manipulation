@@ -1,4 +1,7 @@
 <launch>
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find amigo_robot_model)/robot.urdf.xacro' " />
+    <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml" />
+
     <include file="$(find planning_environment)/launch/planning_environment_visualization_prerequisites.launch" />
     <include file="$(find amigo_arm_navigation)/launch/constraint_aware_kinematics.launch" />
     <include file="$(find amigo_arm_navigation)/launch/ompl_planning.launch" />

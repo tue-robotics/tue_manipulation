@@ -3,6 +3,7 @@ multi_dof_joints:
     type: Floating
     parent_frame_id: base_link
     child_frame_id: base_link
+
 groups:
   - name: left_arm
     base_link: shoulder_mount_left
@@ -10,7 +11,72 @@ groups:
   - name: right_arm
     base_link: shoulder_mount_right
     tip_link: grippoint_right
+
 default_collision_operations:
+  - object1: finger1_left
+    object2: base
+    operation: enable   
+
+  - object1: finger1_left
+    object2: base_link
+    operation: enable   
+
+  - object1: finger1_left
+    object2: torso
+    operation: enable   
+
+  - object1: finger1_left
+    object2: torso_slider
+    operation: enable   
+  
+  - object1: finger2_left
+    object2: base
+    operation: enable   
+
+  - object1: finger2_left
+    object2: base_link
+    operation: enable   
+
+  - object1: finger2_left
+    object2: torso
+    operation: enable   
+
+  - object1: finger2_left
+    object2: torso_slider
+    operation: enable
+
+  - object1: finger1_right
+    object2: base
+    operation: enable   
+
+  - object1: finger1_right
+    object2: base_link
+    operation: enable   
+
+  - object1: finger1_right
+    object2: torso
+    operation: enable   
+
+  - object1: finger1_right
+    object2: torso_slider
+    operation: enable   
+  
+  - object1: finger2_right
+    object2: base
+    operation: enable   
+
+  - object1: finger2_right
+    object2: base_link
+    operation: enable   
+
+  - object1: finger2_right
+    object2: torso
+    operation: enable   
+
+  - object1: finger2_right
+    object2: torso_slider
+    operation: enable
+
   - object1: base_link
     object2: base
     operation: disable  # Adjacent in collision
@@ -1153,18 +1219,6 @@ default_collision_operations:
     operation: disable  # Always in collision
   - object1: base_link
     object2: torso_slider
-    operation: disable  # Default in collision
-  - object1: base_link
-    object2: finger2_right
-    operation: disable  # Default in collision
-  - object1: base_link
-    object2: finger1_right
-    operation: disable  # Default in collision
-  - object1: base_link
-    object2: finger2_left
-    operation: disable  # Default in collision
-  - object1: base_link
-    object2: finger1_left
     operation: disable  # Default in collision
   - object1: omni_sphere1_left_front
     object2: omni_sphere7_left_front

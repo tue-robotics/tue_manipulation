@@ -21,7 +21,7 @@ public:
                    boost::bind(&JointTrajectoryExecuter::cancelCB, this, _1),
                    false),
     has_active_goal_(false),
-    new_active_goal_(false)
+    current_point(0)
   {
     using namespace XmlRpc;
     ros::NodeHandle pn("~");
@@ -82,7 +82,8 @@ private:
 
   void goalCB(GoalHandle gh)
   {
-    new_active_goal_ = true;
+    current_point = 0;
+    now = ros::Time::now();
     
     // Cancels the currently active goal.
     if (has_active_goal_)
@@ -121,11 +122,11 @@ private:
   JTAS action_server_;
   ros::Publisher pub;
   ros::Subscriber sub;
+  ros::Time now;
 
   bool has_active_goal_;
-  bool new_active_goal_;
+  int current_point;
   GoalHandle active_goal_;
-  amigo_msgs::arm_joints joint_ref;
 
   std::vector<std::string> joint_names_;
   std::map<std::string,double> goal_constraints_;
@@ -133,60 +134,62 @@ private:
   double goal_time_constraint_;
 
   void controllerCB(const amigo_msgs::arm_jointsConstPtr &joint_meas)
-  {		 
-		if (!has_active_goal_)
-		return;
-		
-	    ros::Time now;
-	    unsigned int i=0,j=0,converged=0;
-	    float abs_error=0.0;
-		
-		new_active_goal_ = true;
-		   
-    	// Go over each point
-		/*while (ros::ok() && j < active_goal_.getGoal()->trajectory.points.size() && new_active_goal_)
-		{
-			for (i = 0; i < joint_names_.size(); ++i)
-			{
-				joint_ref.time.data   = ros::Time::now().toSec() + active_goal_.getGoal()->trajectory.points[j].time_from_start.toSec();
-				joint_ref.pos[i].data = active_goal_.getGoal()->trajectory.points[j].positions[i];
-				joint_ref.vel[i].data = active_goal_.getGoal()->trajectory.points[j].velocities[i];
-				joint_ref.acc[i].data = active_goal_.getGoal()->trajectory.points[j].accelerations[i];
-			}
-			pub.publish(joint_ref);
-	        now = ros::Time::now();		
-			converged=0;
-			while(ros::ok() && !converged && new_active_goal_)
-			{
-				// Check if the time for this point was not yet violated
-				if(ros::Time::now() > now + active_goal_.getGoal()->trajectory.points[j].time_from_start)
-				{
-					ROS_WARN("Aborting because the time constraint was violated");
-					active_goal_.setAborted();
-					has_active_goal_=false;
-					return;
-				}
-				// Check if no joints go outside their boundaries and if they have reached their goal
-				for (size_t i = 0; i < joint_names_.size(); ++i)
-				{
-					abs_error = fabs(joint_ref.pos[i].data - joint_meas->pos[i].data);
-					if(abs_error > active_goal_.getGoal()->path_tolerance[i].position)
-					{
-						ROS_WARN("Aborting because the trajectory constraint was violated");
-						active_goal_.setAborted();
-						has_active_goal_=false;
-						return;
-					}
-					if(abs_error < active_goal_.getGoal()->goal_tolerance[i].position)
-					{
-						converged = converged + 1;
-					}
-				}
-			}
-			j = j + 1;			
-		}  */
-		active_goal_.setSucceeded();
-		has_active_goal_ = false;
+  {
+
+	  if (!has_active_goal_)
+		  return;
+
+	  int i=0,converged_joints=0;
+	  float abs_error=0.0;
+	  amigo_msgs::arm_joints joint_ref;
+
+	  // Check if the time constraint is not violated
+	  if(ros::Time::now().toSec() > goal_time_constraint_ + now.toSec())
+	  {
+		  ROS_WARN("Aborting because the time constraint was violated");
+		  active_goal_.setAborted();
+		  has_active_goal_=false;
+		  return;
+	  }
+
+	  for (i = 0; i < (int)joint_names_.size(); ++i)
+	  {
+		  joint_ref.time.data   = ros::Time::now().toSec() + active_goal_.getGoal()->trajectory.points[current_point].time_from_start.toSec();
+		  joint_ref.pos[i].data = active_goal_.getGoal()->trajectory.points[current_point].positions[i];
+		  joint_ref.vel[i].data = active_goal_.getGoal()->trajectory.points[current_point].velocities[i];
+		  joint_ref.acc[i].data = active_goal_.getGoal()->trajectory.points[current_point].accelerations[i];
+
+		  abs_error = fabs(joint_ref.pos[i].data - joint_meas->pos[i].data);
+
+		  // Check if the joints stay within their constraints
+		  if(abs_error > trajectory_constraints_[joint_names_[i]])
+		  {
+			  ROS_WARN("Aborting because the trajectory constraint was violated");
+			  active_goal_.setAborted();
+			  has_active_goal_=false;
+			  return;
+		  }
+		  // Check if this joint has converged
+		  if(abs_error < goal_constraints_[joint_names_[i]])
+		  {
+			  converged_joints = converged_joints + 1;
+		  }
+	  }
+
+	  pub.publish(joint_ref);
+
+	  if(converged_joints==(int)joint_names_.size())
+	  {
+		  now = ros::Time::now();
+		  current_point = current_point + 1;
+	  }
+
+	  if(current_point==(int)active_goal_.getGoal()->trajectory.points.size())
+	  {
+		  active_goal_.setSucceeded();
+		  has_active_goal_ = false;
+	  }
+
   }
 };
 
