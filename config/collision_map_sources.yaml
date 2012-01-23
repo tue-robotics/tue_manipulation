@@ -4,3 +4,5 @@ cloud_sources:
     point_subsample: 1
     sensor_frame: /openni_depth_optical_frame
 
+camera_info_topic: /camera/camera_info
+
