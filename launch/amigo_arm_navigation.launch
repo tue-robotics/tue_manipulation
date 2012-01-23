@@ -11,7 +11,7 @@
     <include file="$(find amigo_arm_navigation)/launch/trajectory_filter_server.launch" />
     <include file="$(find amigo_arm_navigation)/launch/move_groups.launch" />
     <!--<include file="$(find amigo_arm_navigation)/launch/pre_grasp.launch" />-->
-    <include file="$(find amigo_self_filter)/start_filter.launch" />
+    <!--<include file="$(find amigo_self_filter)/start_filter.launch" />-->
     <include file="$(find amigo_arm_navigation)/launch/collision_monitor.launch" />
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find amigo_arm_navigation)/launch/demo.vcg"/>
 </launch>

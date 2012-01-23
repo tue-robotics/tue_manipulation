@@ -173,7 +173,7 @@ private:
 			  return;
 		  }
 		  // Check if this joint has converged
-		  if(current_point < (int)active_goal_.getGoal()->trajectory.points.size())
+		  if(current_point < ((int)active_goal_.getGoal()->trajectory.points.size()-1))
 		  {
 		  	if(abs_error < intermediate_goal_constraints_[joint_names_[i]])
 		  	{
