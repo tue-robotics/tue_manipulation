@@ -5,6 +5,7 @@
         <param name="trajectory_filter_allowed_time" type="double" value="2.0" />       
         <param name="controller_action_name" type="string" value="/joint_trajectory_action_left" />
 
+        <!--<remap from="move_left_arm/goal" to="move_left_arm/pre_grasp/goal" />-->
 	    <remap from="joint_state" to="joint_states" />
         <remap from="arm_ik" to="amigo_left_arm_kinematics/get_constraint_aware_ik" />
         <remap from="arm_fk" to="amigo_left_arm_kinematics/get_fk" />
