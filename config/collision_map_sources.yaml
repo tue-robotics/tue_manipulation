@@ -1,0 +1,6 @@
+cloud_sources:
+  - name: /camera/depth/points
+    frame_subsample: 1
+    point_subsample: 1
+    sensor_frame: /openni_depth_optical_frame
+
