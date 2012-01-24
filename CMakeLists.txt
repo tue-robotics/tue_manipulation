@@ -30,3 +30,5 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(joint_trajectory_action src/joint_trajectory_action.cpp)
+rosbuild_add_executable(dummy_joint_publisher src/dummy_joint_publisher.cpp)
+

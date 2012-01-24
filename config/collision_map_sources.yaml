@@ -1,8 +1,8 @@
 cloud_sources:
-  - name: /camera/depth/points
+  - name: /camera/rgb/points
     frame_subsample: 1
     point_subsample: 1
     sensor_frame: /openni_depth_optical_frame
 
-camera_info_topic: /camera/camera_info
+camera_info_topic: /camera/rgb/camera_info
 
