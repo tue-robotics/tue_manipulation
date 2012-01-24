@@ -305,7 +305,7 @@ TF.Update\ Interval=0.05
 Tool\ 2D\ Nav\ GoalTopic=/move_base_simple/goal
 Tool\ 2D\ Pose\ EstimateTopic=initialpose
 Camera\ Type=rviz::OrbitViewController
-Camera\ Config=0.54779 5.08899 0.940421 -3.10999 2.38361 -1.55671
+Camera\ Config=1.13279 0.385807 1.85622 -2.61806 1.07469 -1.13879
 Property\ Grid\ State=selection=;expanded=.Global Options,PCV Markers.Enabled.PCV Markers.Namespaces,CollisionMap.Enabled.CollisionMap.StatusTopStatus,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree;scrollpos=0,0;splitterpos=269,554;ispageselected=1
 [Display0]
 Name=Grid

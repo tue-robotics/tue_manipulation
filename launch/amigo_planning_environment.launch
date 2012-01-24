@@ -17,6 +17,6 @@
     <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml" />
 
     <!-- push robot_description to factory and spawn robot in gazebo -->
-    <node name="spawn_amigo" pkg="gazebo" type="spawn_model" args=" -unpause -urdf -param robot_description -model amigo -x 1.5 -y 3.5 -Y 3.1416 -z 0.1" respawn="false" output="screen" />
+    <node name="spawn_amigo" pkg="gazebo" type="spawn_model" args=" -unpause -urdf -param robot_description -model amigo -x 0.9 -y 3.5 -Y 3.1416 -z 0.1" respawn="false" output="screen" />
 
 </launch>
