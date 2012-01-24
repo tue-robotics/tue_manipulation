@@ -71,8 +71,6 @@ if __name__ == '__main__':
 	goal.motion_plan_request.num_planning_attempts = 5
 	goal.motion_plan_request.allowed_planning_time = rospy.Duration(10.0)
 
-        goal.disable_collision_monitoring = true;
-
 	goal.motion_plan_request.planner_id = ""
 	goal.planner_service_name = "ompl_planning/plan_kinematic_path"
 
