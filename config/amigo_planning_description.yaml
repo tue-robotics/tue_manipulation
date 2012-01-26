@@ -3,24 +3,80 @@ multi_dof_joints:
     type: Floating
     parent_frame_id: base_link
     child_frame_id: base_link
+
 groups:
   - name: left_arm
-    base_link: torso
+    base_link: shoulder_mount_left
     tip_link: grippoint_left
   - name: right_arm
-    base_link: torso
+    base_link: shoulder_mount_right
     tip_link: grippoint_right
-    
+
 default_collision_operations:
-  - object1: torso_slider
-    object2: hand_left
+  - object1: finger1_left
+    object2: base
+    operation: enable   
+
+  - object1: finger1_left
+    object2: base_link
+    operation: enable   
+
+  - object1: finger1_left
+    object2: torso
+    operation: enable   
+
+  - object1: finger1_left
+    object2: torso_slider
+    operation: enable   
+  
+  - object1: finger2_left
+    object2: base
+    operation: enable   
+
+  - object1: finger2_left
+    object2: base_link
+    operation: enable   
+
+  - object1: finger2_left
+    object2: torso
+    operation: enable   
+
+  - object1: finger2_left
+    object2: torso_slider
     operation: enable
-  - object1: torso_slider
-    object2: finger1_left
+
+  - object1: finger1_right
+    object2: base
+    operation: enable   
+
+  - object1: finger1_right
+    object2: base_link
+    operation: enable   
+
+  - object1: finger1_right
+    object2: torso
+    operation: enable   
+
+  - object1: finger1_right
+    object2: torso_slider
+    operation: enable   
+  
+  - object1: finger2_right
+    object2: base
+    operation: enable   
+
+  - object1: finger2_right
+    object2: base_link
+    operation: enable   
+
+  - object1: finger2_right
+    object2: torso
+    operation: enable   
+
+  - object1: finger2_right
+    object2: torso_slider
     operation: enable
-  - object1: torso_slider
-    object2: finger2_left
-    operation: enable
+
   - object1: base_link
     object2: base
     operation: disable  # Adjacent in collision
@@ -40,21 +96,27 @@ default_collision_operations:
     object2: neck_tilt
     operation: disable  # Adjacent in collision
   - object1: neck_tilt
-    object2: kinect_link
+    object2: head
     operation: disable  # Adjacent in collision
-  - object1: kinect_link
-    object2: kinect_depth_frame
+  - object1: head
+    object2: openni_camera
     operation: disable  # Adjacent in collision
-  - object1: kinect_depth_frame
-    object2: kinect_depth_optical_frame
+  - object1: openni_camera
+    object2: openni_depth_frame
     operation: disable  # Adjacent in collision
-  - object1: kinect_link
-    object2: kinect_rgb_frame
+  - object1: openni_depth_frame
+    object2: openni_depth_optical_frame
     operation: disable  # Adjacent in collision
-  - object1: kinect_rgb_frame
-    object2: kinect_rgb_optical_frame
+  - object1: openni_camera
+    object2: openni_rgb_frame
+    operation: disable  # Adjacent in collision
+  - object1: openni_rgb_frame
+    object2: openni_rgb_optical_frame
     operation: disable  # Adjacent in collision
   - object1: torso
+    object2: shoulder_mount_left
+    operation: disable  # Adjacent in collision
+  - object1: shoulder_mount_left
     object2: shoulder_link1_left
     operation: disable  # Adjacent in collision
   - object1: shoulder_link1_left
@@ -85,6 +147,9 @@ default_collision_operations:
     object2: grippoint_left
     operation: disable  # Adjacent in collision
   - object1: torso
+    object2: shoulder_mount_right
+    operation: disable  # Adjacent in collision
+  - object1: shoulder_mount_right
     object2: shoulder_link1_right
     operation: disable  # Adjacent in collision
   - object1: shoulder_link1_right
@@ -420,11 +485,11 @@ default_collision_operations:
   - object1: base_link
     object2: omni_sphere9_right_rear
     operation: disable  # Always in collision
-  - object1: kinect_link
-    object2: neck_pan
-    operation: disable  # Always in collision
   - object1: neck_pan
     object2: torso
+    operation: disable  # Always in collision
+  - object1: neck_tilt
+    object2: openni_camera
     operation: disable  # Always in collision
   - object1: omni_sphere10_left_front
     object2: omni_sphere11_left_front
@@ -440,9 +505,6 @@ default_collision_operations:
     operation: disable  # Always in collision
   - object1: omni_sphere10_left_front
     object2: omni_sphere3_left_front
-    operation: disable  # Always in collision
-  - object1: omni_sphere10_left_front
-    object2: omni_sphere4_left_front
     operation: disable  # Always in collision
   - object1: omni_sphere10_left_front
     object2: omni_sphere5_left_front
@@ -475,9 +537,6 @@ default_collision_operations:
     object2: omni_sphere3_left_rear
     operation: disable  # Always in collision
   - object1: omni_sphere10_left_rear
-    object2: omni_sphere4_left_rear
-    operation: disable  # Always in collision
-  - object1: omni_sphere10_left_rear
     object2: omni_sphere5_left_rear
     operation: disable  # Always in collision
   - object1: omni_sphere10_left_rear
@@ -508,9 +567,6 @@ default_collision_operations:
     object2: omni_sphere3_right_front
     operation: disable  # Always in collision
   - object1: omni_sphere10_right_front
-    object2: omni_sphere4_right_front
-    operation: disable  # Always in collision
-  - object1: omni_sphere10_right_front
     object2: omni_sphere5_right_front
     operation: disable  # Always in collision
   - object1: omni_sphere10_right_front
@@ -539,9 +595,6 @@ default_collision_operations:
     operation: disable  # Always in collision
   - object1: omni_sphere10_right_rear
     object2: omni_sphere3_right_rear
-    operation: disable  # Always in collision
-  - object1: omni_sphere10_right_rear
-    object2: omni_sphere4_right_rear
     operation: disable  # Always in collision
   - object1: omni_sphere10_right_rear
     object2: omni_sphere5_right_rear
@@ -778,9 +831,6 @@ default_collision_operations:
     object2: omni_sphere6_left_front
     operation: disable  # Always in collision
   - object1: omni_sphere1_left_front
-    object2: omni_sphere7_left_front
-    operation: disable  # Always in collision
-  - object1: omni_sphere1_left_front
     object2: omni_sphere8_left_front
     operation: disable  # Always in collision
   - object1: omni_sphere1_left_front
@@ -800,9 +850,6 @@ default_collision_operations:
     operation: disable  # Always in collision
   - object1: omni_sphere1_left_rear
     object2: omni_sphere6_left_rear
-    operation: disable  # Always in collision
-  - object1: omni_sphere1_left_rear
-    object2: omni_sphere7_left_rear
     operation: disable  # Always in collision
   - object1: omni_sphere1_left_rear
     object2: omni_sphere8_left_rear
@@ -1164,26 +1211,50 @@ default_collision_operations:
   - object1: omni_sphere8_right_rear
     object2: omni_sphere9_right_rear
     operation: disable  # Always in collision
-  - object1: fore_arm_left
-    object2: upper_arm_left
-    operation: disable  # Default in collision
+  - object1: shoulder_link1_left
+    object2: torso
+    operation: disable  # Always in collision
+  - object1: shoulder_link1_right
+    object2: torso
+    operation: disable  # Always in collision
   - object1: base_link
     object2: torso_slider
     operation: disable  # Default in collision
-  - object1: upper_arm_left
-    object2: torso
-    operation: disable
+  - object1: omni_sphere1_left_front
+    object2: omni_sphere7_left_front
+    operation: disable  # Default in collision
+  - object1: omni_sphere7_left_rear
+    object2: omni_sphere1_left_rear
+    operation: disable  # Default in collision
+  - object1: omni_sphere10_left_front
+    object2: omni_sphere4_left_front
+    operation: disable  # Default in collision
+  - object1: omni_sphere4_left_rear
+    object2: omni_sphere10_left_rear
+    operation: disable  # Default in collision
+  - object1: torso
+    object2: upper_arm_left
+    operation: disable  # Default in collision
+  - object1: torso
+    object2: upper_arm_right
+    operation: disable  # Default in collision
   - object1: torso
     object2: shoulder_link2_right
     operation: disable  # Default in collision
   - object1: torso
     object2: shoulder_link2_left
     operation: disable  # Default in collision
-  - object1: torso
-    object2: upper_arm_right
+  - object1: upper_arm_left
+    object2: fore_arm_left
     operation: disable  # Default in collision
   - object1: upper_arm_right
     object2: fore_arm_right
+    operation: disable  # Default in collision
+  - object1: omni_sphere4_right_rear
+    object2: omni_sphere10_right_rear
+    operation: disable  # Default in collision
+  - object1: omni_sphere4_right_front
+    object2: omni_sphere10_right_front
     operation: disable  # Default in collision
   - object1: fore_arm_left
     object2: hand_left
@@ -1191,17 +1262,14 @@ default_collision_operations:
   - object1: fore_arm_right
     object2: hand_right
     operation: disable  # Often in collision
-  - object1: base
-    object2: elbow_link4_left
-    operation: disable  # Never in collision
-  - object1: base
-    object2: elbow_link4_right
-    operation: disable  # Never in collision
+  - object1: omni_sphere1_right_front
+    object2: omni_sphere7_right_front
+    operation: disable  # Often in collision
+  - object1: omni_sphere1_right_rear
+    object2: omni_sphere7_right_rear
+    operation: disable  # Often in collision
   - object1: base
     object2: head_mount
-    operation: disable  # Never in collision
-  - object1: base
-    object2: kinect_link
     operation: disable  # Never in collision
   - object1: base
     object2: neck_pan
@@ -1354,6 +1422,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: base
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: base
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: base
@@ -1366,10 +1437,10 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: base
-    object2: upper_arm_left
-    operation: enable
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
   - object1: base
-    object2: upper_arm_right
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: base_laser
     object2: base_link
@@ -1381,17 +1452,8 @@ default_collision_operations:
     object2: elbow_link4_right
     operation: disable  # Never in collision
   - object1: base_laser
-    object2: finger1_left
-    operation: enable
-  - object1: base_laser
-    object2: finger2_left
-    operation: enable
-  - object1: base_laser
-    object2: finger2_right
-    operation: enable
-  - object1: base_laser
     object2: fore_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: base_laser
     object2: fore_arm_right
     operation: disable  # Never in collision
@@ -1402,16 +1464,7 @@ default_collision_operations:
     object2: grippoint_right
     operation: disable  # Never in collision
   - object1: base_laser
-    object2: hand_left
-    operation: enable
-  - object1: base_laser
-    object2: hand_right
-    operation: disable  # Never in collision
-  - object1: base_laser
     object2: head_mount
-    operation: disable  # Never in collision
-  - object1: base_laser
-    object2: kinect_link
     operation: disable  # Never in collision
   - object1: base_laser
     object2: neck_pan
@@ -1564,6 +1617,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: base_laser
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: base_laser
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: base_laser
@@ -1576,6 +1632,12 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: base_laser
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: base_laser
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  - object1: base_laser
     object2: torso
     operation: disable  # Never in collision
   - object1: base_laser
@@ -1583,7 +1645,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: base_laser
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: base_laser
     object2: upper_arm_right
     operation: disable  # Never in collision
@@ -1613,7 +1675,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: base_link
     object2: fore_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: base_link
     object2: fore_arm_right
     operation: disable  # Never in collision
@@ -1625,7 +1687,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: base_link
     object2: hand_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: base_link
     object2: hand_right
     operation: disable  # Never in collision
@@ -1633,13 +1695,13 @@ default_collision_operations:
     object2: head_mount
     operation: disable  # Never in collision
   - object1: base_link
-    object2: kinect_link
-    operation: disable  # Never in collision
-  - object1: base_link
     object2: neck_pan
     operation: disable  # Never in collision
   - object1: base_link
     object2: neck_tilt
+    operation: disable  # Never in collision
+  - object1: base_link
+    object2: openni_camera
     operation: disable  # Never in collision
   - object1: base_link
     object2: shoulder_link1_left
@@ -1654,11 +1716,17 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: base_link
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: base_link
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  - object1: base_link
     object2: torso
     operation: disable  # Never in collision
   - object1: base_link
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: base_link
     object2: upper_arm_right
     operation: disable  # Never in collision
@@ -1685,30 +1753,18 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: elbow_link4_left
     object2: finger1_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: elbow_link4_left
     object2: finger2_left
-    operation: enable
-  - object1: elbow_link4_left
-    object2: fore_arm_right
     operation: disable  # Never in collision
   - object1: elbow_link4_left
     object2: grippoint_left
     operation: disable  # Never in collision
   - object1: elbow_link4_left
-    object2: grippoint_right
-    operation: disable  # Never in collision
-  - object1: elbow_link4_left
     object2: hand_left
     operation: disable  # Never in collision
   - object1: elbow_link4_left
-    object2: hand_right
-    operation: disable  # Never in collision
-  - object1: elbow_link4_left
     object2: head_mount
-    operation: disable  # Never in collision
-  - object1: elbow_link4_left
-    object2: kinect_link
     operation: disable  # Never in collision
   - object1: elbow_link4_left
     object2: neck_pan
@@ -1873,10 +1929,10 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: elbow_link4_left
-    object2: torso
+    object2: shoulder_mount_left
     operation: disable  # Never in collision
   - object1: elbow_link4_left
-    object2: torso_slider
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: elbow_link4_left
     object2: upper_arm_right
@@ -1901,24 +1957,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: elbow_link4_right
     object2: finger1_right
-    operation: enable
-  - object1: elbow_link4_right
-    object2: finger2_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: elbow_link4_right
     object2: finger2_right
-    operation: enable
-  - object1: elbow_link4_right
-    object2: fore_arm_left
-    operation: enable
-  - object1: elbow_link4_right
-    object2: grippoint_left
     operation: disable  # Never in collision
   - object1: elbow_link4_right
     object2: grippoint_right
-    operation: disable  # Never in collision
-  - object1: elbow_link4_right
-    object2: hand_left
     operation: disable  # Never in collision
   - object1: elbow_link4_right
     object2: hand_right
@@ -1927,9 +1971,6 @@ default_collision_operations:
     object2: head_mount
     operation: disable  # Never in collision
   - object1: elbow_link4_right
-    object2: kinect_link
-    operation: disable  # Never in collision
-  - object1: elbow_link4_right
     object2: neck_pan
     operation: disable  # Never in collision
   - object1: elbow_link4_right
@@ -2092,14 +2133,14 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: elbow_link4_right
-    object2: torso
+    object2: shoulder_mount_left
     operation: disable  # Never in collision
   - object1: elbow_link4_right
-    object2: torso_slider
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: elbow_link4_right
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: elbow_link4_right
     object2: wheel_left_front
     operation: disable  # Never in collision
@@ -2120,21 +2161,9 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: fore_arm_left
-    operation: enable
-  - object1: finger1_left
-    object2: grippoint_left
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: head_mount
-    operation: enable
-  - object1: finger1_left
-    object2: neck_pan
-    operation: enable
-  - object1: finger1_left
-    object2: neck_tilt
-    operation: enable
-  - object1: finger1_left
-    object2: omni_sphere10_left_front
+    object2: grippoint_left
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere10_left_rear
@@ -2146,9 +2175,6 @@ default_collision_operations:
     object2: omni_sphere10_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere11_left_front
-    operation: disable  # Never in collision
-  - object1: finger1_left
     object2: omni_sphere11_left_rear
     operation: disable  # Never in collision
   - object1: finger1_left
@@ -2156,9 +2182,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere11_right_rear
-    operation: disable  # Never in collision
-  - object1: finger1_left
-    object2: omni_sphere12_left_front
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere12_left_rear
@@ -2170,19 +2193,10 @@ default_collision_operations:
     object2: omni_sphere12_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere1_left_front
-    operation: disable  # Never in collision
-  - object1: finger1_left
     object2: omni_sphere1_left_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere1_right_front
-    operation: disable  # Never in collision
-  - object1: finger1_left
     object2: omni_sphere1_right_rear
-    operation: disable  # Never in collision
-  - object1: finger1_left
-    object2: omni_sphere2_left_front
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere2_left_rear
@@ -2191,34 +2205,28 @@ default_collision_operations:
     object2: omni_sphere2_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere3_left_front
+    object2: omni_sphere3_left_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere3_left_rear
+    object2: omni_sphere3_right_front
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere3_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere4_left_front
-    operation: disable  # Never in collision
-  - object1: finger1_left
     object2: omni_sphere4_left_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere4_right_rear
+    object2: omni_sphere4_right_front
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere5_left_front
+    object2: omni_sphere4_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere5_left_rear
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere5_right_rear
-    operation: disable  # Never in collision
-  - object1: finger1_left
-    object2: omni_sphere6_left_front
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere6_left_rear
@@ -2230,9 +2238,6 @@ default_collision_operations:
     object2: omni_sphere6_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere7_left_front
-    operation: disable  # Never in collision
-  - object1: finger1_left
     object2: omni_sphere7_left_rear
     operation: disable  # Never in collision
   - object1: finger1_left
@@ -2242,44 +2247,29 @@ default_collision_operations:
     object2: omni_sphere7_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere8_left_front
-    operation: disable  # Never in collision
-  - object1: finger1_left
     object2: omni_sphere8_left_rear
-    operation: disable  # Never in collision
-  - object1: finger1_left
-    object2: omni_sphere8_right_front
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere8_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
-    object2: omni_sphere9_left_front
-    operation: disable  # Never in collision
-  - object1: finger1_left
     object2: omni_sphere9_left_rear
-    operation: disable  # Never in collision
-  - object1: finger1_left
-    object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: finger1_left
     object2: shoulder_link1_left
-    operation: enable
-  - object1: finger1_left
-    object2: shoulder_link1_right
-    operation: enable
+    operation: disable  # Never in collision
   - object1: finger1_left
     object2: shoulder_link2_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: finger1_left
-    object2: shoulder_link2_right
-    operation: enable
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
   - object1: finger1_left
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: finger1_left
     object2: wheel_left_rear
     operation: disable  # Never in collision
@@ -2296,22 +2286,10 @@ default_collision_operations:
     object2: grippoint_right
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: head_mount
-    operation: enable
-  - object1: finger1_right
-    object2: neck_pan
-    operation: enable
-  - object1: finger1_right
-    object2: neck_tilt
-    operation: enable
-  - object1: finger1_right
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere10_right_front
-    operation: disable  # Never in collision
-  - object1: finger1_right
-    object2: omni_sphere10_right_rear
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere11_left_front
@@ -2320,16 +2298,10 @@ default_collision_operations:
     object2: omni_sphere11_right_front
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: omni_sphere11_right_rear
-    operation: disable  # Never in collision
-  - object1: finger1_right
     object2: omni_sphere12_left_front
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere12_right_front
-    operation: disable  # Never in collision
-  - object1: finger1_right
-    object2: omni_sphere12_right_rear
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere1_left_front
@@ -2347,16 +2319,28 @@ default_collision_operations:
     object2: omni_sphere2_right_front
     operation: disable  # Never in collision
   - object1: finger1_right
+    object2: omni_sphere2_right_rear
+    operation: disable  # Never in collision
+  - object1: finger1_right
     object2: omni_sphere3_left_front
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere3_right_front
     operation: disable  # Never in collision
   - object1: finger1_right
+    object2: omni_sphere3_right_rear
+    operation: disable  # Never in collision
+  - object1: finger1_right
     object2: omni_sphere4_left_front
     operation: disable  # Never in collision
   - object1: finger1_right
+    object2: omni_sphere4_left_rear
+    operation: disable  # Never in collision
+  - object1: finger1_right
     object2: omni_sphere4_right_front
+    operation: disable  # Never in collision
+  - object1: finger1_right
+    object2: omni_sphere4_right_rear
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere5_left_front
@@ -2365,10 +2349,10 @@ default_collision_operations:
     object2: omni_sphere5_right_front
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: omni_sphere6_left_front
+    object2: omni_sphere5_right_rear
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: omni_sphere6_left_rear
+    object2: omni_sphere6_left_front
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere6_right_front
@@ -2377,50 +2361,29 @@ default_collision_operations:
     object2: omni_sphere7_left_front
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: omni_sphere7_left_rear
-    operation: disable  # Never in collision
-  - object1: finger1_right
     object2: omni_sphere7_right_front
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere8_left_front
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: omni_sphere8_left_rear
-    operation: disable  # Never in collision
-  - object1: finger1_right
     object2: omni_sphere8_right_front
-    operation: disable  # Never in collision
-  - object1: finger1_right
-    object2: omni_sphere8_right_rear
     operation: disable  # Never in collision
   - object1: finger1_right
     object2: omni_sphere9_left_front
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: omni_sphere9_left_rear
-    operation: disable  # Never in collision
-  - object1: finger1_right
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: omni_sphere9_right_rear
+    object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: finger1_right
-    object2: shoulder_link1_left
-    operation: enable
-  - object1: finger1_right
-    object2: shoulder_link1_right
-    operation: enable
-  - object1: finger1_right
-    object2: shoulder_link2_left
-    operation: enable
-  - object1: finger1_right
-    object2: shoulder_link2_right
-    operation: enable
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
   - object1: finger1_right
     object2: upper_arm_right
-    operation: enable
+    operation: disable  # Never in collision
   - object1: finger1_right
     object2: wheel_left_front
     operation: disable  # Never in collision
@@ -2437,21 +2400,6 @@ default_collision_operations:
     object2: grippoint_left
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: grippoint_right
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: head_mount
-    operation: enable
-  - object1: finger2_left
-    object2: neck_pan
-    operation: enable
-  - object1: finger2_left
-    object2: neck_tilt
-    operation: enable
-  - object1: finger2_left
-    object2: omni_sphere10_left_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere10_left_rear
     operation: disable  # Never in collision
   - object1: finger2_left
@@ -2461,49 +2409,25 @@ default_collision_operations:
     object2: omni_sphere10_right_rear
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: omni_sphere11_left_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere11_left_rear
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: omni_sphere11_right_front
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: omni_sphere11_right_rear
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: omni_sphere12_left_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere12_left_rear
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: omni_sphere12_right_front
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: omni_sphere12_right_rear
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: omni_sphere1_left_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere1_left_rear
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: omni_sphere1_right_front
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: omni_sphere1_right_rear
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: omni_sphere2_left_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere2_left_rear
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: omni_sphere2_right_front
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: omni_sphere2_right_rear
@@ -2524,49 +2448,25 @@ default_collision_operations:
     object2: omni_sphere5_left_rear
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: omni_sphere5_right_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere5_right_rear
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: omni_sphere6_left_front
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: omni_sphere6_left_rear
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: omni_sphere6_right_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere6_right_rear
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: omni_sphere7_left_front
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: omni_sphere7_left_rear
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: omni_sphere7_right_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere7_right_rear
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: omni_sphere8_left_front
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: omni_sphere8_left_rear
     operation: disable  # Never in collision
   - object1: finger2_left
-    object2: omni_sphere8_right_front
-    operation: disable  # Never in collision
-  - object1: finger2_left
     object2: omni_sphere8_right_rear
-    operation: disable  # Never in collision
-  - object1: finger2_left
-    object2: omni_sphere9_left_front
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: omni_sphere9_left_rear
@@ -2579,19 +2479,16 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: finger2_left
     object2: shoulder_link1_left
-    operation: enable
-  - object1: finger2_left
-    object2: shoulder_link1_right
-    operation: enable
+    operation: disable  # Never in collision
   - object1: finger2_left
     object2: shoulder_link2_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: finger2_left
-    object2: shoulder_link2_right
-    operation: enable
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
   - object1: finger2_left
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: finger2_left
     object2: wheel_left_rear
     operation: disable  # Never in collision
@@ -2605,31 +2502,13 @@ default_collision_operations:
     object2: fore_arm_right
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: grippoint_left
-    operation: disable  # Never in collision
-  - object1: finger2_right
     object2: grippoint_right
     operation: disable  # Never in collision
-  - object1: finger2_right
-    object2: head_mount
-    operation: enable
-  - object1: finger2_right
-    object2: neck_pan
-    operation: enable
-  - object1: finger2_right
-    object2: neck_tilt
-    operation: enable
   - object1: finger2_right
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: omni_sphere10_left_rear
-    operation: disable  # Never in collision
-  - object1: finger2_right
     object2: omni_sphere10_right_front
-    operation: disable  # Never in collision
-  - object1: finger2_right
-    object2: omni_sphere10_right_rear
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: omni_sphere11_left_front
@@ -2641,16 +2520,10 @@ default_collision_operations:
     object2: omni_sphere11_right_front
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: omni_sphere11_right_rear
-    operation: disable  # Never in collision
-  - object1: finger2_right
     object2: omni_sphere12_left_front
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: omni_sphere12_right_front
-    operation: disable  # Never in collision
-  - object1: finger2_right
-    object2: omni_sphere12_right_rear
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: omni_sphere1_left_front
@@ -2660,9 +2533,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: omni_sphere2_left_front
-    operation: disable  # Never in collision
-  - object1: finger2_right
-    object2: omni_sphere2_left_rear
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: omni_sphere2_right_front
@@ -2689,25 +2559,19 @@ default_collision_operations:
     object2: omni_sphere6_left_front
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: omni_sphere6_left_rear
-    operation: disable  # Never in collision
-  - object1: finger2_right
     object2: omni_sphere6_right_front
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: omni_sphere7_left_front
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: omni_sphere7_left_rear
-    operation: disable  # Never in collision
-  - object1: finger2_right
     object2: omni_sphere7_right_front
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: omni_sphere8_left_front
+    object2: omni_sphere7_right_rear
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: omni_sphere8_left_rear
+    object2: omni_sphere8_left_front
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: omni_sphere8_right_front
@@ -2716,22 +2580,16 @@ default_collision_operations:
     object2: omni_sphere9_left_front
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: omni_sphere9_left_rear
-    operation: disable  # Never in collision
-  - object1: finger2_right
     object2: omni_sphere9_right_front
-    operation: disable  # Never in collision
-  - object1: finger2_right
-    object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: shoulder_link1_right
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: shoulder_link2_left
+    object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: finger2_right
-    object2: shoulder_link2_right
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: finger2_right
     object2: upper_arm_right
@@ -2749,15 +2607,6 @@ default_collision_operations:
     object2: grippoint_left
     operation: disable  # Never in collision
   - object1: fore_arm_left
-    object2: head_mount
-    operation: enable
-  - object1: fore_arm_left
-    object2: neck_pan
-    operation: enable
-  - object1: fore_arm_left
-    object2: neck_tilt
-    operation: enable
-  - object1: fore_arm_left
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   - object1: fore_arm_left
@@ -2903,22 +2752,13 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: fore_arm_left
     object2: shoulder_link1_left
-    operation: enable
-  - object1: fore_arm_left
-    object2: shoulder_link1_right
-    operation: enable
+    operation: disable  # Never in collision
   - object1: fore_arm_left
     object2: shoulder_link2_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: fore_arm_left
-    object2: shoulder_link2_right
-    operation: enable
-  - object1: fore_arm_left
-    object2: torso
-    operation: enable
-  - object1: fore_arm_left
-    object2: upper_arm_right
-    operation: enable
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
   - object1: fore_arm_left
     object2: wheel_left_front
     operation: disable  # Never in collision
@@ -2935,15 +2775,6 @@ default_collision_operations:
     object2: grippoint_right
     operation: disable  # Never in collision
   - object1: fore_arm_right
-    object2: head_mount
-    operation: disable  # Never in collision
-  - object1: fore_arm_right
-    object2: neck_pan
-    operation: disable  # Never in collision
-  - object1: fore_arm_right
-    object2: neck_tilt
-    operation: disable  # Never in collision
-  - object1: fore_arm_right
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   - object1: fore_arm_right
@@ -3088,23 +2919,14 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: fore_arm_right
-    object2: shoulder_link1_left
-    operation: disable  # Never in collision
-  - object1: fore_arm_right
     object2: shoulder_link1_right
-    operation: disable  # Never in collision
-  - object1: fore_arm_right
-    object2: shoulder_link2_left
     operation: disable  # Never in collision
   - object1: fore_arm_right
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: fore_arm_right
-    object2: torso
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
-  - object1: fore_arm_right
-    object2: upper_arm_left
-    operation: enable
   - object1: fore_arm_right
     object2: wheel_left_front
     operation: disable  # Never in collision
@@ -3116,20 +2938,11 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: fore_arm_right
     object2: wheel_right_rear
-    operation: disable  # Never in collision
-  - object1: grippoint_left
-    object2: grippoint_right
     operation: disable  # Never in collision
   - object1: grippoint_left
     object2: head_mount
     operation: disable  # Never in collision
   - object1: grippoint_left
-    object2: neck_pan
-    operation: disable  # Never in collision
-  - object1: grippoint_left
-    object2: neck_tilt
-    operation: disable  # Never in collision
-  - object1: grippoint_left
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   - object1: grippoint_left
@@ -3277,22 +3090,16 @@ default_collision_operations:
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: grippoint_left
-    object2: shoulder_link1_right
-    operation: disable  # Never in collision
-  - object1: grippoint_left
     object2: shoulder_link2_left
     operation: disable  # Never in collision
   - object1: grippoint_left
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: grippoint_left
-    object2: torso
+    object2: shoulder_mount_left
     operation: disable  # Never in collision
   - object1: grippoint_left
     object2: upper_arm_left
-    operation: enable
-  - object1: grippoint_left
-    object2: upper_arm_right
     operation: disable  # Never in collision
   - object1: grippoint_left
     object2: wheel_left_front
@@ -3310,18 +3117,6 @@ default_collision_operations:
     object2: wrist_link6_left
     operation: disable  # Never in collision
   - object1: grippoint_right
-    object2: head_mount
-    operation: disable  # Never in collision
-  - object1: grippoint_right
-    object2: kinect_link
-    operation: disable  # Never in collision
-  - object1: grippoint_right
-    object2: neck_pan
-    operation: disable  # Never in collision
-  - object1: grippoint_right
-    object2: neck_tilt
-    operation: disable  # Never in collision
-  - object1: grippoint_right
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   - object1: grippoint_right
@@ -3466,9 +3261,6 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: grippoint_right
-    object2: shoulder_link1_left
-    operation: disable  # Never in collision
-  - object1: grippoint_right
     object2: shoulder_link1_right
     operation: disable  # Never in collision
   - object1: grippoint_right
@@ -3478,11 +3270,8 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: grippoint_right
-    object2: torso
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
-  - object1: grippoint_right
-    object2: upper_arm_left
-    operation: enable
   - object1: grippoint_right
     object2: upper_arm_right
     operation: disable  # Never in collision
@@ -3502,15 +3291,6 @@ default_collision_operations:
     object2: wrist_link6_right
     operation: disable  # Never in collision
   - object1: hand_left
-    object2: head_mount
-    operation: enable
-  - object1: hand_left
-    object2: neck_pan
-    operation: enable
-  - object1: hand_left
-    object2: neck_tilt
-    operation: enable
-  - object1: hand_left
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   - object1: hand_left
@@ -3656,25 +3436,16 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: hand_left
     object2: shoulder_link1_left
-    operation: enable
-  - object1: hand_left
-    object2: shoulder_link1_right
-    operation: enable
+    operation: disable  # Never in collision
   - object1: hand_left
     object2: shoulder_link2_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: hand_left
-    object2: shoulder_link2_right
-    operation: enable
-  - object1: hand_left
-    object2: torso
-    operation: enable
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
   - object1: hand_left
     object2: upper_arm_left
-    operation: enable
-  - object1: hand_left
-    object2: upper_arm_right
-    operation: enable
+    operation: disable  # Never in collision
   - object1: hand_left
     object2: wheel_left_front
     operation: disable  # Never in collision
@@ -3688,15 +3459,6 @@ default_collision_operations:
     object2: wheel_right_rear
     operation: disable  # Never in collision
   - object1: hand_right
-    object2: head_mount
-    operation: disable  # Never in collision
-  - object1: hand_right
-    object2: neck_pan
-    operation: disable  # Never in collision
-  - object1: hand_right
-    object2: neck_tilt
-    operation: disable  # Never in collision
-  - object1: hand_right
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   - object1: hand_right
@@ -3841,19 +3603,13 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: hand_right
-    object2: shoulder_link1_left
-    operation: disable  # Never in collision
-  - object1: hand_right
     object2: shoulder_link1_right
-    operation: disable  # Never in collision
-  - object1: hand_right
-    object2: shoulder_link2_left
     operation: disable  # Never in collision
   - object1: hand_right
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: hand_right
-    object2: torso
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: hand_right
     object2: upper_arm_right
@@ -4018,6 +3774,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: head_mount
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: head_mount
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: head_mount
@@ -4030,13 +3789,13 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: head_mount
-    object2: torso_slider
+    object2: shoulder_mount_left
     operation: disable  # Never in collision
   - object1: head_mount
-    object2: upper_arm_left
-    operation: enable
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
   - object1: head_mount
-    object2: upper_arm_right
+    object2: torso_slider
     operation: disable  # Never in collision
   - object1: head_mount
     object2: wheel_left_front
@@ -4048,183 +3807,6 @@ default_collision_operations:
     object2: wheel_right_front
     operation: disable  # Never in collision
   - object1: head_mount
-    object2: wheel_right_rear
-    operation: disable  # Never in collision
-  - object1: head_mount
-    object2: wrist_link6_left
-    operation: disable  # Never in collision
-  - object1: head_mount
-    object2: wrist_link6_right
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere10_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere10_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere10_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere10_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere11_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere11_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere11_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere11_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere12_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere12_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere12_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere12_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere1_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere1_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere1_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere1_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere2_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere2_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere2_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere2_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere3_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere3_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere3_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere3_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere4_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere4_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere4_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere4_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere5_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere5_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere5_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere5_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere6_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere6_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere6_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere6_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere7_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere7_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere7_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere7_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere8_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere8_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere8_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere8_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere9_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere9_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere9_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: omni_sphere9_right_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: shoulder_link2_left
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: shoulder_link2_right
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: torso_slider
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: upper_arm_left
-    operation: enable
-  - object1: kinect_link
-    object2: upper_arm_right
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: wheel_left_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: wheel_left_rear
-    operation: disable  # Never in collision
-  - object1: kinect_link
-    object2: wheel_right_front
-    operation: disable  # Never in collision
-  - object1: kinect_link
     object2: wheel_right_rear
     operation: disable  # Never in collision
   - object1: neck_pan
@@ -4384,11 +3966,17 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: neck_pan
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: neck_pan
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  - object1: neck_pan
     object2: torso_slider
     operation: disable  # Never in collision
   - object1: neck_pan
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: neck_pan
     object2: upper_arm_right
     operation: disable  # Never in collision
@@ -4567,6 +4155,12 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: neck_tilt
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: neck_tilt
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  - object1: neck_tilt
     object2: torso
     operation: disable  # Never in collision
   - object1: neck_tilt
@@ -4574,7 +4168,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: neck_tilt
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: neck_tilt
     object2: upper_arm_right
     operation: disable  # Never in collision
@@ -4705,6 +4299,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere10_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere10_left_front
@@ -4715,6 +4312,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere10_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere10_left_front
     object2: torso
@@ -4849,6 +4452,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere10_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere10_left_rear
@@ -4859,6 +4465,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere10_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere10_left_rear
     object2: torso
@@ -4990,6 +4602,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere10_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere10_right_front
@@ -5000,6 +4615,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere10_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere10_right_front
     object2: torso
@@ -5128,6 +4749,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere10_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere10_right_rear
@@ -5138,6 +4762,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere10_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere10_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere10_right_rear
     object2: torso
@@ -5269,6 +4899,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere11_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere11_left_front
@@ -5279,6 +4912,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere11_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere11_left_front
     object2: torso
@@ -5407,6 +5046,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere11_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere11_left_rear
@@ -5417,6 +5059,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere11_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere11_left_rear
     object2: torso
@@ -5542,6 +5190,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere11_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere11_right_front
@@ -5552,6 +5203,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere11_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere11_right_front
     object2: torso
@@ -5674,6 +5331,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere11_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere11_right_rear
@@ -5684,6 +5344,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere11_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere11_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere11_right_rear
     object2: torso
@@ -5806,6 +5472,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere12_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere12_left_front
@@ -5816,6 +5485,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere12_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere12_left_front
     object2: torso
@@ -5935,6 +5610,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere12_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere12_left_rear
@@ -5945,6 +5623,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere12_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere12_left_rear
     object2: torso
@@ -6061,6 +5745,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere12_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere12_right_front
@@ -6071,6 +5758,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere12_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere12_right_front
     object2: torso
@@ -6184,6 +5877,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere12_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere12_right_rear
@@ -6194,6 +5890,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere12_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere12_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere12_right_rear
     object2: torso
@@ -6304,6 +6006,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere1_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere1_left_front
@@ -6314,6 +6019,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere1_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere1_left_front
     object2: torso
@@ -6421,6 +6132,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere1_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere1_left_rear
@@ -6431,6 +6145,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere1_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere1_left_rear
     object2: torso
@@ -6514,9 +6234,6 @@ default_collision_operations:
     object2: omni_sphere7_left_rear
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_front
-    object2: omni_sphere7_right_front
-    operation: disable  # Never in collision
-  - object1: omni_sphere1_right_front
     object2: omni_sphere7_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_front
@@ -6538,6 +6255,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_front
@@ -6548,6 +6268,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_front
     object2: torso
@@ -6631,9 +6357,6 @@ default_collision_operations:
     object2: omni_sphere7_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_rear
-    object2: omni_sphere7_right_rear
-    operation: disable  # Never in collision
-  - object1: omni_sphere1_right_rear
     object2: omni_sphere8_left_front
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_rear
@@ -6652,6 +6375,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_rear
@@ -6662,6 +6388,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere1_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere1_right_rear
     object2: torso
@@ -6766,6 +6498,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere2_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere2_left_front
@@ -6776,6 +6511,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere2_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere2_left_front
     object2: torso
@@ -6877,6 +6618,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere2_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere2_left_rear
@@ -6887,6 +6631,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere2_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere2_left_rear
     object2: torso
@@ -6985,6 +6735,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere2_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere2_right_front
@@ -6995,6 +6748,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere2_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere2_right_front
     object2: torso
@@ -7090,6 +6849,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere2_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere2_right_rear
@@ -7100,6 +6862,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere2_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere2_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere2_right_rear
     object2: torso
@@ -7195,6 +6963,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere3_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere3_left_front
@@ -7205,6 +6976,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere3_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere3_left_front
     object2: torso
@@ -7297,6 +7074,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere3_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere3_left_rear
@@ -7307,6 +7087,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere3_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere3_left_rear
     object2: torso
@@ -7396,6 +7182,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere3_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere3_right_front
@@ -7406,6 +7195,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere3_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere3_right_front
     object2: torso
@@ -7492,6 +7287,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere3_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere3_right_rear
@@ -7502,6 +7300,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere3_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere3_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere3_right_rear
     object2: torso
@@ -7585,6 +7389,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere4_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere4_left_front
@@ -7595,6 +7402,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere4_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere4_left_front
     object2: torso
@@ -7675,6 +7488,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere4_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere4_left_rear
@@ -7685,6 +7501,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere4_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere4_left_rear
     object2: torso
@@ -7762,6 +7584,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere4_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere4_right_front
@@ -7772,6 +7597,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere4_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere4_right_front
     object2: torso
@@ -7846,6 +7677,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere4_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere4_right_rear
@@ -7856,6 +7690,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere4_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere4_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere4_right_rear
     object2: torso
@@ -7930,6 +7770,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere5_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere5_left_front
@@ -7940,6 +7783,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere5_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere5_left_front
     object2: torso
@@ -8011,6 +7860,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere5_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere5_left_rear
@@ -8021,6 +7873,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere5_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere5_left_rear
     object2: torso
@@ -8089,6 +7947,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere5_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere5_right_front
@@ -8099,6 +7960,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere5_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere5_right_front
     object2: torso
@@ -8164,6 +8031,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere5_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere5_right_rear
@@ -8174,6 +8044,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere5_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere5_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere5_right_rear
     object2: torso
@@ -8239,6 +8115,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere6_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere6_left_front
@@ -8249,6 +8128,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere6_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere6_left_front
     object2: torso
@@ -8311,6 +8196,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere6_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere6_left_rear
@@ -8321,6 +8209,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere6_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere6_left_rear
     object2: torso
@@ -8380,6 +8274,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere6_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere6_right_front
@@ -8390,6 +8287,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere6_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere6_right_front
     object2: torso
@@ -8446,6 +8349,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere6_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere6_right_rear
@@ -8456,6 +8362,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere6_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere6_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere6_right_rear
     object2: torso
@@ -8512,6 +8424,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere7_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere7_left_front
@@ -8522,6 +8437,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere7_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere7_left_front
     object2: torso
@@ -8575,6 +8496,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere7_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere7_left_rear
@@ -8585,6 +8509,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere7_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere7_left_rear
     object2: torso
@@ -8635,6 +8565,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere7_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere7_right_front
@@ -8645,6 +8578,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere7_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere7_right_front
     object2: torso
@@ -8692,6 +8631,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere7_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere7_right_rear
@@ -8702,6 +8644,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere7_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere7_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere7_right_rear
     object2: torso
@@ -8749,6 +8697,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere8_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere8_left_front
@@ -8759,6 +8710,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere8_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere8_left_front
     object2: torso
@@ -8803,6 +8760,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere8_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere8_left_rear
@@ -8813,6 +8773,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere8_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere8_left_rear
     object2: torso
@@ -8854,6 +8820,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere8_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere8_right_front
@@ -8864,6 +8833,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere8_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere8_right_front
     object2: torso
@@ -8902,6 +8877,9 @@ default_collision_operations:
     object2: omni_sphere9_right_front
     operation: disable  # Never in collision
   - object1: omni_sphere8_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere8_right_rear
@@ -8912,6 +8890,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere8_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere8_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere8_right_rear
     object2: torso
@@ -8950,6 +8934,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere9_left_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_left_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere9_left_front
@@ -8960,6 +8947,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere9_left_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_left_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_left_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere9_left_front
     object2: torso
@@ -8995,6 +8988,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere9_left_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_left_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere9_left_rear
@@ -9005,6 +9001,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere9_left_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_left_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_left_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere9_left_rear
     object2: torso
@@ -9037,6 +9039,9 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Never in collision
   - object1: omni_sphere9_right_front
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_right_front
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere9_right_front
@@ -9047,6 +9052,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere9_right_front
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_right_front
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_right_front
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere9_right_front
     object2: torso
@@ -9076,6 +9087,9 @@ default_collision_operations:
     object2: wrist_link6_right
     operation: disable  # Never in collision
   - object1: omni_sphere9_right_rear
+    object2: openni_camera
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_right_rear
     object2: shoulder_link1_left
     operation: disable  # Never in collision
   - object1: omni_sphere9_right_rear
@@ -9086,6 +9100,12 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: omni_sphere9_right_rear
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_right_rear
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: omni_sphere9_right_rear
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: omni_sphere9_right_rear
     object2: torso
@@ -9114,11 +9134,47 @@ default_collision_operations:
   - object1: omni_sphere9_right_rear
     object2: wrist_link6_right
     operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: shoulder_link1_left
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: shoulder_link1_right
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: shoulder_link2_left
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: torso_slider
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: wheel_left_front
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: wheel_left_rear
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: wheel_right_front
+    operation: disable  # Never in collision
+  - object1: openni_camera
+    object2: wheel_right_rear
+    operation: disable  # Never in collision
   - object1: shoulder_link1_left
     object2: shoulder_link1_right
     operation: disable  # Never in collision
   - object1: shoulder_link1_left
     object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  - object1: shoulder_link1_left
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
   - object1: shoulder_link1_left
     object2: torso_slider
@@ -9151,11 +9207,14 @@ default_collision_operations:
     object2: shoulder_link2_left
     operation: disable  # Never in collision
   - object1: shoulder_link1_right
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: shoulder_link1_right
     object2: torso_slider
     operation: disable  # Never in collision
   - object1: shoulder_link1_right
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: shoulder_link1_right
     object2: upper_arm_right
     operation: disable  # Never in collision
@@ -9181,6 +9240,12 @@ default_collision_operations:
     object2: shoulder_link2_right
     operation: disable  # Never in collision
   - object1: shoulder_link2_left
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: shoulder_link2_left
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  - object1: shoulder_link2_left
     object2: torso_slider
     operation: disable  # Never in collision
   - object1: shoulder_link2_left
@@ -9205,11 +9270,17 @@ default_collision_operations:
     object2: wrist_link6_right
     operation: disable  # Never in collision
   - object1: shoulder_link2_right
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  - object1: shoulder_link2_right
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  - object1: shoulder_link2_right
     object2: torso_slider
     operation: disable  # Never in collision
   - object1: shoulder_link2_right
     object2: upper_arm_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: shoulder_link2_right
     object2: wheel_left_front
     operation: disable  # Never in collision
@@ -9228,29 +9299,74 @@ default_collision_operations:
   - object1: shoulder_link2_right
     object2: wrist_link6_right
     operation: disable  # Never in collision
-  - object1: torso
-    object2: wheel_left_front
+  - object1: shoulder_mount_left
+    object2: shoulder_mount_right
     operation: disable  # Never in collision
-  - object1: torso
-    object2: wheel_left_rear
+  - object1: shoulder_mount_left
+    object2: torso_slider
     operation: disable  # Never in collision
-  - object1: torso
-    object2: wheel_right_front
-    operation: disable  # Never in collision
-  - object1: torso
-    object2: wheel_right_rear
-    operation: disable  # Never in collision
-  - object1: torso
-    object2: wrist_link6_left
-    operation: disable  # Never in collision
-  - object1: torso
-    object2: wrist_link6_right
-    operation: disable  # Never in collision
-  - object1: torso_slider
+  - object1: shoulder_mount_left
     object2: upper_arm_left
-    operation: enable
-  - object1: torso_slider
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_left
     object2: upper_arm_right
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_left
+    object2: wheel_left_front
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_left
+    object2: wheel_left_rear
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_left
+    object2: wheel_right_front
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_left
+    object2: wheel_right_rear
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_left
+    object2: wrist_link6_left
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_left
+    object2: wrist_link6_right
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: torso_slider
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: upper_arm_left
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: upper_arm_right
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: wheel_left_front
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: wheel_left_rear
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: wheel_right_front
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: wheel_right_rear
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: wrist_link6_left
+    operation: disable  # Never in collision
+  - object1: shoulder_mount_right
+    object2: wrist_link6_right
+    operation: disable  # Never in collision
+  - object1: torso
+    object2: wheel_left_front
+    operation: disable  # Never in collision
+  - object1: torso
+    object2: wheel_left_rear
+    operation: disable  # Never in collision
+  - object1: torso
+    object2: wheel_right_front
+    operation: disable  # Never in collision
+  - object1: torso
+    object2: wheel_right_rear
     operation: disable  # Never in collision
   - object1: torso_slider
     object2: wheel_left_front
@@ -9266,7 +9382,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: upper_arm_left
     object2: upper_arm_right
-    operation: enable
+    operation: disable  # Never in collision
   - object1: upper_arm_left
     object2: wheel_left_front
     operation: disable  # Never in collision
@@ -9281,10 +9397,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   - object1: upper_arm_left
     object2: wrist_link6_left
-    operation: enable
+    operation: disable  # Never in collision
   - object1: upper_arm_left
     object2: wrist_link6_right
-    operation: enable
+    operation: disable  # Never in collision
   - object1: upper_arm_right
     object2: wheel_left_front
     operation: disable  # Never in collision

@@ -1,3 +1,19 @@
+<?xml version="1.0"?>
 <launch>
-    <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml" />
+    <!-- Required simulation parameter -->
+    <param name="/use_sim_time" value="true"/>
+  
+    <!-- start empty world-->
+    <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find amigo_maps)/worlds/hospital_room.world" respawn="false" output="screen"/>
+
+    <!-- start controller manager (rviz) -->
+    <include file="$(find pr2_controller_manager)/controller_manager.launch"/>
+    <include file="$(find amigo_simulation_controllers)/controllers.launch"/>
+
+    <!-- load robot -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find amigo_robot_model)/robot.urdf.xacro' " />
+
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <node name="spawn_amigo" pkg="gazebo" type="spawn_model" args=" -unpause -urdf -param robot_description -model amigo -x 0.9 -y 3.5 -Y 3.1416 -z 0.1" respawn="false" output="screen" />
+
 </launch>

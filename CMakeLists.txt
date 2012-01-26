@@ -29,16 +29,6 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_executable(move_arm_pose_goal src/move_arm_pose_goal.cpp)
-rosbuild_add_executable(move_arm_joint_goal_left src/move_arm_joint_goal_left.cpp)
-rosbuild_add_executable(move_arm_joint_goal_right src/move_arm_joint_goal_right.cpp)
-rosbuild_add_executable(get_state_validity src/get_state_validity.cpp)
-rosbuild_add_executable(get_solver_info src/get_solver_info.cpp)
-rosbuild_add_executable(get_ik src/get_ik.cpp)
-
-rosbuild_add_executable(joint_trajectory_publisher src/joint_trajectory_publisher.cpp)
-
 rosbuild_add_executable(joint_trajectory_action src/joint_trajectory_action.cpp)
-rosbuild_add_executable(simple_trajectory src/simple_trajectory.cpp)
-
 rosbuild_add_executable(dummy_joint_publisher src/dummy_joint_publisher.cpp)
+

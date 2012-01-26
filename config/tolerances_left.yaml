@@ -1,7 +1,0 @@
-l_joint_trajectory_action:
-  tol_x: 0.05
-  tol_y: 0.05
-  tol_z: 0.05
-  tol_roll: 0.05
-  tol_pitch: 0.05
-  tol_yaw: 0.05

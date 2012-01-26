@@ -1,13 +1,38 @@
-r_joint_trajectory_action:
-  joints:
-    - shoulder_yaw_joint_right
-    - shoulder_pitch_joint_right
-    - shoulder_roll_joint_right
-    - elbow_pitch_joint_right
-    - elbow_roll_joint_right
-    - wrist_pitch_joint_right
-    - wrist_yaw_joint_right
-    
-  root_frame: base_link
-  tip_frame: grippoint_right  
-##constraints weggehaald
+joint_names:
+  - shoulder_yaw_joint_right
+  - shoulder_pitch_joint_right
+  - shoulder_roll_joint_right
+  - elbow_pitch_joint_right
+  - elbow_roll_joint_right
+  - wrist_pitch_joint_right
+  - wrist_yaw_joint_right
+constraints:
+   goal_time: 10.0
+   shoulder_yaw_joint_right:
+        intermediate_goal: 0.2
+        trajectory: 1.0
+        final_goal: 0.02
+   shoulder_pitch_joint_right:
+        intermediate_goal: 0.2
+        trajectory: 1.0
+        final_goal: 0.02
+   shoulder_roll_joint_right:
+        intermediate_goal: 0.2
+        trajectory: 1.0
+        final_goal: 0.02
+   elbow_pitch_joint_right:
+        intermediate_goal: 0.2
+        trajectory: 1.0
+        final_goal: 0.02
+   elbow_roll_joint_right:
+        intermediate_goal: 0.2
+        trajectory: 1.0
+        final_goal: 0.02
+   wrist_pitch_joint_right:
+        intermediate_goal: 0.2
+        trajectory: 1.0
+        final_goal: 0.02
+   wrist_yaw_joint_right:
+        intermediate_goal: 0.2
+        trajectory: 1.0
+        final_goal: 0.02

@@ -1,5 +1,9 @@
+<?xml version="1.0"?>
 <launch>
-    <include file="$(find amigo_arm_navigation)/launch/amigo_planning_environment.launch" />
+    <!--<include file="$(find amigo_arm_navigation)/launch/amigo_planning_environment.launch" />-->
+    <!-- load arm planning config file -->
+    <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml" />
+    <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_action.launch" />
     <include file="$(find planning_environment)/launch/environment_server.launch">
         <arg name="use_monitor" value="true" />
         <arg name="use_collision_map" value="false" />
@@ -8,4 +12,9 @@
     <include file="$(find amigo_arm_navigation)/launch/ompl_planning.launch" />
     <include file="$(find amigo_arm_navigation)/launch/trajectory_filter_server.launch" />
     <include file="$(find amigo_arm_navigation)/launch/move_groups.launch" />
+    <!--<include file="$(find amigo_arm_navigation)/launch/pre_grasp.launch" />-->
+    <!--<include file="$(find amigo_self_filter)/start_filter.launch" />-->
+    <include file="$(find amigo_arm_navigation)/launch/collision_monitor.launch" />
+    <!--<include file="$(find amigo_startup_simulation)/start_base_navigation.launch" />
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find amigo_arm_navigation)/launch/demo.vcg"/>-->
 </launch>

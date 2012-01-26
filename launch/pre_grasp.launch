@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="amigo_arm_navigation" type="pre_grasp" name="pre_grasp_left" output="screen"/>
+
+</launch>

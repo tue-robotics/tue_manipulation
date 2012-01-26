@@ -1,9 +1,0 @@
-<launch>
-
-    <rosparam file="$(find amigo_arm_navigation)/config/joints_left.yaml" command="load" /> 
-
-   <node pkg="amigo_arm_navigation" type="joint_trajectory_action" respawn="false" name="l_joint_trajectory_action">
-   <remap from = "command" to = "arm_left_controller/controller_command"/>
-   </node>
-   
-</launch>

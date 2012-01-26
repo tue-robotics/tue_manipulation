@@ -1,8 +1,0 @@
-<launch>
-
-  <node pkg="amigo_arm_navigation" type="joint_trajectory_publisher" respawn="false" name="l_joint_trajectory_publisher">
-  <remap from = "controller_command" to = "arm_left_controller/controller_command"/>
-  <remap from = "joint_coordinates" to = "arm_left_controller/joint_coordinates"/>
-  </node>
-  
-</launch>

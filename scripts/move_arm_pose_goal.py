@@ -68,35 +68,37 @@ if __name__ == '__main__':
 	goal = MoveArmGoal()
 
 	goal.motion_plan_request.group_name = side + "_arm"
-	goal.motion_plan_request.num_planning_attempts = 1
+	goal.motion_plan_request.num_planning_attempts = 5
 	goal.motion_plan_request.allowed_planning_time = rospy.Duration(10.0)
 
 	goal.motion_plan_request.planner_id = ""
 	goal.planner_service_name = "ompl_planning/plan_kinematic_path"
 
 	desired_pose = SimplePoseConstraint()
-	desired_pose.header.frame_id = "base_link"
-	desired_pose.link_name = "grippoint_" + side;
+	desired_pose.header.frame_id = "/base_link"
+	desired_pose.link_name = "grippoint_" + side;	
 	
-	desired_pose.pose.position.x = -0.2;
-	desired_pose.pose.position.y =  0.05;
-	desired_pose.pose.position.z = 0.30;
-
-	desired_pose.pose.orientation.x = 0.0;
-	desired_pose.pose.orientation.y = 0.6;
-	desired_pose.pose.orientation.z = 0.0;
-	desired_pose.pose.orientation.w = 1.0;
-	
-	
-	#desired_pose.pose.position.x = 0.4;
-	#desired_pose.pose.position.y =  0.05;
-	#desired_pose.pose.position.z = 0.30;
-
-	#desired_pose.pose.orientation.x = 0.0;
-	#desired_pose.pose.orientation.y = 0.1;
-	#desired_pose.pose.orientation.z = 0.0;
-	#desired_pose.pose.orientation.w = 0.9;
-
+        
+	if 0:
+		# Backwards pose
+		desired_pose.pose.position.x = -0.2;
+		desired_pose.pose.position.y =  0.1;
+		desired_pose.pose.position.z = 0.60;
+		desired_pose.pose.orientation.x = 0.0;
+		desired_pose.pose.orientation.y = 0.51;
+		desired_pose.pose.orientation.z = 0.0;
+		desired_pose.pose.orientation.w = 0.86;
+        else:
+        	# Forward poise
+        	desired_pose.pose.position.x = 0.30;
+		desired_pose.pose.position.y = 0.20;
+		desired_pose.pose.position.z = 0.85;
+		desired_pose.pose.orientation.x = 0.0;
+		desired_pose.pose.orientation.y = 0.0;
+		desired_pose.pose.orientation.z = 0.0;
+		desired_pose.pose.orientation.w = 1.0;
+        
+        # Tolerances
 	desired_pose.absolute_position_tolerance.x = 0.02;
 	desired_pose.absolute_position_tolerance.y = 0.02;
 	desired_pose.absolute_position_tolerance.z = 0.02;
