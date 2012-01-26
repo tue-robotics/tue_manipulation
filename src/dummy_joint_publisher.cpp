@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
 	}
 
 	// Publisher
-	ros::Publisher pub_left  = n.advertise<amigo_msgs::arm_joints>("/arm_left_controller/joint_coordinates", 100);
-    ros::Publisher pub_right = n.advertise<amigo_msgs::arm_joints>("/arm_right_controller/joint_coordinates", 100);
+	ros::Publisher pub_left  = n.advertise<amigo_msgs::arm_joints>("/arm_left_controller/joint_references", 100);
+    ros::Publisher pub_right = n.advertise<amigo_msgs::arm_joints>("/arm_right_controller/joint_references", 100);
     
 	// Loop 20 Hz
 	int rate = 1;
