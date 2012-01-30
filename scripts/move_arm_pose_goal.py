@@ -81,8 +81,8 @@ if __name__ == '__main__':
         
 	if 1:
 		# Backwards pose
-		desired_pose.pose.position.x = -0.2;
-		desired_pose.pose.position.y =  0.2;
+		desired_pose.pose.position.x = -0.15;
+		desired_pose.pose.position.y =  0.05;
 		desired_pose.pose.position.z = 0.60;
 		desired_pose.pose.orientation.x = 0.0;
 		desired_pose.pose.orientation.y = 0.51;
@@ -90,9 +90,9 @@ if __name__ == '__main__':
 		desired_pose.pose.orientation.w = 0.86;
         else:
         	# Forward poise
-        	desired_pose.pose.position.x = 0.30;
-		desired_pose.pose.position.y = 0.20;
-		desired_pose.pose.position.z = 0.85;
+        	desired_pose.pose.position.x = 0.4;
+		desired_pose.pose.position.y = 0.05;
+		desired_pose.pose.position.z = 0.8;
 		desired_pose.pose.orientation.x = 0.0;
 		desired_pose.pose.orientation.y = 0.0;
 		desired_pose.pose.orientation.z = 0.0;
