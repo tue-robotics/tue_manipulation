@@ -2,10 +2,10 @@
 <launch>
 
   <!-- Full collider node -->
-  <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen">
+  <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen" >
      <param name="fixed_frame" type="string" value="/map" />
      <param name="resolution" type="double" value="0.025" />
-     <param name="max_range" type="double" value="-1.0" />
+     <param name="max_range" type="double" value="2.0" />
      <param name="publish_static_over_dynamic_map" value="true" />
      <param name="sensor_model_hit" value= "0.8" />
      <param name="sensor_model_miss" value= "0.31" />
