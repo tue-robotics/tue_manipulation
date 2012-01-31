@@ -10,6 +10,7 @@ groups:
   - name: right_arm
     base_link: shoulder_mount_right
     tip_link: grippoint_right
+default_robot_padding: 0.02
 default_collision_operations:
   - object1: base_link
     object2: base
@@ -1407,12 +1408,6 @@ default_collision_operations:
     object2: fore_arm_top_right
     operation: disable  # Never in collision
   - object1: base
-    object2: grippoint_left
-    operation: disable  # Never in collision
-  - object1: base
-    object2: grippoint_right
-    operation: disable  # Never in collision
-  - object1: base
     object2: head
     operation: disable  # Never in collision
   - object1: base
@@ -1683,12 +1678,6 @@ default_collision_operations:
     object2: fore_arm_top_right
     operation: disable  # Never in collision
   - object1: base_laser
-    object2: grippoint_left
-    operation: disable  # Never in collision
-  - object1: base_laser
-    object2: grippoint_right
-    operation: disable  # Never in collision
-  - object1: base_laser
     object2: hand_left
     operation: disable  # Never in collision
   - object1: base_laser
@@ -2295,12 +2284,6 @@ default_collision_operations:
     object2: fore_arm_top_right
     operation: disable  # Never in collision
   - object1: base_plate
-    object2: grippoint_left
-    operation: disable  # Never in collision
-  - object1: base_plate
-    object2: grippoint_right
-    operation: disable  # Never in collision
-  - object1: base_plate
     object2: hand_left
     operation: disable  # Never in collision
   - object1: base_plate
@@ -2451,12 +2434,6 @@ default_collision_operations:
     object2: fore_arm_top_right
     operation: disable  # Never in collision
   - object1: batterycovercollision_back
-    object2: grippoint_left
-    operation: disable  # Never in collision
-  - object1: batterycovercollision_back
-    object2: grippoint_right
-    operation: disable  # Never in collision
-  - object1: batterycovercollision_back
     object2: head
     operation: disable  # Never in collision
   - object1: batterycovercollision_back
@@ -2745,9 +2722,6 @@ default_collision_operations:
     object2: fore_arm_top_right
     operation: disable  # Never in collision
   - object1: batterycovercollision_left
-    object2: grippoint_left
-    operation: disable  # Never in collision
-  - object1: batterycovercollision_left
     object2: grippoint_right
     operation: disable  # Never in collision
   - object1: batterycovercollision_left
@@ -3039,9 +3013,6 @@ default_collision_operations:
     object2: grippoint_left
     operation: disable  # Never in collision
   - object1: batterycovercollision_right
-    object2: grippoint_right
-    operation: disable  # Never in collision
-  - object1: batterycovercollision_right
     object2: hand_left
     operation: disable  # Never in collision
   - object1: batterycovercollision_right
@@ -7947,12 +7918,6 @@ default_collision_operations:
     object2: torso
     operation: disable  # Never in collision
   - object1: grippoint_left
-    object2: torso_assist_slider_back
-    operation: disable  # Never in collision
-  - object1: grippoint_left
-    object2: torso_assist_slider_left
-    operation: disable  # Never in collision
-  - object1: grippoint_left
     object2: torso_assist_slider_right
     operation: disable  # Never in collision
   - object1: grippoint_left
@@ -8190,13 +8155,7 @@ default_collision_operations:
     object2: torso
     operation: disable  # Never in collision
   - object1: grippoint_right
-    object2: torso_assist_slider_back
-    operation: disable  # Never in collision
-  - object1: grippoint_right
     object2: torso_assist_slider_left
-    operation: disable  # Never in collision
-  - object1: grippoint_right
-    object2: torso_assist_slider_right
     operation: disable  # Never in collision
   - object1: grippoint_right
     object2: torso_slider
