@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-
-  <!-- Full collider node -->
-  <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen" >
+  <include file="$(find amigo_machine_files)/machines/amigo4.machine" />
+  
+  <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen" machine="amigo4">
      <param name="fixed_frame" type="string" value="/map" />
      <param name="resolution" type="double" value="0.025" />
      <param name="max_range" type="double" value="2.0" />
