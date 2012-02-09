@@ -1,7 +1,14 @@
+<?xml version="1.0"?>
 <launch>
+    <include file="$(find amigo_machine_files)/machines/amigo1.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo2.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo3.machine" />
     <include file="$(find amigo_machine_files)/machines/amigo4.machine" />
+    <include file="$(find amigo_machine_files)/machines/localhost.machine" />
 
-    <node pkg="trajectory_filter_server" type="trajectory_filter_server" name="trajectory_filter_server" machine="amigo4">
+    <arg name="machine" default="localhost"/>
+
+    <node pkg="trajectory_filter_server" type="trajectory_filter_server" name="trajectory_filter_server" machine="$(arg machine)">
         <rosparam command="load" file="$(find trajectory_filter_server)/config/filters.yaml" />
         <rosparam command="load" file="$(find amigo_arm_navigation)/config/joint_limits.yaml" />
     </node>

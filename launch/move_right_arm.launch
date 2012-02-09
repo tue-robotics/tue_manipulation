@@ -1,8 +1,14 @@
+<?xml version="1.0"?>
 <launch>
-
+    <include file="$(find amigo_machine_files)/machines/amigo1.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo2.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo3.machine" />
     <include file="$(find amigo_machine_files)/machines/amigo4.machine" />
+    <include file="$(find amigo_machine_files)/machines/localhost.machine" />
 
-    <node pkg="move_arm" type="move_arm_simple_action" name="move_right_arm" output="screen" machine="amigo4">
+    <arg name="machine" default="localhost"/>
+
+    <node pkg="move_arm" type="move_arm_simple_action" name="move_right_arm" output="screen" machine="$(arg machine)">
         <param name="group" type="string" value="right_arm" />
         <param name="ik_allowed_time" type="double" value="2.0" />
         <param name="trajectory_filter_allowed_time" type="double" value="2.0" />       

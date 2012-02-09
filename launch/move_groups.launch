@@ -1,4 +1,0 @@
-<launch>
-    <include file="$(find amigo_arm_navigation)/launch/move_left_arm.launch" />
-    <include file="$(find amigo_arm_navigation)/launch/move_right_arm.launch" />
-</launch>

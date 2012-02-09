@@ -1,15 +1,20 @@
 <?xml version="1.0"?>
 <launch>
+  <include file="$(find amigo_machine_files)/machines/amigo1.machine" />
+  <include file="$(find amigo_machine_files)/machines/amigo2.machine" />
+  <include file="$(find amigo_machine_files)/machines/amigo3.machine" />
   <include file="$(find amigo_machine_files)/machines/amigo4.machine" />
+  <include file="$(find amigo_machine_files)/machines/localhost.machine" />
 
+  <arg name="machine" default="localhost"/>
   <arg name="use_monitor" default="true"/>
   <arg name="use_collision_map" default="true"/>
 
-  <node pkg="planning_environment" type="environment_server" output="screen" name="environment_server" machine="amigo4">      
+  <node pkg="planning_environment" type="environment_server" output="screen" name="environment_server" machine="$(arg machine)">      
     <param name="use_monitor" type="bool" value="$(arg use_monitor)"/>
     <param name="use_collision_map" type="bool" value="$(arg use_collision_map)"/>
   </node>
 
-  <node pkg="planning_environment" type="planning_scene_validity_server" output="screen" name="planning_scene_validity_server" machine="amigo4"/>      
+  <node pkg="planning_environment" type="planning_scene_validity_server" output="screen" name="planning_scene_validity_server" machine="$(arg machine)"/>      
 
 </launch>
