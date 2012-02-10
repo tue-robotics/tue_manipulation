@@ -4,7 +4,7 @@
 
     <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml"/>
 
-    <arg if="$(optenv ROBOT_REAL false)" name="machine" value="amigo3"/>
+    <arg if="$(optenv ROBOT_REAL false)" name="machine" value="amigo4"/>
     <arg unless="$(optenv ROBOT_REAL false)" name="machine" value="localhost"/> 
 
     <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_action.launch">
