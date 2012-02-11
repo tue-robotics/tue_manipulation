@@ -164,6 +164,8 @@ private:
 
 		  abs_error = fabs(joint_ref.pos[i].data - joint_meas->pos[i].data);
 
+      std::cout << "joint" << i << " error = " << abs_error << std::endl;
+
 		  // Check if the joints stay within their constraints
 		  if(abs_error > trajectory_constraints_[joint_names_[i]])
 		  {
