@@ -9,30 +9,30 @@ joint_names:
 constraints:
    goal_time: 10.0
    shoulder_yaw_joint_left:
-        intermediate_goal: 0.04
+        intermediate_goal: 0.02
         trajectory: 0.1
         final_goal: 0.02
    shoulder_pitch_joint_left:
-        intermediate_goal: 0.04
+        intermediate_goal: 0.02
         trajectory: 0.1
         final_goal: 0.02
    shoulder_roll_joint_left:
-        intermediate_goal: 0.04
+        intermediate_goal: 0.02
         trajectory: 0.1
         final_goal: 0.02
    elbow_pitch_joint_left:
-        intermediate_goal: 0.04
+        intermediate_goal: 0.02
         trajectory: 0.1
         final_goal: 0.02
    elbow_roll_joint_left:
-        intermediate_goal: 0.04
+        intermediate_goal: 0.02
         trajectory: 0.1
         final_goal: 0.02
    wrist_pitch_joint_left:
-        intermediate_goal: 0.04
+        intermediate_goal: 0.02
         trajectory: 0.1
         final_goal: 0.02
    wrist_yaw_joint_left:
-        intermediate_goal: 0.04
+        intermediate_goal: 0.02
         trajectory: 0.1
         final_goal: 0.02
