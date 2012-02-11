@@ -11,14 +11,14 @@
     <node pkg="amigo_arm_navigation" type="joint_trajectory_action" name="joint_trajectory_action_left" output="screen" machine="$(arg machine)">
 	<rosparam command="load" file="$(find amigo_arm_navigation)/config/joints_left.yaml" />
         <remap from="joint_trajectory_action" to="joint_trajectory_action_left" />
-        <remap from="joint_measurements" to="/arm_left_controller/joint_references_interpolated" />
+        <remap from="joint_measurements" to="/arm_left_controller/joint_measurements" />
 	      <remap from="joint_references" to="/arm_left_controller/joint_references" />
     </node>
 
     <node pkg="amigo_arm_navigation" type="joint_trajectory_action" name="joint_trajectory_action_right" output="screen" machine="$(arg machine)">
 	<rosparam command="load" file="$(find amigo_arm_navigation)/config/joints_right.yaml" />
         <remap from="joint_trajectory_action" to="joint_trajectory_action_right" />
-        <remap from="joint_measurements" to="/arm_right_controller/joint_references_interpolated" />
+        <remap from="joint_measurements" to="/arm_right_controller/joint_measurements" />
 	      <remap from="joint_references" to="/arm_right_controller/joint_references" />
     </node>
 
