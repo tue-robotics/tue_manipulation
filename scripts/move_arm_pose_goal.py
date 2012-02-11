@@ -75,7 +75,7 @@ if __name__ == '__main__':
 	goal.planner_service_name = "ompl_planning/plan_kinematic_path"
 
 	desired_pose = SimplePoseConstraint()
-	desired_pose.header.frame_id = "/map"
+	desired_pose.header.frame_id = "/base_link"
 	desired_pose.link_name = "grippoint_" + side;	
 	
         
@@ -90,21 +90,13 @@ if __name__ == '__main__':
 		desired_pose.pose.orientation.w = 0.86;
 	else:
 	# Forward pose
-#		desired_pose.pose.position.x = 0.4;
-#		desired_pose.pose.position.y = 0.1;
-#		desired_pose.pose.position.z = 0.8;
-#		desired_pose.pose.orientation.x = 0.0;
-#		desired_pose.pose.orientation.y = 0.0;
-#		desired_pose.pose.orientation.z = 0.0;
-#		desired_pose.pose.orientation.w = 1.0;
-
-		desired_pose.pose.position.x = 0.65;
-		desired_pose.pose.position.y =  3.51;
-		desired_pose.pose.position.z =  1.34;
+		desired_pose.pose.position.x = 0.4;
+		desired_pose.pose.position.y = 0.1;
+		desired_pose.pose.position.z = 0.8;
 		desired_pose.pose.orientation.x = 0.0;
 		desired_pose.pose.orientation.y = 0.0;
-		desired_pose.pose.orientation.z = 0.977;
-		desired_pose.pose.orientation.w = 0.224;
+		desired_pose.pose.orientation.z = 0.0;
+		desired_pose.pose.orientation.w = 1.0;
         
         # Tolerances
 	desired_pose.absolute_position_tolerance.x = 0.02;
