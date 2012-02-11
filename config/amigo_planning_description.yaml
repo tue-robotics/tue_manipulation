@@ -13,6 +13,12 @@ groups:
     tip_link: grippoint_right
 
 default_collision_operations:
+  - object1: finger1_left
+    object2: finger2_left
+    operation: disable  # Adjacent in collision
+  - object1: finger1_right
+    object2: finger2_right
+    operation: disable  # Adjacent in collision
   - object1: base_link
     object2: base
     operation: disable  # Adjacent in collision
