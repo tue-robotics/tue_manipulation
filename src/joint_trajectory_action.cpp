@@ -162,8 +162,6 @@ private:
 		  joint_ref.vel[i].data = active_goal_.getGoal()->trajectory.points[current_point].velocities[i];
 		  joint_ref.acc[i].data = active_goal_.getGoal()->trajectory.points[current_point].accelerations[i];
 
-		  abs_error = fabs(joint_ref.pos[i].data - joint_meas->pos[i].data);
-
       std::cout << "joint" << i << " error = " << abs_error << std::endl;
 
 		  // Check if the joints stay within their constraints
