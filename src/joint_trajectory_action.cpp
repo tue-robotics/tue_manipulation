@@ -159,8 +159,8 @@ private:
 	  {
 		  joint_ref.time.data   = ros::Time::now().toSec() + active_goal_.getGoal()->trajectory.points[current_point].time_from_start.toSec();
 		  joint_ref.pos[i].data = active_goal_.getGoal()->trajectory.points[current_point].positions[i];
-		  joint_ref.vel[i].data = active_goal_.getGoal()->trajectory.points[current_point].velocities[i];
-		  joint_ref.acc[i].data = active_goal_.getGoal()->trajectory.points[current_point].accelerations[i];
+		  //joint_ref.vel[i].data = active_goal_.getGoal()->trajectory.points[current_point].velocities[i];
+		  //joint_ref.acc[i].data = active_goal_.getGoal()->trajectory.points[current_point].accelerations[i];
 
 		  // Check if the joints stay within their constraints
 		  if(abs_error > trajectory_constraints_[joint_names_[i]])
