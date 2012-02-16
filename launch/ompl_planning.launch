@@ -8,7 +8,7 @@
 
     <arg name="machine" default="localhost"/>
 
-    <node pkg="ompl_ros_interface" type="ompl_ros" name="ompl_planning" machine="$(arg machine)">
+    <node pkg="ompl_ros_interface" type="ompl_ros" name="ompl_planning" machine="$(arg machine)" output="screen">
         <param name="default_planner_config" type="string" value="SBLkConfig1" />
         <rosparam command="load" file="$(find amigo_arm_navigation)/config/ompl_planning.yaml" />
     </node>
