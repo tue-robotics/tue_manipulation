@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="amigo_arm_navigation" type="grasp_precompute_action" name="grasp_precompute_action" output="screen" />
+
+
+</launch>
