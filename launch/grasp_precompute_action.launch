@@ -1,7 +1,13 @@
 <?xml version="1.0"?>
 <launch>
+    <include file="$(find amigo_machine_files)/machines/amigo1.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo2.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo3.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo4.machine" />
+    <include file="$(find amigo_machine_files)/machines/localhost.machine" />
 
-    <node pkg="amigo_arm_navigation" type="grasp_precompute_action" name="grasp_precompute_action" output="screen" />
+    <arg name="machine" default="localhost"/>
 
+    <node pkg="amigo_arm_navigation" type="grasp_precompute_action" name="grasp_precompute_action" output="screen" machine="$(arg machine)"/>
 
 </launch>

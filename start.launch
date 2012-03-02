@@ -36,6 +36,10 @@
     <include file="$(find amigo_arm_navigation)/launch/move_right_arm.launch" >
 	<arg name="machine" value="$(arg machine)" />
     </include>
+    
+    <!--<include file="$(find amigo_arm_navigation)/launch/grasp_precompute_action.launch" >
+	<arg name="machine" value="$(arg machine)" />
+    </include>-->
 
     <!--<include file="$(find amigo_arm_navigation)/launch/collision_monitor.launch" >
 	<arg name="machine" value="$(arg machine)" />
