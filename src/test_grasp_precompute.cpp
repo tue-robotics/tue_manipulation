@@ -20,19 +20,16 @@ int main(int argc, char** argv)
 
   goal.goal.header.stamp=ros::Time::now();
   goal.goal.header.frame_id = "base_link";
-  goal.goal.pose.position.x = 0.2;
-  goal.goal.pose.position.y = -0.2;
-  goal.goal.pose.position.z = 1.0;
+  goal.goal.x = 0.5;
+  goal.goal.y = 0.3;
+  goal.goal.z = 1.15;
 
-  goal.goal.pose.orientation.x = 0;
-  goal.goal.pose.orientation.y = 0;
-  goal.goal.pose.orientation.z = 0;
-  goal.goal.pose.orientation.w = 1;
+  goal.goal.roll  = 0;
+  goal.goal.pitch = 0;
+  goal.goal.yaw   = 0;
 
   client.sendGoal(goal);
-  ROS_INFO("Waiting..");
-  client.waitForResult(ros::Duration(20));
-  ROS_INFO("Done..");
+  client.waitForResult();
   if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
       printf("Grasp precompute successful\n");
   else
