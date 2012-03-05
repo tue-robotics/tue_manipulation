@@ -19,6 +19,7 @@
 #include <tf/tf.h>
 
 double MAX_YAW_DELTA,YAW_SAMPLING_STEP,PRE_GRASP_DELTA,SPINDLE_MIN,SPINDLE_MAX,SPINDLE_SAMPLING_STEP;
+int MAX_RESEND_ATTEMPTS;
 
 using namespace std;
 
@@ -79,7 +80,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	// Define general move arm goal info
 	arm_navigation_msgs::MoveArmGoal magoal;
 	magoal.motion_plan_request.group_name = "left_arm";
-	magoal.motion_plan_request.num_planning_attempts = 5;
+	magoal.motion_plan_request.num_planning_attempts = 1;
 	magoal.motion_plan_request.allowed_planning_time = ros::Duration(10.0);
 	magoal.planner_service_name = "ompl_planning/plan_kinematic_path";
 
@@ -146,17 +147,25 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 			if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
 			{
 				printf("Grasp_pose feasible\n");
-				tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
-				if(ik_client.call(gpik_req, gpik_res))
+				if(goal->PERFORM_PRE_GRASP)
 				{
-					if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
+					tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
+					if(ik_client.call(gpik_req, gpik_res))
 					{
-						printf("Pre_grasp_pose feasible\n");
-						GRASP_FEASIBLE = true;
-						break;
-					}//else{printf("IK for new_pre_grasp_pose not feasible\n");}
-				}else{printf("IK call unsuccessful\n");}
-			}//else{printf("IK for new_grasp_pose not feasible\n");}
+						if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
+						{
+							printf("Pre_grasp_pose feasible\n");
+							GRASP_FEASIBLE = true;
+							break;
+						}
+					}else{printf("IK call unsuccessful\n");}
+				}
+				else
+				{
+					GRASP_FEASIBLE = true;
+					break;
+				}
+			}
 		}else{printf("IK call unsuccessful\n");}
 
 		// Change the yaw and the sampling direction
@@ -206,60 +215,82 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
     		}
 		}
 
-		// Execute pre-grasp goal
-		position_constraint.position.x = new_pre_grasp_pose.getOrigin().getX();
-		position_constraint.position.y = new_pre_grasp_pose.getOrigin().getY();
-		position_constraint.position.z = new_pre_grasp_pose.getOrigin().getZ();
-		magoal.motion_plan_request.goal_constraints.position_constraints.push_back(position_constraint);
-
-		orientation_constraint.orientation.x = new_pre_grasp_pose.getRotation().getX();
-		orientation_constraint.orientation.y = new_pre_grasp_pose.getRotation().getY();
-		orientation_constraint.orientation.z = new_pre_grasp_pose.getRotation().getZ();
-		orientation_constraint.orientation.w = new_pre_grasp_pose.getRotation().getW();
-		magoal.motion_plan_request.goal_constraints.orientation_constraints.push_back(orientation_constraint);
-
-		ac->sendGoal(magoal);
-		ac->waitForResult();
-		if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+		if(goal->PERFORM_PRE_GRASP)
 		{
-			printf("Pre-grasp succeeded\n");
-			// Execute grasp goal
-			position_constraint.position.x = new_grasp_pose.getOrigin().getX();
-			position_constraint.position.y = new_grasp_pose.getOrigin().getY();
-			position_constraint.position.z = new_grasp_pose.getOrigin().getZ();
-			magoal.motion_plan_request.goal_constraints.position_constraints.at(0) = position_constraint;
+			// Execute pre-grasp goal
+			position_constraint.position.x = new_pre_grasp_pose.getOrigin().getX();
+			position_constraint.position.y = new_pre_grasp_pose.getOrigin().getY();
+			position_constraint.position.z = new_pre_grasp_pose.getOrigin().getZ();
+			magoal.motion_plan_request.goal_constraints.position_constraints.push_back(position_constraint);
 
-			orientation_constraint.orientation.x = new_grasp_pose.getRotation().getX();
-			orientation_constraint.orientation.y = new_grasp_pose.getRotation().getY();
-			orientation_constraint.orientation.z = new_grasp_pose.getRotation().getZ();
-			orientation_constraint.orientation.w = new_grasp_pose.getRotation().getW();
-			magoal.motion_plan_request.goal_constraints.orientation_constraints.at(0) = orientation_constraint;
+			orientation_constraint.orientation.x = new_pre_grasp_pose.getRotation().getX();
+			orientation_constraint.orientation.y = new_pre_grasp_pose.getRotation().getY();
+			orientation_constraint.orientation.z = new_pre_grasp_pose.getRotation().getZ();
+			orientation_constraint.orientation.w = new_pre_grasp_pose.getRotation().getW();
+			magoal.motion_plan_request.goal_constraints.orientation_constraints.push_back(orientation_constraint);
 
-			ac->sendGoal(magoal);
-			ac->waitForResult();
-			if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+			int num_pre_grasp_attempts = 0,num_grasp_attempts = 0;
+			bool PRE_GRASP_SUCCESS = false,GRASP_SUCCESS = false;
+			while(ros::ok() && !PRE_GRASP_SUCCESS && num_pre_grasp_attempts < MAX_RESEND_ATTEMPTS)
 			{
-				printf("Grasp succeeded\n");
-				as->setSucceeded();
+				num_pre_grasp_attempts++;
+				ac->sendGoal(magoal);
+				ac->waitForResult();
+				if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+				{
+					printf("Pre-grasp succeeded\n");
+					PRE_GRASP_SUCCESS = true;
+
+					// Execute grasp goal
+					position_constraint.position.x = new_grasp_pose.getOrigin().getX();
+					position_constraint.position.y = new_grasp_pose.getOrigin().getY();
+					position_constraint.position.z = new_grasp_pose.getOrigin().getZ();
+					magoal.motion_plan_request.goal_constraints.position_constraints.at(0) = position_constraint;
+
+					orientation_constraint.orientation.x = new_grasp_pose.getRotation().getX();
+					orientation_constraint.orientation.y = new_grasp_pose.getRotation().getY();
+					orientation_constraint.orientation.z = new_grasp_pose.getRotation().getZ();
+					orientation_constraint.orientation.w = new_grasp_pose.getRotation().getW();
+					magoal.motion_plan_request.goal_constraints.orientation_constraints.at(0) = orientation_constraint;
+
+					while(ros::ok() && !GRASP_SUCCESS && num_grasp_attempts < MAX_RESEND_ATTEMPTS)
+					{
+						num_grasp_attempts++;
+						ac->sendGoal(magoal);
+						ac->waitForResult();
+						if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+						{
+							printf("Grasp succeeded\n");
+							GRASP_SUCCESS = true;
+							as->setSucceeded();
+						}
+						else
+						{
+							printf("Grasp failed, resending MAX_RESEND_ATTEMPTS\n");
+							sleep(2);
+						}
+					}
+					if(!GRASP_SUCCESS){
+						printf("Grasp failed after MAX_RESEND_ATTEMPTS");
+						as->setAborted();
+					}
+				}
+				else
+				{
+					printf("Pre-grasp failed, resending MAX_RESEND_ATTEMPTS\n");
+					sleep(2);
+				}
 			}
-			else
-			{
-				printf("Grasp failed\n");
+			if(!PRE_GRASP_SUCCESS){
+				printf("Pre-grasp failed after MAX_RESEND_ATTEMPTS");
 				as->setAborted();
 			}
-		}
-		else
-		{
-			printf("Pre-grasp failed\n");
-			as->setAborted();
 		}
 	}else
 	{
 		printf("Grasp not feasible\n");
 		as->setAborted();
 	}
-
-
 
 }
 
@@ -275,6 +306,7 @@ int main(int argc, char** argv)
   n.param("spindle_min", SPINDLE_MIN, 0.0); // Spindle minimum [m]
   n.param("spindle_max", SPINDLE_MAX, 0.4); // Spindle maximum [m]
   n.param("spindle_sampling_step", SPINDLE_SAMPLING_STEP, 0.02); // step-size for spindle sampling [m]
+  n.param("max_resend_attempts", MAX_RESEND_ATTEMPTS, 5); // maximum move_arm resend attempts
 
   // Wait for the move arm server
   Client client("move_left_arm", true);

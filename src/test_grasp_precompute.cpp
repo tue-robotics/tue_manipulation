@@ -20,12 +20,13 @@ int main(int argc, char** argv)
 
   goal.goal.header.stamp=ros::Time::now();
   goal.goal.header.frame_id = "base_link";
-  goal.goal.x = 0.5;
-  goal.goal.y = 0.3;
-  goal.goal.z = 1.15;
+  goal.PERFORM_PRE_GRASP = true;
+  goal.goal.x = -0.2;
+  goal.goal.y = 0.2;
+  goal.goal.z = 0.65;
 
   goal.goal.roll  = 0;
-  goal.goal.pitch = 0;
+  goal.goal.pitch = 1.0;
   goal.goal.yaw   = 0;
 
   client.sendGoal(goal);
