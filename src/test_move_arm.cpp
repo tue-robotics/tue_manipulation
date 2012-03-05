@@ -53,10 +53,10 @@ int main(int argc, char** argv)
     for(unsigned int i=0; i<response.kinematic_solver_info.joint_names.size(); i++)
     {
       //ROS_INFO("Joint: %d %s",i,response.kinematic_solver_info.joint_names[i].c_str());
-      goal.motion_plan_request.start_state.joint_state.name.push_back(response.kinematic_solver_info.joint_names[i]);
-      goal.motion_plan_request.start_state.joint_state.position.push_back(max(min(arm_joints.pos[i].data,response.kinematic_solver_info.limits[i].max_position),response.kinematic_solver_info.limits[i].min_position));
+      goal.planning_scene_diff.robot_state.joint_state.name.push_back(response.kinematic_solver_info.joint_names[i]);
+      goal.planning_scene_diff.robot_state.joint_state.position.push_back(max(min(arm_joints.pos[i].data,response.kinematic_solver_info.limits[i].max_position),response.kinematic_solver_info.limits[i].min_position));
       printf("%s: value=%f min=%f max=%f final=%f\n",response.kinematic_solver_info.joint_names[i].c_str(),arm_joints.pos[i].data,
-    		  response.kinematic_solver_info.limits[i].min_position,response.kinematic_solver_info.limits[i].max_position,goal.motion_plan_request.start_state.joint_state.position[i]);
+    		  response.kinematic_solver_info.limits[i].min_position,response.kinematic_solver_info.limits[i].max_position,goal.planning_scene_diff.robot_state.joint_state.position[i]);
     }
   }else
   {
@@ -72,9 +72,9 @@ int main(int argc, char** argv)
   arm_navigation_msgs::PositionConstraint position_constraint;
   position_constraint.header.frame_id = "base_link";
   position_constraint.link_name = "grippoint_left";
-  position_constraint.position.x = 0.7;
-  position_constraint.position.y = 0.09;
-  position_constraint.position.z = 0.83;
+  position_constraint.position.x = 0.5;
+  position_constraint.position.y = 0.08;
+  position_constraint.position.z = 0.8;
   position_constraint.constraint_region_shape.type = 0;
   position_constraint.constraint_region_shape.dimensions.push_back(0.02);
   position_constraint.weight = 1.0;
