@@ -12,7 +12,7 @@ typedef actionlib::SimpleActionClient<amigo_arm_navigation::grasp_precomputeActi
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "test_grasp");
-  Client client("grasp_precompute", true); // true -> don't need ros::spin()
+  Client client("grasp_precompute_left", true); // true -> don't need ros::spin()
   client.waitForServer();
   amigo_arm_navigation::grasp_precomputeGoal goal;
 
@@ -21,12 +21,12 @@ int main(int argc, char** argv)
   goal.goal.header.stamp=ros::Time::now();
   goal.goal.header.frame_id = "base_link";
   goal.PERFORM_PRE_GRASP = true;
-  goal.goal.x = -0.2;
-  goal.goal.y = 0.2;
-  goal.goal.z = 0.65;
+  goal.goal.x = 0.6;
+  goal.goal.y = 0.3;
+  goal.goal.z = 1.2;
 
   goal.goal.roll  = 0;
-  goal.goal.pitch = 1.0;
+  goal.goal.pitch = 0;
   goal.goal.yaw   = 0;
 
   client.sendGoal(goal);

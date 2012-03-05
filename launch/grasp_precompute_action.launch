@@ -8,6 +8,22 @@
 
     <arg name="machine" default="localhost"/>
 
-    <node pkg="amigo_arm_navigation" type="grasp_precompute_action" name="grasp_precompute_action" output="screen" machine="$(arg machine)"/>
+    <node pkg="amigo_arm_navigation" type="grasp_precompute_action" name="grasp_precompute_action_left" output="screen" machine="$(arg machine)">
+    	<remap from="/get_ik_solver_info" to="/amigo_left_arm_kinematics/get_ik_solver_info"/>
+    	<remap from="/get_constraint_aware_ik" to="/amigo_left_arm_kinematics/get_constraint_aware_ik"/>
+    	<rempa from="/joint_measurements" to="/arm_left_controller/joint_measurements"/>
+    	<remap from="/spindle_measurement" to="/spindle_position" />
+    	<remap from="/spindle_reference" to="/spindle_controller/spindle_coordinates"/>
+    	<param name="side" value="left"/>
+    </node>
+    
+    <node pkg="amigo_arm_navigation" type="grasp_precompute_action" name="grasp_precompute_action_right" output="screen" machine="$(arg machine)">
+    	<remap from="/get_ik_solver_info" to="/amigo_right_arm_kinematics/get_ik_solver_info"/>
+    	<remap from="/get_constraint_aware_ik" to="/amigo_right_arm_kinematics/get_constraint_aware_ik"/>
+    	<rempa from="/joint_measurements" to="/arm_right_controller/joint_measurements"/>
+    	<remap from="/spindle_measurement" to="/spindle_position" />
+    	<remap from="/spindle_reference" to="/spindle_controller/spindle_coordinates"/>
+    	<param name="side" value="right"/>
+    </node>
 
 </launch>
