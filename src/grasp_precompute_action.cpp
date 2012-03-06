@@ -306,7 +306,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "grasp_precompute_server");
-  ros::NodeHandle n;
+  ros::NodeHandle n("~");
 
   // Get the parameters
   n.param<string>("side", SIDE, "left"); //determine for which side this node operates
@@ -327,7 +327,7 @@ int main(int argc, char** argv)
   spindleclient.waitForServer();
 
   // Initialize the grasp_precompute server
-  Server server(n, "grasp_precompute_" + SIDE, boost::bind(&execute, _1, &server, &client, &spindleclient), false);
+  Server server(n, "/grasp_precompute_" + SIDE, boost::bind(&execute, _1, &server, &client, &spindleclient), false);
   server.start();
 
   // Initialize the IK clients
