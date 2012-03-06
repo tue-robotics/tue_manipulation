@@ -133,7 +133,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	int YAW_SAMPLING_DIRECTION = 1, HEIGHT_SAMPLING_DIRECTION = 1;
 	while(ros::ok() && !GRASP_FEASIBLE && !SAMPLING_BOUNDARIES_REACHED )
 	{
-		printf("YAW_DELTA=%f \t HEIGHT_DELTA=%f\n",YAW_SAMPLING_DIRECTION * YAW_DELTA,HEIGHT_DELTA);
+		//printf("YAW_DELTA=%f \t HEIGHT_DELTA=%f\n",YAW_SAMPLING_DIRECTION * YAW_DELTA,HEIGHT_DELTA);
 		// Define new_grasp_pose
 		tf::Transform height_offset(tf::Quaternion(0,0,0,1),tf::Point(0,0,-HEIGHT_DELTA));
 		tf::Transform yaw_offset(tf::createQuaternionFromYaw(YAW_SAMPLING_DIRECTION * YAW_DELTA),tf::Point(0,0,0));
@@ -149,7 +149,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 		{
 			if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
 			{
-				printf("Grasp_pose feasible\n");
+				//printf("Grasp_pose feasible\n");
 				if(goal->PERFORM_PRE_GRASP)
 				{
 					tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
@@ -157,11 +157,14 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 					{
 						if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
 						{
-							printf("Pre_grasp_pose feasible\n");
+							//printf("Pre_grasp_pose feasible\n");
 							GRASP_FEASIBLE = true;
 							break;
 						}
-					}else{printf("IK call unsuccessful\n");}
+					}else{
+						ROS_ERROR("IK call unsuccessful");
+						ros::shutdown();
+						exit(-1);}
 				}
 				else
 				{
@@ -169,7 +172,10 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 					break;
 				}
 			}
-		}else{printf("IK call unsuccessful\n");}
+		}else{
+			ROS_ERROR("IK call unsuccessful");
+			ros::shutdown();
+			exit(-1);}
 
 		// Change the yaw and the sampling direction
 		YAW_DELTA = YAW_DELTA + YAW_SAMPLING_STEP;
@@ -196,7 +202,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 			HEIGHT_DELTA = HEIGHT_SAMPLING_DIRECTION * SPINDLE_DELTA;
 			if( (spindle_position - SPINDLE_DELTA) < SPINDLE_MIN &&  (spindle_position + SPINDLE_DELTA) > SPINDLE_MAX )
 			{
-				printf("Sampling boundaries reached\n");
+				ROS_WARN("Sampling boundaries reached. No feasible sample found\n");
 				SAMPLING_BOUNDARIES_REACHED = true;
 			}
 		}
@@ -206,14 +212,14 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	{
 		if(SPINDLE_REQUIRED)
 		{
-			printf("Spindle required\n");
+			ROS_INFO("Spindle going to be activated\n");
 			amigo_actions::AmigoSpindleCommandGoal spgoal;
             spgoal.spindle_height = spindle_position + HEIGHT_DELTA;
             sc->sendGoal(spgoal);
             sc->waitForResult();
     		if (sc->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
     		{
-    			printf("Spindle failed\n");
+    			ROS_WARN("Spindle failed\n");
     			as->setAborted();
     		}
 		}
@@ -241,17 +247,17 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 				ac->waitForResult();
 				if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
 				{
-					printf("Pre-grasp succeeded\n");
+					ROS_INFO("Pre-grasp succeeded\n");
 					GRASP_SUCCESS = true;
 				}
 				else
 				{
-					printf("Pre-grasp failed, resending MAX_RESEND_ATTEMPTS\n");
+					ROS_INFO("Pre-grasp failed, resending MAX_RESEND_ATTEMPTS\n");
 					sleep(2);
 				}
 			}
 			if(!GRASP_SUCCESS){
-				printf("Pre-grasp failed after MAX_RESEND_ATTEMPTS");
+				ROS_INFO("Pre-grasp failed after MAX_RESEND_ATTEMPTS");
 			}
 		}
 
@@ -278,18 +284,18 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 				ac->waitForResult();
 				if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
 				{
-					printf("Grasp succeeded\n");
+					ROS_INFO("Grasp succeeded\n");
 					GRASP_SUCCESS = true;
 					as->setSucceeded();
 				}
 				else
 				{
-					printf("Grasp failed, resending MAX_RESEND_ATTEMPTS\n");
+					ROS_INFO("Grasp failed, resending MAX_RESEND_ATTEMPTS\n");
 					sleep(2);
 				}
 			}
 			if(!GRASP_SUCCESS){
-				printf("Grasp failed after MAX_RESEND_ATTEMPTS");
+				ROS_INFO("Grasp failed after MAX_RESEND_ATTEMPTS");
 				as->setAborted();
 			}
 		}else{
@@ -297,7 +303,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 		}
 	}else
 	{
-		printf("Grasp not feasible\n");
+		ROS_INFO("Grasp not feasible\n");
 		as->setAborted();
 	}
 
