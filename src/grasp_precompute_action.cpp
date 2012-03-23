@@ -6,6 +6,8 @@
 
 #include <amigo_arm_navigation/grasp_precomputeAction.h>
 
+#include <control_msgs/FollowJointTrajectoryAction.h>
+
 #include <arm_navigation_msgs/MoveArmAction.h>
 #include <amigo_actions/AmigoSpindleCommandAction.h>
 
@@ -21,11 +23,11 @@
 using namespace std;
 
 double MAX_YAW_DELTA,YAW_SAMPLING_STEP,PRE_GRASP_DELTA,SPINDLE_MIN,SPINDLE_MAX,SPINDLE_SAMPLING_STEP;
-int MAX_RESEND_ATTEMPTS;
 string SIDE;
 
 typedef actionlib::SimpleActionServer<amigo_arm_navigation::grasp_precomputeAction> Server;
-typedef actionlib::SimpleActionClient<arm_navigation_msgs::MoveArmAction> Client;
+typedef actionlib::SimpleActionClient<arm_navigation_msgs::MoveArmAction> Clientfake;
+typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> Client;
 typedef actionlib::SimpleActionClient<amigo_actions::AmigoSpindleCommandAction> SpindleClient;
 
 ros::Publisher *spindlepub;
@@ -78,33 +80,20 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	  exit(-1);
 	}
 
-	// Define general move arm goal info
-	arm_navigation_msgs::MoveArmGoal magoal;
-	magoal.motion_plan_request.group_name = SIDE + "_arm";
-	magoal.motion_plan_request.num_planning_attempts = 1;
-	magoal.motion_plan_request.allowed_planning_time = ros::Duration(10.0);
-	magoal.planner_service_name = "ompl_planning/plan_kinematic_path";
-
-	arm_navigation_msgs::PositionConstraint position_constraint;
-	position_constraint.header.frame_id = goal->goal.header.frame_id;
-	position_constraint.link_name = "grippoint_" + SIDE;
-	position_constraint.constraint_region_shape.type = 0;
-	position_constraint.constraint_region_shape.dimensions.push_back(0.02);
-	magoal.motion_plan_request.goal_constraints.position_constraints.resize(1);
-	position_constraint.weight = 1.0;
-
-	arm_navigation_msgs::OrientationConstraint orientation_constraint;
-	orientation_constraint.header.frame_id = goal->goal.header.frame_id;
-	orientation_constraint.link_name = "grippoint_" + SIDE;
-	orientation_constraint.absolute_roll_tolerance = 0.1;
-	orientation_constraint.absolute_pitch_tolerance = 0.1;
-	orientation_constraint.absolute_yaw_tolerance = 0.1;
-	magoal.motion_plan_request.goal_constraints.orientation_constraints.resize(1);
-	orientation_constraint.weight = 1.0;
+	// Define general joint trajectory action info
+	control_msgs::FollowJointTrajectoryGoal jtagoal;
+	jtagoal.trajectory.points.resize(1);
+	jtagoal.trajectory.points[0].positions.resize(response.kinematic_solver_info.joint_names.size());
+	jtagoal.trajectory.points[0].velocities.resize(response.kinematic_solver_info.joint_names.size());
+	jtagoal.trajectory.points[0].accelerations.resize(response.kinematic_solver_info.joint_names.size());
 
 	//Call IK
 	kinematics_msgs::GetConstraintAwarePositionIK::Request  gpik_req;
 	kinematics_msgs::GetConstraintAwarePositionIK::Response gpik_res;
+
+	// Store the solutions
+	arm_navigation_msgs::RobotState grasp_solution;
+	arm_navigation_msgs::RobotState pre_grasp_solution;
 
 	gpik_req.timeout = ros::Duration(5.0);
 	gpik_req.ik_request.ik_link_name = "grippoint_" + SIDE;
@@ -113,11 +102,12 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
     // Define joint names and seed positions
 	for(unsigned int i=0; i< response.kinematic_solver_info.joint_names.size(); i++)
 	{
-		//double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
-		double joint_seed = arm_joints.pos[i].data;
+		double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
+		//double joint_seed = arm_joints.pos[i].data;
 		string joint_name = response.kinematic_solver_info.joint_names[i];
 		gpik_req.ik_request.ik_seed_state.joint_state.name.push_back(joint_name);
 		gpik_req.ik_request.ik_seed_state.joint_state.position.push_back(joint_seed);
+		jtagoal.trajectory.joint_names.push_back(joint_name);
 		//magoal.planning_scene_diff.robot_state.joint_state.name.push_back(joint_name);
 		//magoal.planning_scene_diff.robot_state.joint_state.position.push_back(joint_seed);
 	}
@@ -150,6 +140,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 			if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
 			{
 				//printf("Grasp_pose feasible\n");
+				grasp_solution = gpik_res.solution;
 				if(goal->PERFORM_PRE_GRASP)
 				{
 					tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
@@ -158,6 +149,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 						if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
 						{
 							//printf("Pre_grasp_pose feasible\n");
+							pre_grasp_solution = gpik_res.solution;
 							GRASP_FEASIBLE = true;
 							break;
 						}
@@ -224,80 +216,56 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
     		}
 		}
 
-		int num_attempts = 0;
 		bool GRASP_SUCCESS = false;
 		if(goal->PERFORM_PRE_GRASP)
 		{
 			// Execute pre-grasp goal
-			position_constraint.position.x = new_pre_grasp_pose.getOrigin().getX();
-			position_constraint.position.y = new_pre_grasp_pose.getOrigin().getY();
-			position_constraint.position.z = new_pre_grasp_pose.getOrigin().getZ();
-			magoal.motion_plan_request.goal_constraints.position_constraints.at(0) = position_constraint;
-
-			orientation_constraint.orientation.x = new_pre_grasp_pose.getRotation().getX();
-			orientation_constraint.orientation.y = new_pre_grasp_pose.getRotation().getY();
-			orientation_constraint.orientation.z = new_pre_grasp_pose.getRotation().getZ();
-			orientation_constraint.orientation.w = new_pre_grasp_pose.getRotation().getW();
-			magoal.motion_plan_request.goal_constraints.orientation_constraints.at(0) = orientation_constraint;
-
-			while(ros::ok() && !GRASP_SUCCESS && num_attempts < MAX_RESEND_ATTEMPTS)
+			for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
 			{
-				num_attempts++;
-				ac->sendGoal(magoal);
-				ac->waitForResult();
-				if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-				{
-					ROS_INFO("Pre-grasp succeeded\n");
-					GRASP_SUCCESS = true;
-				}
-				else
-				{
-					ROS_INFO("Pre-grasp failed, resending MAX_RESEND_ATTEMPTS\n");
-					sleep(2);
-				}
+				jtagoal.trajectory.points[0].positions[i]   = pre_grasp_solution.joint_state.position[i];
+				//jtagoal.trajectory.points[0].velocities[i] = pre_grasp_solution.joint_state.velocity[i];
+				//jtagoal.trajectory.points[0].accelerations[i] = 0.0;
 			}
-			if(!GRASP_SUCCESS){
-				ROS_INFO("Pre-grasp failed after MAX_RESEND_ATTEMPTS");
+
+			ac->sendGoal(jtagoal);
+			ac->waitForResult();
+			if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+			{
+				ROS_INFO("Pre-grasp stage: joint trajectory action succeeded\n");
+				GRASP_SUCCESS = true;
 			}
+			else
+			{
+				ROS_INFO("Pre-grasp stage: joint trajectory action failed\n");
+			}
+
 		}
 
 		if(goal->PERFORM_PRE_GRASP == GRASP_SUCCESS)
 		{
 			// Execute grasp goal
-			position_constraint.position.x = new_grasp_pose.getOrigin().getX();
-			position_constraint.position.y = new_grasp_pose.getOrigin().getY();
-			position_constraint.position.z = new_grasp_pose.getOrigin().getZ();
-			magoal.motion_plan_request.goal_constraints.position_constraints.at(0) = position_constraint;
-
-			orientation_constraint.orientation.x = new_grasp_pose.getRotation().getX();
-			orientation_constraint.orientation.y = new_grasp_pose.getRotation().getY();
-			orientation_constraint.orientation.z = new_grasp_pose.getRotation().getZ();
-			orientation_constraint.orientation.w = new_grasp_pose.getRotation().getW();
-			magoal.motion_plan_request.goal_constraints.orientation_constraints.at(0) = orientation_constraint;
-
-			num_attempts = 0;
-			GRASP_SUCCESS = false;
-			while(ros::ok() && !GRASP_SUCCESS && num_attempts < MAX_RESEND_ATTEMPTS)
+			for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
 			{
-				num_attempts++;
-				ac->sendGoal(magoal);
-				ac->waitForResult();
-				if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-				{
-					ROS_INFO("Grasp succeeded\n");
-					GRASP_SUCCESS = true;
-					as->setSucceeded();
-				}
-				else
-				{
-					ROS_INFO("Grasp failed, resending MAX_RESEND_ATTEMPTS\n");
-					sleep(2);
-				}
+				jtagoal.trajectory.points[0].positions[i]   = grasp_solution.joint_state.position[i];
+				//jtagoal.trajectory.points[0].velocities[i] = grasp_solution.joint_state.velocity[i];
+				//jtagoal.trajectory.points[0].accelerations[i] = 0.0;
 			}
-			if(!GRASP_SUCCESS){
-				ROS_INFO("Grasp failed after MAX_RESEND_ATTEMPTS");
-				as->setAborted();
+
+			GRASP_SUCCESS = false;
+
+			ac->sendGoal(jtagoal);
+			ac->waitForResult();
+			if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+			{
+				ROS_INFO("Grasp stage: joint trajectory action succeeded\n");
+				GRASP_SUCCESS = true;
+				as->setSucceeded();
 			}
+			else
+			{
+				ROS_INFO("Grasp stage: joint trajectory action failed\n");
+			}
+
 		}else{
 			as->setAborted();
 		}
@@ -322,10 +290,9 @@ int main(int argc, char** argv)
   n.param("spindle_min", SPINDLE_MIN, 0.0); // Spindle minimum [m]
   n.param("spindle_max", SPINDLE_MAX, 0.4); // Spindle maximum [m]
   n.param("spindle_sampling_step", SPINDLE_SAMPLING_STEP, 0.02); // step-size for spindle sampling [m]
-  n.param("max_resend_attempts", MAX_RESEND_ATTEMPTS, 5); // maximum move_arm resend attempts
 
-  // Wait for the move arm server
-  Client client("move_" + SIDE + "_arm", true);
+  // Wait for the joint trajectory action server
+  Client client("joint_trajectory_action_" + SIDE, true);
   client.waitForServer();
 
   // Wait for the spindle server
