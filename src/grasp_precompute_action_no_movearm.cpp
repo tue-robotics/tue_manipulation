@@ -15,6 +15,8 @@
 
 #include <amigo_msgs/spindle_setpoint.h>
 
+#include <std_msgs/Float64.h>
+
 #include <tf/tf.h>
 
 using namespace std;
@@ -192,40 +194,51 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 		if(goal->PERFORM_PRE_GRASP)
 		{
 			// Execute pre-grasp goal i.e send the obtained solution to the joint_action_node
-			//jtagoal.
+			jtagoal.trajectory.points.resize(1);
+			for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
+			{
+				jtagoal.trajectory.joint_names.push_back(pre_grasp_solution.joint_state.name[i]);
+				jtagoal.trajectory.points[0].positions.push_back(pre_grasp_solution.joint_state.position[i]);
+				jtagoal.trajectory.points[0].velocities.push_back(pre_grasp_solution.joint_state.velocity[i]);
+			}
 
-				jta->sendGoal(jtagoal);
-				jta->waitForResult();
-				if (jta->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-				{
-					ROS_INFO("Pre-grasp succeeded\n");
-					GRASP_SUCCESS = true;
-				}
-				else
-				{
-					ROS_INFO("Pre-grasp sending to joint trajectory action failed \n");
-				}
+			jta->sendGoal(jtagoal);
+			jta->waitForResult();
+			if (jta->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+			{
+				ROS_INFO("Pre-grasp succeeded\n");
+				GRASP_SUCCESS = true;
+			}
+			else
+			{
+				ROS_INFO("Pre-grasp sending to joint trajectory action failed \n");
+			}
 		}
 
 		if(goal->PERFORM_PRE_GRASP == GRASP_SUCCESS)
 		{
-			// Execute grasp goal i.e send the obtained solution to the joint_action_node
-			//jtagoal.
-
 			GRASP_SUCCESS = false;
+			// Execute grasp goal i.e send the obtained solution to the joint_action_node
+			jtagoal.trajectory.points.resize(1);
+			for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
+			{
+				jtagoal.trajectory.joint_names.push_back(grasp_solution.joint_state.name[i]);
+				jtagoal.trajectory.points[0].positions.push_back(grasp_solution.joint_state.position[i]);
+				jtagoal.trajectory.points[0].velocities.push_back(grasp_solution.joint_state.velocity[i]);
+			}
 
-				jta->sendGoal(jtagoal);
-				jta->waitForResult();
-				if (jta->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-				{
-					ROS_INFO("Grasp succeeded\n");
-					GRASP_SUCCESS = true;
-					as->setSucceeded();
-				}
-				else
-				{
-					ROS_INFO("Grasp sending to joint trajectory action failed \n");
-				}
+			jta->sendGoal(jtagoal);
+			jta->waitForResult();
+			if (jta->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+			{
+				ROS_INFO("Grasp succeeded\n");
+				GRASP_SUCCESS = true;
+				as->setSucceeded();
+			}
+			else
+			{
+				ROS_INFO("Grasp sending to joint trajectory action failed \n");
+			}
 
 			if(!GRASP_SUCCESS){
 				ROS_INFO("Grasp failed");
