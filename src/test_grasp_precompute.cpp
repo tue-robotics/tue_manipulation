@@ -20,10 +20,10 @@ int main(int argc, char** argv)
 
   goal.goal.header.stamp=ros::Time::now();
   goal.goal.header.frame_id = "base_link";
-  goal.PERFORM_PRE_GRASP = true;
-  goal.goal.x = 0.6;
-  goal.goal.y = 0.3;
-  goal.goal.z = 1.2;
+  goal.PERFORM_PRE_GRASP = false;
+  goal.goal.x = 0.4;
+  goal.goal.y = -0.2;
+  goal.goal.z = 0.8;
 
   goal.goal.roll  = 0;
   goal.goal.pitch = 0;
