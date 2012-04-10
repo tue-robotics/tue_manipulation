@@ -286,7 +286,7 @@ int main(int argc, char** argv)
   n.param<string>("side", SIDE, "left"); //determine for which side this node operates
   n.param("max_yaw_delta", MAX_YAW_DELTA, 2.0); // maximum sampling offset from desired yaw [rad]
   n.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); // step-size for yaw sampling [rad]
-  n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
+  n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.2); // offset for pre-grasping in cartesian x-direction [m]
   n.param("spindle_min", SPINDLE_MIN, 0.0); // Spindle minimum [m]
   n.param("spindle_max", SPINDLE_MAX, 0.4); // Spindle maximum [m]
   n.param("spindle_sampling_step", SPINDLE_SAMPLING_STEP, 0.02); // step-size for spindle sampling [m]
