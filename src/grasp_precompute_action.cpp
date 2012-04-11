@@ -25,6 +25,8 @@ using namespace std;
 double MAX_YAW_DELTA,YAW_SAMPLING_STEP,PRE_GRASP_DELTA,SPINDLE_MIN,SPINDLE_MAX,SPINDLE_SAMPLING_STEP;
 string SIDE;
 
+int NUM_GRASP_POINTS = 0, PRE_GRASP_INBETWEEN_SAMPLING_STEPS = 0;
+
 typedef actionlib::SimpleActionServer<amigo_arm_navigation::grasp_precomputeAction> Server;
 typedef actionlib::SimpleActionClient<arm_navigation_msgs::MoveArmAction> Clientfake;
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> Client;
@@ -82,10 +84,25 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 
 	// Define general joint trajectory action info
 	control_msgs::FollowJointTrajectoryGoal jtagoal;
-	jtagoal.trajectory.points.resize(1);
-	jtagoal.trajectory.points[0].positions.resize(response.kinematic_solver_info.joint_names.size());
-	jtagoal.trajectory.points[0].velocities.resize(response.kinematic_solver_info.joint_names.size());
-	jtagoal.trajectory.points[0].accelerations.resize(response.kinematic_solver_info.joint_names.size());
+
+	// Check if a pre-grasp is required, resize Joint Trajectory Action
+	if(!goal->PERFORM_PRE_GRASP)
+	{
+		NUM_GRASP_POINTS = 1;
+	}
+	else
+	{
+		NUM_GRASP_POINTS = PRE_GRASP_INBETWEEN_SAMPLING_STEPS+2; // Inbetween sample points + Pre-grasp + Grasp point
+	}
+
+	// Resize the Joint Trajectory Action goal accordingly to the number of grasp points
+	jtagoal.trajectory.points.resize(NUM_GRASP_POINTS); // Number of sample points
+	for(int i=0;i<(NUM_GRASP_POINTS);++i)
+	{
+		jtagoal.trajectory.points[i].positions.resize(response.kinematic_solver_info.joint_names.size());
+		jtagoal.trajectory.points[i].velocities.resize(response.kinematic_solver_info.joint_names.size());
+		jtagoal.trajectory.points[i].accelerations.resize(response.kinematic_solver_info.joint_names.size());
+	}
 
 	//Call IK
 	kinematics_msgs::GetConstraintAwarePositionIK::Request  gpik_req;
@@ -93,14 +110,14 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 
 	// Store the solutions
 	arm_navigation_msgs::RobotState grasp_solution;
-	arm_navigation_msgs::RobotState pre_grasp_solution;
+	vector<arm_navigation_msgs::RobotState> pre_grasp_solution;
 
 	gpik_req.timeout = ros::Duration(5.0);
 	gpik_req.ik_request.ik_link_name = "grippoint_" + SIDE;
     gpik_req.ik_request.pose_stamped.header.frame_id = goal->goal.header.frame_id;
 
     // Define joint names and seed positions
-	for(unsigned int i=0; i< response.kinematic_solver_info.joint_names.size(); i++)
+	for(unsigned int i=0; i< response.kinematic_solver_info.joint_names.size(); ++i)
 	{
 		double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
 		//double joint_seed = arm_joints.pos[i].data;
@@ -129,152 +146,110 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 		tf::Transform yaw_offset(tf::createQuaternionFromYaw(YAW_SAMPLING_DIRECTION * YAW_DELTA),tf::Point(0,0,0));
 		new_grasp_pose = grasp_pose * height_offset * yaw_offset;
 
-		//Define pre_grasp_pose
-		tf::Transform pre_grasp_offset(tf::Quaternion(0,0,0,1),tf::Point(-PRE_GRASP_DELTA,0,0));
-		new_pre_grasp_pose = new_grasp_pose * pre_grasp_offset;
-
-		// Check if they both are valid
-		tf::poseTFToMsg(new_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
-		if(ik_client.call(gpik_req, gpik_res))
+		// Check if all grasp points are feasible
+		GRASP_FEASIBLE = true;
+		for(int i=(NUM_GRASP_POINTS-1);i>=0;--i)
 		{
-			if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
+			//cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
+			tf::Transform pre_grasp_offset(tf::Quaternion(0,0,0,1),tf::Point(-PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0),0,0));
+			new_pre_grasp_pose = new_grasp_pose * pre_grasp_offset;
+			tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
+			if(ik_client.call(gpik_req, gpik_res))
 			{
-				//printf("Grasp_pose feasible\n");
-				grasp_solution = gpik_res.solution;
-				if(goal->PERFORM_PRE_GRASP)
+				if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
 				{
-					tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
-					if(ik_client.call(gpik_req, gpik_res))
-					{
-						if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
-						{
-							//printf("Pre_grasp_pose feasible\n");
-							pre_grasp_solution = gpik_res.solution;
-							GRASP_FEASIBLE = true;
-							break;
-						}
-					}else{
-						ROS_ERROR("IK call unsuccessful");
-						ros::shutdown();
-						exit(-1);}
+					//printf("Pre_grasp_pose feasible\n");
+					pre_grasp_solution.push_back(gpik_res.solution);
+				}else{
+					GRASP_FEASIBLE = false;
+					break;
 				}
-				else
+			}else{
+				ROS_ERROR("IK call unsuccessful");
+				GRASP_FEASIBLE = false;
+				ros::shutdown();
+				exit(-1);}
+		}
+
+		// If the grasp is not feasible, change the yaw and the sampling direction
+		if(!GRASP_FEASIBLE)
+		{
+			ROS_INFO("Not all pre-grasp points feasible: resampling yaw");
+			YAW_DELTA = YAW_DELTA + YAW_SAMPLING_STEP;
+			YAW_SAMPLING_DIRECTION = -1 * YAW_SAMPLING_DIRECTION;
+
+			if(YAW_DELTA > MAX_YAW_DELTA)
+			{
+				ROS_INFO("Not all pre-grasp points feasible over yaw range: resampling spindle");
+				// Re-initialize the YAW_DELTA to zero again
+				YAW_DELTA = 0.0;
+
+				// Define new height delta
+				SPINDLE_REQUIRED = true;
+				SPINDLE_DELTA = SPINDLE_DELTA + SPINDLE_SAMPLING_STEP;
+				if( (spindle_position - SPINDLE_DELTA) < SPINDLE_MIN )
 				{
-					GRASP_FEASIBLE = true;
+					HEIGHT_SAMPLING_DIRECTION = 1;
+				}else if( (spindle_position + SPINDLE_DELTA) > SPINDLE_MAX )
+				{
+					HEIGHT_SAMPLING_DIRECTION = -1;
+				}else
+				{
+					HEIGHT_SAMPLING_DIRECTION = -1 * HEIGHT_SAMPLING_DIRECTION;
+				}
+				HEIGHT_DELTA = HEIGHT_SAMPLING_DIRECTION * SPINDLE_DELTA;
+				if( (spindle_position - SPINDLE_DELTA) < SPINDLE_MIN &&  (spindle_position + SPINDLE_DELTA) > SPINDLE_MAX )
+				{
+					ROS_WARN("Sampling boundaries reached. No feasible sample found\n");
+					SAMPLING_BOUNDARIES_REACHED = true;
+					as->setAborted();
 					break;
 				}
 			}
-		}else{
-			ROS_ERROR("IK call unsuccessful");
-			ros::shutdown();
-			exit(-1);}
-
-		// Change the yaw and the sampling direction
-		YAW_DELTA = YAW_DELTA + YAW_SAMPLING_STEP;
-		YAW_SAMPLING_DIRECTION = -1 * YAW_SAMPLING_DIRECTION;
-
-		if(YAW_DELTA > MAX_YAW_DELTA)
+		}else	// Start actuating the robot when all grasp points are feasible
 		{
-			// Re-initialize the YAW_DELTA to zero again
-			YAW_DELTA = 0.0;
-
-			// Define new height delta
-			SPINDLE_REQUIRED = true;
-			SPINDLE_DELTA = SPINDLE_DELTA + SPINDLE_SAMPLING_STEP;
-			if( (spindle_position - SPINDLE_DELTA) < SPINDLE_MIN )
+			ROS_INFO("Solution found: moving arms");
+			if(SPINDLE_REQUIRED)
 			{
-				HEIGHT_SAMPLING_DIRECTION = 1;
-			}else if( (spindle_position + SPINDLE_DELTA) > SPINDLE_MAX )
-			{
-				HEIGHT_SAMPLING_DIRECTION = -1;
-			}else
-			{
-				HEIGHT_SAMPLING_DIRECTION = -1 * HEIGHT_SAMPLING_DIRECTION;
-			}
-			HEIGHT_DELTA = HEIGHT_SAMPLING_DIRECTION * SPINDLE_DELTA;
-			if( (spindle_position - SPINDLE_DELTA) < SPINDLE_MIN &&  (spindle_position + SPINDLE_DELTA) > SPINDLE_MAX )
-			{
-				ROS_WARN("Sampling boundaries reached. No feasible sample found\n");
-				SAMPLING_BOUNDARIES_REACHED = true;
-			}
-		}
-	}
-
-	if(GRASP_FEASIBLE)
-	{
-		if(SPINDLE_REQUIRED)
-		{
-			ROS_INFO("Spindle going to be activated\n");
-			amigo_actions::AmigoSpindleCommandGoal spgoal;
-            spgoal.spindle_height = spindle_position + HEIGHT_DELTA;
-            sc->sendGoal(spgoal);
-            sc->waitForResult();
-    		if (sc->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
-    		{
-    			ROS_WARN("Spindle failed\n");
-    			as->setAborted();
-    		}
-		}
-
-		bool GRASP_SUCCESS = false;
-		if(goal->PERFORM_PRE_GRASP)
-		{
-			// Execute pre-grasp goal
-			for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
-			{
-				jtagoal.trajectory.points[0].positions[i]   = pre_grasp_solution.joint_state.position[i];
-				//jtagoal.trajectory.points[0].velocities[i] = pre_grasp_solution.joint_state.velocity[i];
-				//jtagoal.trajectory.points[0].accelerations[i] = 0.0;
+				ROS_INFO("Spindle going to be activated\n");
+				amigo_actions::AmigoSpindleCommandGoal spgoal;
+				spgoal.spindle_height = spindle_position + HEIGHT_DELTA;
+				sc->sendGoal(spgoal);
+				sc->waitForResult();
+				if (sc->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
+				{
+					ROS_WARN("Spindle failed\n");
+					as->setAborted();
+				}
 			}
 
+			// Fill in all the solutions to the JTA goal
+			for(int j=0;j<NUM_GRASP_POINTS;++j)
+			{
+				for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
+				{
+					jtagoal.trajectory.points[j].positions[i] = pre_grasp_solution[j].joint_state.position[i];
+					//jtagoal.trajectory.points[j].positions[i]   = pre_grasp_solution[j].joint_state.position[i];
+					//jtagoal.trajectory.points[0].velocities[i] = pre_grasp_solution.joint_state.velocity[i];
+					//jtagoal.trajectory.points[0].accelerations[i] = 0.0;
+				}
+			}
 			ac->sendGoal(jtagoal);
 			ac->waitForResult();
 			if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
 			{
-				ROS_INFO("Pre-grasp stage: joint trajectory action succeeded\n");
-				GRASP_SUCCESS = true;
-			}
-			else
-			{
-				ROS_INFO("Pre-grasp stage: joint trajectory action failed\n");
-			}
-
-		}
-
-		if(goal->PERFORM_PRE_GRASP == GRASP_SUCCESS)
-		{
-			// Execute grasp goal
-			for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
-			{
-				jtagoal.trajectory.points[0].positions[i]   = grasp_solution.joint_state.position[i];
-				//jtagoal.trajectory.points[0].velocities[i] = grasp_solution.joint_state.velocity[i];
-				//jtagoal.trajectory.points[0].accelerations[i] = 0.0;
-			}
-
-			GRASP_SUCCESS = false;
-
-			ac->sendGoal(jtagoal);
-			ac->waitForResult();
-			if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-			{
-				ROS_INFO("Grasp stage: joint trajectory action succeeded\n");
-				GRASP_SUCCESS = true;
+				ROS_INFO("Execution of all grasp points succeeded\n");
 				as->setSucceeded();
+				break;
 			}
 			else
 			{
-				ROS_INFO("Grasp stage: joint trajectory action failed\n");
+				ROS_INFO("Execution of all grasp points failed\n");
+				as->setAborted();
+				break;
 			}
-
-		}else{
-			as->setAborted();
 		}
-	}else
-	{
-		ROS_INFO("Grasp not feasible\n");
-		as->setAborted();
 	}
-
 }
 
 int main(int argc, char** argv)
@@ -286,7 +261,8 @@ int main(int argc, char** argv)
   n.param<string>("side", SIDE, "left"); //determine for which side this node operates
   n.param("max_yaw_delta", MAX_YAW_DELTA, 2.0); // maximum sampling offset from desired yaw [rad]
   n.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); // step-size for yaw sampling [rad]
-  n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.2); // offset for pre-grasping in cartesian x-direction [m]
+  n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
+  n.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
   n.param("spindle_min", SPINDLE_MIN, 0.0); // Spindle minimum [m]
   n.param("spindle_max", SPINDLE_MAX, 0.4); // Spindle maximum [m]
   n.param("spindle_sampling_step", SPINDLE_SAMPLING_STEP, 0.02); // step-size for spindle sampling [m]
