@@ -119,8 +119,8 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
     // Define joint names and seed positions
 	for(unsigned int i=0; i< response.kinematic_solver_info.joint_names.size(); ++i)
 	{
-		double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
-		//double joint_seed = arm_joints.pos[i].data;
+		//double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
+		double joint_seed = arm_joints.pos[i].data;
 		string joint_name = response.kinematic_solver_info.joint_names[i];
 		gpik_req.ik_request.ik_seed_state.joint_state.name.push_back(joint_name);
 		gpik_req.ik_request.ik_seed_state.joint_state.position.push_back(joint_seed);
