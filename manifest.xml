@@ -16,6 +16,7 @@
   <depend package="move_arm"/>
   <depend package="amigo_msgs"/>
   <depend package="amigo_actions"/>
+  <depend package="visualization_msgs"/>
 
 </package>
 

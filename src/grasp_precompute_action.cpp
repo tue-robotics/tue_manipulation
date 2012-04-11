@@ -16,7 +16,8 @@
 #include <arm_navigation_msgs/SetPlanningSceneDiff.h>
 
 #include <amigo_msgs/arm_joints.h>
-#include <amigo_msgs/spindle_setpoint.h>
+
+#include <visualization_msgs/MarkerArray.h>
 
 #include <tf/tf.h>
 
@@ -32,7 +33,7 @@ typedef actionlib::SimpleActionClient<arm_navigation_msgs::MoveArmAction> Client
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> Client;
 typedef actionlib::SimpleActionClient<amigo_actions::AmigoSpindleCommandAction> SpindleClient;
 
-ros::Publisher *spindlepub;
+ros::Publisher *IKpospub;
 
 ros::ServiceClient query_client;
 ros::ServiceClient ik_client;
@@ -85,24 +86,11 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	// Define general joint trajectory action info
 	control_msgs::FollowJointTrajectoryGoal jtagoal;
 
-	// Check if a pre-grasp is required, resize Joint Trajectory Action
-	if(!goal->PERFORM_PRE_GRASP)
-	{
-		NUM_GRASP_POINTS = 1;
-	}
-	else
-	{
-		NUM_GRASP_POINTS = PRE_GRASP_INBETWEEN_SAMPLING_STEPS+2; // Inbetween sample points + Pre-grasp + Grasp point
-	}
+	// Define general visualization markers for feasible IK positions
+	visualization_msgs::MarkerArray IKPosMarkerArray;
 
-	// Resize the Joint Trajectory Action goal accordingly to the number of grasp points
-	jtagoal.trajectory.points.resize(NUM_GRASP_POINTS); // Number of sample points
-	for(int i=0;i<(NUM_GRASP_POINTS);++i)
-	{
-		jtagoal.trajectory.points[i].positions.resize(response.kinematic_solver_info.joint_names.size());
-		jtagoal.trajectory.points[i].velocities.resize(response.kinematic_solver_info.joint_names.size());
-		jtagoal.trajectory.points[i].accelerations.resize(response.kinematic_solver_info.joint_names.size());
-	}
+	// Define stringstream for IK pos ID
+	ostringstream ss;
 
 	//Call IK
 	kinematics_msgs::GetConstraintAwarePositionIK::Request  gpik_req;
@@ -129,6 +117,39 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 		//magoal.planning_scene_diff.robot_state.joint_state.position.push_back(joint_seed);
 	}
 
+	// Check if a pre-grasp is required, resize Joint Trajectory Action
+	if(!goal->PERFORM_PRE_GRASP)
+	{
+		NUM_GRASP_POINTS = 1;
+	}
+	else
+	{
+		NUM_GRASP_POINTS = PRE_GRASP_INBETWEEN_SAMPLING_STEPS+2; // Inbetween sample points + Pre-grasp + Grasp point
+	}
+
+	// Resize the Joint Trajectory Action goal accordingly to the number of grasp points
+	jtagoal.trajectory.points.resize(NUM_GRASP_POINTS); // Number of sample points
+	IKPosMarkerArray.markers.resize(NUM_GRASP_POINTS);
+	for(int i=0;i<(NUM_GRASP_POINTS);++i)
+	{
+		jtagoal.trajectory.points[i].positions.resize(response.kinematic_solver_info.joint_names.size());
+		jtagoal.trajectory.points[i].velocities.resize(response.kinematic_solver_info.joint_names.size());
+		jtagoal.trajectory.points[i].accelerations.resize(response.kinematic_solver_info.joint_names.size());
+
+		IKPosMarkerArray.markers[i].type = 2; // 2=SPHERE
+		IKPosMarkerArray.markers[i].scale.x = 0.01;
+		IKPosMarkerArray.markers[i].scale.y = 0.01;
+		IKPosMarkerArray.markers[i].scale.z = 0.01;
+		IKPosMarkerArray.markers[i].color.r = 1.0f;
+		IKPosMarkerArray.markers[i].color.g = 0.0f;
+		IKPosMarkerArray.markers[i].color.b = 0.0f;
+		IKPosMarkerArray.markers[i].color.a = 1.0;
+		IKPosMarkerArray.markers[i].header.frame_id = goal->goal.header.frame_id;
+	}
+
+	///////////////////////////////////////////////////////////
+	/// EVALUATE IF GRASP IS FEASIBLE AND CREATE JOINT ARRAY///
+	///////////////////////////////////////////////////////////
     // Define tf transform pose
     tf::Transform grasp_pose(tf::createQuaternionFromRPY(goal->goal.roll,goal->goal.pitch,goal->goal.yaw),tf::Point(goal->goal.x,goal->goal.y,goal->goal.z));
 	tf::poseTFToMsg(grasp_pose, gpik_req.ik_request.pose_stamped.pose);
@@ -150,16 +171,21 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 		GRASP_FEASIBLE = true;
 		for(int i=(NUM_GRASP_POINTS-1);i>=0;--i)
 		{
-			//cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
+			cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
 			tf::Transform pre_grasp_offset(tf::Quaternion(0,0,0,1),tf::Point(-PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0),0,0));
 			new_pre_grasp_pose = new_grasp_pose * pre_grasp_offset;
 			tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
+			// Fill the IK markers
+			IKPosMarkerArray.markers[i].id = i;
+			IKPosMarkerArray.markers[i].pose = gpik_req.ik_request.pose_stamped.pose;
 			if(ik_client.call(gpik_req, gpik_res))
 			{
 				if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
 				{
 					//printf("Pre_grasp_pose feasible\n");
 					pre_grasp_solution.push_back(gpik_res.solution);
+					// Set the seed state for the next point to the solution of the previous point
+					gpik_req.ik_request.ik_seed_state = gpik_res.solution;
 				}else{
 					GRASP_FEASIBLE = false;
 					break;
@@ -202,27 +228,45 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 				{
 					ROS_WARN("Sampling boundaries reached. No feasible sample found\n");
 					SAMPLING_BOUNDARIES_REACHED = true;
-					as->setAborted();
 					break;
 				}
 			}
-		}else	// Start actuating the robot when all grasp points are feasible
-		{
-			ROS_INFO("Solution found: moving arms");
-			if(SPINDLE_REQUIRED)
-			{
-				ROS_INFO("Spindle going to be activated\n");
-				amigo_actions::AmigoSpindleCommandGoal spgoal;
-				spgoal.spindle_height = spindle_position + HEIGHT_DELTA;
-				sc->sendGoal(spgoal);
-				sc->waitForResult();
-				if (sc->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
-				{
-					ROS_WARN("Spindle failed\n");
-					as->setAborted();
-				}
-			}
+		}
+	}
 
+	//////////////////////////////////////////////////////////
+	//////////////// EXECUTING JOINT ARRAY ///////////////////
+	//////////////////////////////////////////////////////////
+	// SetAborted when grasp not feasible, else start actuating the robot when all grasp points are feasible
+	bool GRASP_SUCCESS = true;
+	if(!GRASP_FEASIBLE)
+	{
+		ROS_INFO("Grasp not feasible\n");
+		GRASP_SUCCESS = false;
+	}
+	else
+	{
+		ROS_INFO("Solution found: moving arms");
+		// Publish the IK markers
+		IKpospub->publish(IKPosMarkerArray);
+		// Check if spindle is required
+		if(SPINDLE_REQUIRED)
+		{
+			ROS_INFO("Spindle going to be activated\n");
+			amigo_actions::AmigoSpindleCommandGoal spgoal;
+			spgoal.spindle_height = spindle_position + HEIGHT_DELTA;
+			sc->sendGoal(spgoal);
+			sc->waitForResult();
+			if (sc->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
+			{
+				ROS_WARN("Spindle failed\n");
+				GRASP_SUCCESS = false;
+			}
+		}
+
+		// Continue if GRASP_SUCCESS is still true
+		if(GRASP_SUCCESS)
+		{
 			// Fill in all the solutions to the JTA goal
 			for(int j=0;j<NUM_GRASP_POINTS;++j)
 			{
@@ -236,19 +280,23 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 			}
 			ac->sendGoal(jtagoal);
 			ac->waitForResult();
-			if (ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+			if (ac->getState() != actionlib::SimpleClientGoalState::SUCCEEDED)
 			{
 				ROS_INFO("Execution of all grasp points succeeded\n");
-				as->setSucceeded();
-				break;
-			}
-			else
-			{
-				ROS_INFO("Execution of all grasp points failed\n");
-				as->setAborted();
-				break;
+				GRASP_SUCCESS = false;
 			}
 		}
+	}
+
+	//////////////////////////////////////////////////////////
+	///////////////// FEEDBACK TO CLIENT /////////////////////
+	//////////////////////////////////////////////////////////
+	if(GRASP_SUCCESS)
+	{
+		as->setSucceeded();
+	}else
+	{
+		as->setAborted();
 	}
 }
 
@@ -289,7 +337,9 @@ int main(int argc, char** argv)
 
   // Start listening to the current spindle measurement
   ros::Subscriber spindlesub = n.subscribe("/spindle_measurement", 1, spindlecontrollerCB);
-  spindlepub = new ros::Publisher(n.advertise<amigo_msgs::spindle_setpoint>("/spindle_reference", 1));
+
+  // IK marker publisher
+  IKpospub = new ros::Publisher(n.advertise<visualization_msgs::MarkerArray>("/IK_Position_Markers", 1));
 
   ros::spin();
 

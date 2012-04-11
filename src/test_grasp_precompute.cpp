@@ -19,7 +19,7 @@ int main(int argc, char** argv)
   ros::Time::waitForValid(ros::WallDuration(2));
 
   goal.goal.header.stamp=ros::Time::now();
-  goal.goal.header.frame_id = "base_link";
+  goal.goal.header.frame_id = "/base_link";
   goal.PERFORM_PRE_GRASP = true;
   goal.goal.x = 0.5;
   goal.goal.y = -0.1;
