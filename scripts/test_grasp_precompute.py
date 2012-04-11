@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	grasp_precompute_goal.PERFORM_PRE_GRASP = True
 	
 	grasp_precompute_goal.goal.x = 0.5
-	grasp_precompute_goal.goal.y = -0.1
+	grasp_precompute_goal.goal.y = 0.7
 	grasp_precompute_goal.goal.z = 0.9
 	
 	grasp_precompute_goal.goal.roll = 0

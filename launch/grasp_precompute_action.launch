@@ -19,7 +19,7 @@
         <param name="yaw_sampling_step" value="0.1"/>
         <param name="spindle_sampling_step" value="0.05"/>
         <param name="pre_grasp_delta" value="0.1"/>
-        <param name="pre_grasp_inbetween_sampling_steps" value="10"/>
+        <param name="pre_grasp_inbetween_sampling_steps" value="20"/>
         <param name="spindle_min" value="0.1"/>
         <param name="spindle_max" value="0.4"/>
     </node>
@@ -35,7 +35,7 @@
         <param name="yaw_sampling_step" value="0.1"/>
         <param name="spindle_sampling_step" value="0.05"/>
         <param name="pre_grasp_delta" value="0.1"/>
-        <param name="pre_grasp_inbetween_sampling_steps" value="10"/>
+        <param name="pre_grasp_inbetween_sampling_steps" value="20"/>
         <param name="spindle_min" value="0.1"/>
         <param name="spindle_max" value="0.4"/>
     </node>

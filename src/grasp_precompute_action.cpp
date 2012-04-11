@@ -130,6 +130,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	// Resize the Joint Trajectory Action goal accordingly to the number of grasp points
 	jtagoal.trajectory.points.resize(NUM_GRASP_POINTS); // Number of sample points
 	IKPosMarkerArray.markers.resize(NUM_GRASP_POINTS);
+        pre_grasp_solution.resize(NUM_GRASP_POINTS);
 	for(int i=0;i<(NUM_GRASP_POINTS);++i)
 	{
 		jtagoal.trajectory.points[i].positions.resize(response.kinematic_solver_info.joint_names.size());
@@ -169,23 +170,25 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 
 		// Check if all grasp points are feasible
 		GRASP_FEASIBLE = true;
+		int k=0;
 		for(int i=(NUM_GRASP_POINTS-1);i>=0;--i)
 		{
 			cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
 			tf::Transform pre_grasp_offset(tf::Quaternion(0,0,0,1),tf::Point(-PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0),0,0));
 			new_pre_grasp_pose = new_grasp_pose * pre_grasp_offset;
 			tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
-			// Fill the IK markers
-			IKPosMarkerArray.markers[i].id = i;
-			IKPosMarkerArray.markers[i].pose = gpik_req.ik_request.pose_stamped.pose;
 			if(ik_client.call(gpik_req, gpik_res))
 			{
 				if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
 				{
 					//printf("Pre_grasp_pose feasible\n");
-					pre_grasp_solution.push_back(gpik_res.solution);
+					pre_grasp_solution[k] = gpik_res.solution;
+					++k;
 					// Set the seed state for the next point to the solution of the previous point
 					gpik_req.ik_request.ik_seed_state = gpik_res.solution;
+					// Fill the IK markers
+					IKPosMarkerArray.markers[i].id = i;
+					IKPosMarkerArray.markers[i].pose = gpik_req.ik_request.pose_stamped.pose;
 				}else{
 					GRASP_FEASIBLE = false;
 					break;
