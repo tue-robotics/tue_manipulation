@@ -56,14 +56,22 @@ void spindlecontrollerCB(const std_msgs::Float64ConstPtr &spindle_meas)
 
 void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Server* as, Client* ac, SpindleClient* sc)
 {
+	// Check if desired coordinate frame is /base_link frame else bail because this is not yet implemented!
+	// We still need to make a nice coordinate transformation here but this will raise quesitons about e.g. SnapMapICP
+	if(goal->goal.header.frame_id.compare("/base_link")){
+		ROS_WARN("Grasp not executed: desired base frame must be '/base_link'");
+		as->setAborted();
+		return;
+	}
+
 	// Test if the planning scene is up and running
 	arm_navigation_msgs::SetPlanningSceneDiff::Request planning_scene_req;
 	arm_navigation_msgs::SetPlanningSceneDiff::Response planning_scene_res;
 
 	if(!set_planning_scene_diff_client.call(planning_scene_req, planning_scene_res)) {
-	  ROS_ERROR("Can't get planning scene");
-	  ros::shutdown();
-	  exit(-1);
+		ROS_WARN("Grasp not executed: cannot call planning scene");
+	    as->setAborted();
+		return;
 	}
 
 	// Get Kinematics solver info for seed state
@@ -78,9 +86,9 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	}
 	else
 	{
-	  ROS_ERROR("Could not call query service");
-	  ros::shutdown();
-	  exit(-1);
+		ROS_WARN("Grasp not executed: IK service cannot be called");
+		as->setAborted();
+		return;
 	}
 
 	// Define general joint trajectory action info
@@ -188,16 +196,15 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 					gpik_req.ik_request.ik_seed_state = gpik_res.solution;
 					// Fill the IK markers
 					IKPosMarkerArray.markers[i].id = i;
-					IKPosMarkerArray.markers[i].pose = gpik_req.ik_request.pose_stamped.pose;
+					tf::poseTFToMsg(grasp_pose * yaw_offset * pre_grasp_offset, IKPosMarkerArray.markers[i].pose);
 				}else{
 					GRASP_FEASIBLE = false;
 					break;
 				}
 			}else{
-				ROS_ERROR("IK call unsuccessful");
-				GRASP_FEASIBLE = false;
-				ros::shutdown();
-				exit(-1);}
+				ROS_WARN("Grasp not executed: IK service cannot be called");
+				as->setAborted();
+				return;}
 		}
 
 		// If the grasp is not feasible, change the yaw and the sampling direction
