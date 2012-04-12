@@ -9,10 +9,10 @@ from amigo_arm_navigation.msg._grasp_precomputeGoal import grasp_precomputeGoal
 from amigo_arm_navigation.msg._grasp_precomputeAction import grasp_precomputeAction
 
 if __name__ == '__main__':
-	rospy.init_node('test_grasp_precompute_left', anonymous=True)
+	rospy.init_node('test_grasp_precompute', anonymous=True)
 	
-	ac_grasp_precompute_left = actionlib.SimpleActionClient("grasp_precompute_left", grasp_precomputeAction)
-	ac_grasp_precompute_left.wait_for_server()#rospy.Duration(5.0)
+	ac_grasp_precompute = actionlib.SimpleActionClient("grasp_precompute_left", grasp_precomputeAction)
+	ac_grasp_precompute.wait_for_server()#rospy.Duration(5.0)
 	
 	grasp_precompute_goal = grasp_precomputeGoal()
 	grasp_precompute_goal.goal.header.frame_id = '/base_link'
@@ -29,9 +29,9 @@ if __name__ == '__main__':
 	grasp_precompute_goal.goal.yaw = 0
 	
 	print "Calling action"
-	ac_grasp_precompute_left.send_goal(grasp_precompute_goal)
+	ac_grasp_precompute.send_goal(grasp_precompute_goal)
 	print "Goal sent, waiting for result..."
-	result = ac_grasp_precompute_left.wait_for_result(rospy.Duration(60.0))
+	result = ac_grasp_precompute.wait_for_result(rospy.Duration(60.0))
 	print "Action ended"
 	if result:
 		print "Grasp precompute successful"
