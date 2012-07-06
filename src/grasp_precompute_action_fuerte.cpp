@@ -106,13 +106,13 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 
 	// Store the solutions
 	arm_navigation_msgs::RobotState grasp_solution;
-	vector<arm_navigation_msgs::RobotState> pre_grasp_solution;
+	vector<moveit_msgs::RobotState> pre_grasp_solution;
 
 	gpik_req.timeout = ros::Duration(5.0);
 	gpik_req.ik_request.ik_link_name = "grippoint_" + SIDE;
-    gpik_req.ik_request.pose_stamped.header.frame_id = goal->goal.header.frame_id;
+        gpik_req.ik_request.pose_stamped.header.frame_id = goal->goal.header.frame_id;
 
-    // Define joint names and seed positions
+        // Define joint names and seed positions
 	for(unsigned int i=0; i< response.kinematic_solver_info.joint_names.size(); ++i)
 	{
 		//double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
