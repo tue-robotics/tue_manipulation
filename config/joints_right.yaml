@@ -7,7 +7,7 @@ joint_names:
   - wrist_pitch_joint_right
   - wrist_yaw_joint_right
 constraints:
-   goal_time: 10.0
+   goal_time: 20.0
    shoulder_yaw_joint_right:
         intermediate_goal: 0.02
         trajectory: 10.0
