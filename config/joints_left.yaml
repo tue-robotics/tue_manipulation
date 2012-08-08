@@ -23,7 +23,7 @@ constraints:
    elbow_pitch_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
-        final_goal: 0.01
+        final_goal: 0.02
    elbow_roll_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
