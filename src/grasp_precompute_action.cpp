@@ -20,6 +20,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 
 using namespace std;
 
@@ -41,6 +42,8 @@ ros::ServiceClient ik_client;
 static const std::string SET_PLANNING_SCENE_DIFF_NAME = "/environment_server/set_planning_scene_diff";
 ros::ServiceClient set_planning_scene_diff_client;
 
+tf::TransformListener* TF_LISTENER;
+
 amigo_msgs::arm_joints arm_joints;
 double spindle_position;
 
@@ -54,23 +57,58 @@ void spindlecontrollerCB(const std_msgs::Float64ConstPtr &spindle_meas)
 	spindle_position = spindle_meas->data;
 }
 
-void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Server* as, Client* ac, SpindleClient* sc)
+void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, Server* as, Client* ac, SpindleClient* sc)
 {
-	// Check if desired coordinate frame is /base_link frame else bail because this is not yet implemented!
-	// We still need to make a nice coordinate transformation here but this will raise quesitons about e.g. SnapMapICP
-	if(goal->goal.header.frame_id.compare("/base_link")){
-		ROS_WARN("Grasp not executed: desired base frame must be '/base_link'");
-		as->setAborted();
-		return;
+
+	// Convert to base_link, so that sampling over the yaw indicates the z-axes pointing up (whereas it wouldn't with e.g. '/torso')
+	geometry_msgs::PoseStamped stamped_out;
+	if(goal_in->goal.header.frame_id.compare("/base_link"))
+	{
+		// Convert to temporary geometry msg to apply transformations
+		geometry_msgs::PoseStamped stamped_tmp;
+		stamped_tmp.header = goal_in->goal.header;
+		stamped_tmp.pose.position.x = goal_in->goal.x;
+		stamped_tmp.pose.position.y = goal_in->goal.y;
+		stamped_tmp.pose.position.z = goal_in->goal.z;
+		stamped_tmp.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(goal_in->goal.roll,goal_in->goal.pitch,goal_in->goal.yaw);
+
+		// Perform the transformation to /base_link
+		if(TF_LISTENER->waitForTransform("/base_link", stamped_tmp.header.frame_id, stamped_tmp.header.stamp, ros::Duration(1.0)))
+		{
+			try
+			{TF_LISTENER->transformPose("/base_link", stamped_tmp, stamped_out);}
+			catch (tf::TransformException ex){
+				as->setAborted();
+				ROS_ERROR("%s",ex.what());
+				return;}
+		}else{
+			as->setAborted();
+			ROS_ERROR("grasp_precompute_action: TF_LISTENER could not find transform from /base_link to %s:",stamped_tmp.header.frame_id.c_str());
+			return;
+
+		}
+
+		// EXPERIMENTAL: WHEN FRAME_ID IS NOT BASE LINK DEFINE ANGLES TO BE ZERO
+		stamped_out.pose.orientation.x = 0;
+		stamped_out.pose.orientation.y = 0;
+		stamped_out.pose.orientation.z = 0;
+		stamped_out.pose.orientation.w = 1;
+	}
+	else{
+		// Frame is in base_link, don't convert just extract
+		stamped_out.header = goal_in->goal.header;
+		stamped_out.pose.position.x = goal_in->goal.x;
+		stamped_out.pose.position.y = goal_in->goal.y;
+		stamped_out.pose.position.z = goal_in->goal.z;
+		stamped_out.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(goal_in->goal.roll,goal_in->goal.pitch,goal_in->goal.yaw);
 	}
 
-	// Test if the planning scene is up and running
+	// Test if the planning scene is up and running (required for the Kinematics node)
 	arm_navigation_msgs::SetPlanningSceneDiff::Request planning_scene_req;
 	arm_navigation_msgs::SetPlanningSceneDiff::Response planning_scene_res;
-
 	if(!set_planning_scene_diff_client.call(planning_scene_req, planning_scene_res)) {
 		ROS_WARN("Grasp not executed: cannot call planning scene");
-	    as->setAborted();
+		as->setAborted();
 		return;
 	}
 
@@ -79,14 +117,14 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	kinematics_msgs::GetKinematicSolverInfo::Response response;
 	if(query_client.call(request,response))
 	{
-	  for(unsigned int i=0; i<response.kinematic_solver_info.joint_names.size(); i++)
-	  {
-	    ROS_DEBUG("Joint: %d %s",i,response.kinematic_solver_info.joint_names[i].c_str());
-	  }
+		for(unsigned int i=0; i<response.kinematic_solver_info.joint_names.size(); i++)
+		{
+			ROS_DEBUG("Joint: %d %s",i,response.kinematic_solver_info.joint_names[i].c_str());
+		}
 	}
 	else
 	{
-		ROS_WARN("Grasp not executed: IK service cannot be called");
+		ROS_WARN("Grasp precompute action: Getting IK solver information failed");
 		as->setAborted();
 		return;
 	}
@@ -108,11 +146,12 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	arm_navigation_msgs::RobotState grasp_solution;
 	vector<arm_navigation_msgs::RobotState> pre_grasp_solution;
 
+	// Fill in the IK request
 	gpik_req.timeout = ros::Duration(5.0);
 	gpik_req.ik_request.ik_link_name = "grippoint_" + SIDE;
-        gpik_req.ik_request.pose_stamped.header.frame_id = goal->goal.header.frame_id;
+	gpik_req.ik_request.pose_stamped.header.frame_id = stamped_out.header.frame_id;
 
-        // Define joint names and seed positions
+	// Define joint names and seed positions
 	for(unsigned int i=0; i< response.kinematic_solver_info.joint_names.size(); ++i)
 	{
 		//double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
@@ -126,7 +165,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	}
 
 	// Check if a pre-grasp is required, resize Joint Trajectory Action
-	if(!goal->PERFORM_PRE_GRASP)
+	if(!goal_in->PERFORM_PRE_GRASP)
 	{
 		NUM_GRASP_POINTS = 1;
 	}
@@ -138,7 +177,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 	// Resize the Joint Trajectory Action goal accordingly to the number of grasp points
 	jtagoal.trajectory.points.resize(NUM_GRASP_POINTS); // Number of sample points
 	IKPosMarkerArray.markers.resize(NUM_GRASP_POINTS);
-        pre_grasp_solution.resize(NUM_GRASP_POINTS);
+	pre_grasp_solution.resize(NUM_GRASP_POINTS);
 	for(int i=0;i<(NUM_GRASP_POINTS);++i)
 	{
 		jtagoal.trajectory.points[i].positions.resize(response.kinematic_solver_info.joint_names.size());
@@ -153,21 +192,21 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 		IKPosMarkerArray.markers[i].color.g = 0.0f;
 		IKPosMarkerArray.markers[i].color.b = 0.0f;
 		IKPosMarkerArray.markers[i].color.a = 1.0;
-		IKPosMarkerArray.markers[i].header.frame_id = goal->goal.header.frame_id;
+		IKPosMarkerArray.markers[i].header.frame_id = stamped_out.header.frame_id;
 	}
 
 	///////////////////////////////////////////////////////////
 	/// EVALUATE IF GRASP IS FEASIBLE AND CREATE JOINT ARRAY///
 	///////////////////////////////////////////////////////////
-    // Define tf transform pose
-    tf::Transform grasp_pose(tf::createQuaternionFromRPY(goal->goal.roll,goal->goal.pitch,goal->goal.yaw),tf::Point(goal->goal.x,goal->goal.y,goal->goal.z));
-	tf::poseTFToMsg(grasp_pose, gpik_req.ik_request.pose_stamped.pose);
+	tf::Transform grasp_pose;
+	tf::poseMsgToTF(stamped_out.pose,grasp_pose);
 
 	tf::Transform new_grasp_pose;
 	tf::Transform new_pre_grasp_pose;
 	bool GRASP_FEASIBLE = false, SAMPLING_BOUNDARIES_REACHED=false, SPINDLE_REQUIRED = false;
 	double YAW_DELTA = 0.0, HEIGHT_DELTA = 0.0, SPINDLE_DELTA = 0.0;
 	int YAW_SAMPLING_DIRECTION = 1, HEIGHT_SAMPLING_DIRECTION = 1;
+
 	while(ros::ok() && !GRASP_FEASIBLE && !SAMPLING_BOUNDARIES_REACHED )
 	{
 		//printf("YAW_DELTA=%f \t HEIGHT_DELTA=%f\n",YAW_SAMPLING_DIRECTION * YAW_DELTA,HEIGHT_DELTA);
@@ -181,10 +220,11 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 		int k=0;
 		for(int i=(NUM_GRASP_POINTS-1);i>=0;--i)
 		{
-			cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
+			//cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
 			tf::Transform pre_grasp_offset(tf::Quaternion(0,0,0,1),tf::Point(-PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0),0,0));
 			new_pre_grasp_pose = new_grasp_pose * pre_grasp_offset;
 			tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
+			gpik_req.ik_request.pose_stamped.header.stamp = ros::Time::now();
 			if(ik_client.call(gpik_req, gpik_res))
 			{
 				if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
@@ -207,16 +247,17 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 				return;}
 		}
 
+		ROS_INFO("%f ",YAW_DELTA);
 		// If the grasp is not feasible, change the yaw and the sampling direction
 		if(!GRASP_FEASIBLE)
 		{
-			ROS_INFO("Not all pre-grasp points feasible: resampling yaw");
+			ROS_DEBUG("Not all grasp points feasible: resampling yaw");
 			YAW_DELTA = YAW_DELTA + YAW_SAMPLING_STEP;
 			YAW_SAMPLING_DIRECTION = -1 * YAW_SAMPLING_DIRECTION;
 
 			if(YAW_DELTA > MAX_YAW_DELTA)
 			{
-				ROS_INFO("Not all pre-grasp points feasible over yaw range: resampling spindle");
+				ROS_DEBUG("Not all pre-grasp points feasible over yaw range: resampling spindle");
 				// Re-initialize the YAW_DELTA to zero again
 				YAW_DELTA = 0.0;
 
@@ -312,46 +353,50 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal, Ser
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "grasp_precompute_server");
-  ros::NodeHandle n("~");
+	ros::init(argc, argv, "grasp_precompute_server");
+	ros::NodeHandle n("~");
 
-  // Get the parameters
-  n.param<string>("side", SIDE, "left"); //determine for which side this node operates
-  n.param("max_yaw_delta", MAX_YAW_DELTA, 2.0); // maximum sampling offset from desired yaw [rad]
-  n.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); // step-size for yaw sampling [rad]
-  n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
-  n.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
-  n.param("spindle_min", SPINDLE_MIN, 0.0); // Spindle minimum [m]
-  n.param("spindle_max", SPINDLE_MAX, 0.4); // Spindle maximum [m]
-  n.param("spindle_sampling_step", SPINDLE_SAMPLING_STEP, 0.02); // step-size for spindle sampling [m]
+	TF_LISTENER = new tf::TransformListener();
 
-  // Wait for the joint trajectory action server
-  Client client("joint_trajectory_action_" + SIDE, true);
-  client.waitForServer();
+	// Get the parameters
+	n.param<string>("side", SIDE, "left"); //determine for which side this node operates
+	n.param("max_yaw_delta", MAX_YAW_DELTA, 2.0); // maximum sampling offset from desired yaw [rad]
+	n.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); // step-size for yaw sampling [rad]
+	n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
+	n.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
+	n.param("spindle_min", SPINDLE_MIN, 0.0); // Spindle minimum [m]
+	n.param("spindle_max", SPINDLE_MAX, 0.4); // Spindle maximum [m]
+	n.param("spindle_sampling_step", SPINDLE_SAMPLING_STEP, 0.02); // step-size for spindle sampling [m]
 
-  // Wait for the spindle server
-  SpindleClient spindleclient("spindle_server", true);
-  spindleclient.waitForServer();
+	// Wait for the joint trajectory action server
+	Client client("joint_trajectory_action_" + SIDE, true);
+	client.waitForServer();
 
-  // Initialize the grasp_precompute server
-  Server server(n, "/grasp_precompute_" + SIDE, boost::bind(&execute, _1, &server, &client, &spindleclient), false);
-  server.start();
+	// Wait for the spindle server
+	SpindleClient spindleclient("spindle_server", true);
+	spindleclient.waitForServer();
 
-  // Initialize the IK clients
-  query_client = n.serviceClient<kinematics_msgs::GetKinematicSolverInfo>("/get_ik_solver_info");
-  ik_client = n.serviceClient<kinematics_msgs::GetConstraintAwarePositionIK>("/get_constraint_aware_ik");
-  set_planning_scene_diff_client = n.serviceClient<arm_navigation_msgs::SetPlanningSceneDiff>(SET_PLANNING_SCENE_DIFF_NAME);
+	// Initialize the grasp_precompute server
+	Server server(n, "/grasp_precompute_" + SIDE, boost::bind(&execute, _1, &server, &client, &spindleclient), false);
+	server.start();
 
-  // Start listening to the current joint measurements
-  ros::Subscriber armsub = n.subscribe("/joint_measurements", 1, armcontrollerCB);
+	// Initialize the IK clients
+	query_client = n.serviceClient<kinematics_msgs::GetKinematicSolverInfo>("/get_ik_solver_info");
+	ik_client = n.serviceClient<kinematics_msgs::GetConstraintAwarePositionIK>("/get_constraint_aware_ik");
+	set_planning_scene_diff_client = n.serviceClient<arm_navigation_msgs::SetPlanningSceneDiff>(SET_PLANNING_SCENE_DIFF_NAME);
 
-  // Start listening to the current spindle measurement
-  ros::Subscriber spindlesub = n.subscribe("/spindle_measurement", 1, spindlecontrollerCB);
+	// Start listening to the current joint measurements
+	ros::Subscriber armsub = n.subscribe("/joint_measurements", 1, armcontrollerCB);
 
-  // IK marker publisher
-  IKpospub = new ros::Publisher(n.advertise<visualization_msgs::MarkerArray>("/IK_Position_Markers", 1));
+	// Start listening to the current spindle measurement
+	ros::Subscriber spindlesub = n.subscribe("/spindle_measurement", 1, spindlecontrollerCB);
 
-  ros::spin();
+	// IK marker publisher
+	IKpospub = new ros::Publisher(n.advertise<visualization_msgs::MarkerArray>("/IK_Position_Markers", 1));
 
-  return 0;
+	ros::spin();
+
+	delete TF_LISTENER;
+
+	return 0;
 }
