@@ -247,7 +247,6 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
 				return;}
 		}
 
-		ROS_INFO("%f ",YAW_DELTA);
 		// If the grasp is not feasible, change the yaw and the sampling direction
 		if(!GRASP_FEASIBLE)
 		{
