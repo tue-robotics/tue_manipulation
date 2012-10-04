@@ -13,15 +13,15 @@
         <param name="left_arm/root_name" type="string" value="shoulder_mount_left" />
         <param name="left_arm/tip_name" type="string" value="grippoint_left" />
         <param name="kinematics_solver" type="string" value="arm_kinematics_constraint_aware/KDLArmKinematicsPlugin" />
-        <param name="left_arm/max_search_iterations" value="1" />
-        <param name="left_arm/max_solver_iterations" value="1" />
+        <param name="left_arm/max_search_iterations" value="3" />
+        <param name="left_arm/max_solver_iterations" value="500" />
     </node>
     <node pkg="arm_kinematics_constraint_aware" type="arm_kinematics_constraint_aware" name="amigo_right_arm_kinematics"  output="screen" machine="$(arg machine)">
         <param name="group" type="string" value="right_arm" />
         <param name="right_arm/root_name" type="string" value="shoulder_mount_right" />
         <param name="right_arm/tip_name" type="string" value="grippoint_right" />
         <param name="kinematics_solver" type="string" value="arm_kinematics_constraint_aware/KDLArmKinematicsPlugin" />
-        <param name="right_arm/max_search_iterations" value="1" />
-        <param name="right_arm/max_solver_iterations" value="1" />
+        <param name="right_arm/max_search_iterations" value="3" />
+        <param name="right_arm/max_solver_iterations" value="500" />
     </node>
 </launch>
