@@ -11,7 +11,11 @@
     <include file="$(find amigo_arm_navigation)/launch/constraint_aware_kinematics.launch" />
     <include file="$(find amigo_arm_navigation)/launch/ompl_planning.launch" />
     <include file="$(find amigo_arm_navigation)/launch/trajectory_filter_server.launch" />
-    <include file="$(find amigo_arm_navigation)/launch/move_groups.launch" />
+    
+    <!--<include file="$(find amigo_arm_navigation)/launch/move_groups.launch" />-->
+    <include file="$(find amigo_arm_navigation)/launch/move_left_arm.launch" />
+    <include file="$(find amigo_arm_navigation)/launch/move_right_arm.launch" />
+    
     <!--<include file="$(find amigo_arm_navigation)/launch/pre_grasp.launch" />-->
     <!--<include file="$(find amigo_self_filter)/start_filter.launch" />-->
     <include file="$(find amigo_arm_navigation)/launch/collision_monitor.launch" />
