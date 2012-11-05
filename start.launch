@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
-    <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description_$(optenv ROBOT_MODEL_COMPLEXITY).yaml"/>
+    <arg name="ROBOT_COMPLEXITY" default="$(optenv ROBOT_COMPLEXITY complex)" />
+
+    <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description_$(arg ROBOT_COMPLEXITY).yaml"/>
 
     <arg if="$(optenv ROBOT_REAL false)" name="machine" value="amigo3"/>
     <arg unless="$(optenv ROBOT_REAL false)" name="machine" value="localhost"/> 
@@ -19,7 +21,7 @@
     <include file="$(find amigo_arm_navigation)/launch/constraint_aware_kinematics.launch" >
 	<arg name="machine" value="$(arg machine)" />
     </include>
-
+<!--
     <include file="$(find amigo_arm_navigation)/launch/ompl_planning.launch" >
 	<arg name="machine" value="$(arg machine)" />
     </include>
@@ -35,6 +37,7 @@
     <include file="$(find amigo_arm_navigation)/launch/move_right_arm.launch" >
 	<arg name="machine" value="$(arg machine)" />
     </include>
+-->
     
     <include file="$(find amigo_arm_navigation)/launch/grasp_precompute_action.launch" >
 	<arg name="machine" value="$(arg machine)" />
