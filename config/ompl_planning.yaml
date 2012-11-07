@@ -21,7 +21,7 @@ right_arm:
     - LBKPIECEkConfig1
   projection_evaluator: joint_state
 left_arm_cartesian:
-  parent_frame: shoulder_mount_left
+  parent_frame: base_link
   physical_group: left_arm
   planner_type: RPYIKTaskSpacePlanner
   state_spaces:
@@ -54,11 +54,11 @@ left_arm_cartesian:
     - LBKPIECEkConfig1
   kinematics_solver: arm_kinematics_constraint_aware/KDLArmKinematicsPlugin
   tip_name: grippoint_left
-  root_name: shoulder_mount_left
+  root_name: base_link
   projection_evaluator: joint_state
   longest_valid_segment_fraction: 0.001
 right_arm_cartesian:
-  parent_frame: shoulder_mount_right
+  parent_frame: base_link
   physical_group: right_arm
   planner_type: RPYIKTaskSpacePlanner
   state_spaces:
@@ -91,6 +91,6 @@ right_arm_cartesian:
     - LBKPIECEkConfig1
   kinematics_solver: arm_kinematics_constraint_aware/KDLArmKinematicsPlugin
   tip_name: grippoint_right
-  root_name: shoulder_mount_right
+  root_name: base_link
   projection_evaluator: joint_state
   longest_valid_segment_fraction: 0.001

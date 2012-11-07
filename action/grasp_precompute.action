@@ -1,6 +1,7 @@
 #goal definition
 bool PERFORM_PRE_GRASP
 amigo_msgs/cart_pos goal
+amigo_msgs/cart_pos delta
 ---
 #result definition
 amigo_msgs/cart_pos result

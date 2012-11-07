@@ -1,4 +1,5 @@
 joint_names:
+  - spindle_joint
   - shoulder_yaw_joint_left
   - shoulder_pitch_joint_left
   - shoulder_roll_joint_left
@@ -8,6 +9,10 @@ joint_names:
   - wrist_yaw_joint_left
 constraints:
    goal_time: 20.0
+   spindle_joint:
+        intermediate_goal: 0.02
+        trajectory: 0.4
+        final_goal: 0.005
    shoulder_yaw_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
