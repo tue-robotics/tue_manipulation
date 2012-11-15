@@ -12,7 +12,7 @@ constraints:
    spindle_joint:
         intermediate_goal: 0.02
         trajectory: 0.4
-        final_goal: 0.005
+        final_goal: 0.01
    shoulder_yaw_joint_right:
         intermediate_goal: 0.02
         trajectory: 10.0
