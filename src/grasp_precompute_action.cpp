@@ -74,7 +74,7 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
         ROS_WARN("grasp_precompute_action: goal consists out of both absolute AND delta values. Choose only one!");
         return;
     }
-
+    ///ROS_INFO("FIRST_JOINT_POS_ONLY = %d",goal_in->FIRST_JOINT_POS_ONLY);
     // Create input variable which we will work with
     geometry_msgs::PoseStamped stamped_in;
     stamped_in.header = goal_in->goal.header;
@@ -232,15 +232,22 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
         NUM_GRASP_POINTS = PRE_GRASP_INBETWEEN_SAMPLING_STEPS+2; // Inbetween sample points + Pre-grasp + Grasp point
     }
 
-    // Resize the Joint Trajectory Action goal accordingly to the number of grasp points
-    jtagoal.trajectory.points.resize(NUM_GRASP_POINTS); // Number of sample points
+    // Resize the Joint Trajectory Action goal according to the number of grasp points or to one if FIRST_JOINT_POS_ONLY is TRUE
+    int num_jta_points = 0;
+    if (goal_in->FIRST_JOINT_POS_ONLY) num_jta_points = 1;
+    else num_jta_points = NUM_GRASP_POINTS;
+
+    jtagoal.trajectory.points.resize(num_jta_points);
     IKPosMarkerArray.markers.resize(NUM_GRASP_POINTS);
     pre_grasp_solution.resize(NUM_GRASP_POINTS);
-    for(int i=0;i<(NUM_GRASP_POINTS);++i)
+    for(int i=0;i<(num_jta_points);++i)
     {
-        jtagoal.trajectory.points[i].positions.resize(response.kinematic_solver_info.joint_names.size());
-        jtagoal.trajectory.points[i].velocities.resize(response.kinematic_solver_info.joint_names.size());
-        jtagoal.trajectory.points[i].accelerations.resize(response.kinematic_solver_info.joint_names.size());
+        if (i < num_jta_points)
+        {
+            jtagoal.trajectory.points[i].positions.resize(response.kinematic_solver_info.joint_names.size());
+            jtagoal.trajectory.points[i].velocities.resize(response.kinematic_solver_info.joint_names.size());
+            jtagoal.trajectory.points[i].accelerations.resize(response.kinematic_solver_info.joint_names.size());
+        }
 
         IKPosMarkerArray.markers[i].type = 2; // 2=SPHERE
         IKPosMarkerArray.markers[i].scale.x = 0.01;
@@ -341,20 +348,31 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
         // Publish the IK markers
         IKpospub->publish(IKPosMarkerArray);
 
-        /////amigo_actions::AmigoSpindleCommandGoal spgoal;
-
         // Continue if GRASP_SUCCESS is still true
         if(GRASP_SUCCESS)
         {
             // Fill in all the solutions to the JTA goal
-            for(int j=0;j<NUM_GRASP_POINTS;++j)
+            if (goal_in->FIRST_JOINT_POS_ONLY)
             {
                 for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
                 {
-                    jtagoal.trajectory.points[j].positions[i] = pre_grasp_solution[j].joint_state.position[i];
-                    //jtagoal.trajectory.points[j].positions[i]   = pre_grasp_solution[j].joint_state.position[i];
+                    jtagoal.trajectory.points[0].positions[i] = pre_grasp_solution[0].joint_state.position[i];
+                    //jtagoal.trajectory.points[0].positions[i]   = pre_grasp_solution[0].joint_state.position[i];
                     //jtagoal.trajectory.points[0].velocities[i] = pre_grasp_solution.joint_state.velocity[i];
                     //jtagoal.trajectory.points[0].accelerations[i] = 0.0;
+                }
+            }
+            else if (!goal_in->FIRST_JOINT_POS_ONLY)
+            {
+                for(int j=0;j<NUM_GRASP_POINTS;++j)
+                {
+                    for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
+                    {
+                        jtagoal.trajectory.points[j].positions[i] = pre_grasp_solution[j].joint_state.position[i];
+                        //jtagoal.trajectory.points[j].positions[i]   = pre_grasp_solution[j].joint_state.position[i];
+                        //jtagoal.trajectory.points[0].velocities[i] = pre_grasp_solution.joint_state.velocity[i];
+                        //jtagoal.trajectory.points[0].accelerations[i] = 0.0;
+                    }
                 }
             }
             ac->sendGoal(jtagoal);
