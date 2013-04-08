@@ -2313,9 +2313,9 @@
         <alwaysOn>true</alwaysOn>
         <updateRate>20</updateRate>
         <cameraName>camera</cameraName>
-        <imageTopicName>/camera/rgb/image_color</imageTopicName>
+        <imageTopicName>/camera/rgb/image_rect_color</imageTopicName>
         <cameraInfoTopicName>/camera/rgb/camera_info</cameraInfoTopicName>
-        <depthImageTopicName>/camera/depth/image</depthImageTopicName>
+        <depthImageTopicName>/camera/depth_registered/image</depthImageTopicName>
         <depthImageCameraInfoTopicName>/camera/depth/camera_info</depthImageCameraInfoTopicName>
         <pointCloudTopicName>/camera/rgb/points</pointCloudTopicName>
         <frameName>/openni_depth_optical_frame</frameName>
