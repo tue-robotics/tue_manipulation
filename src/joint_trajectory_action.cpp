@@ -214,6 +214,27 @@ private:
         if(ros::Time::now().toSec() > goal_time_constraint_ + now.toSec())
         {
             ROS_WARN("Aborting because the time constraint was violated");
+            if (number_of_goal_joints_ == 7) {
+				ROS_WARN("Errors: \n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f",
+				joint_names_[0].c_str(),ref_pos_[0] - cur_pos_[0],
+				joint_names_[1].c_str(),ref_pos_[1] - cur_pos_[1],
+				joint_names_[2].c_str(),ref_pos_[2] - cur_pos_[2],
+				joint_names_[3].c_str(),ref_pos_[3] - cur_pos_[3],
+				joint_names_[4].c_str(),ref_pos_[4] - cur_pos_[4],
+				joint_names_[5].c_str(),ref_pos_[5] - cur_pos_[5],
+				joint_names_[6].c_str(),ref_pos_[6] - cur_pos_[6]);
+			}
+			else if (number_of_goal_joints_ == 8) {
+				ROS_WARN("Errors: \n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f",
+				joint_names_[0].c_str(),ref_pos_[0] - cur_pos_[0],
+				joint_names_[1].c_str(),ref_pos_[1] - cur_pos_[1],
+				joint_names_[2].c_str(),ref_pos_[2] - cur_pos_[2],
+				joint_names_[3].c_str(),ref_pos_[3] - cur_pos_[3],
+				joint_names_[4].c_str(),ref_pos_[4] - cur_pos_[4],
+				joint_names_[5].c_str(),ref_pos_[5] - cur_pos_[5],
+				joint_names_[6].c_str(),ref_pos_[6] - cur_pos_[6],
+				joint_names_[7].c_str(),ref_pos_[7] - cur_pos_[7]);
+			}
             active_goal_.setAborted();
             has_active_goal_=false;
             return;
@@ -237,6 +258,16 @@ private:
             if (number_of_goal_joints_ == 8) {
                 if(abs_error > trajectory_constraints_[joint_names_[i]]) {
                     ROS_WARN("Aborting because the trajectory constraint was violated");
+                    ROS_WARN("Errors: \n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f",
+						joint_names_[0].c_str(),ref_pos_[0] - cur_pos_[0],
+						joint_names_[1].c_str(),ref_pos_[1] - cur_pos_[1],
+						joint_names_[2].c_str(),ref_pos_[2] - cur_pos_[2],
+						joint_names_[3].c_str(),ref_pos_[3] - cur_pos_[3],
+						joint_names_[4].c_str(),ref_pos_[4] - cur_pos_[4],
+						joint_names_[5].c_str(),ref_pos_[5] - cur_pos_[5],
+						joint_names_[6].c_str(),ref_pos_[6] - cur_pos_[6],
+						joint_names_[7].c_str(),ref_pos_[7] - cur_pos_[7]);			
+				
                     active_goal_.setAborted();
                     has_active_goal_=false;
                     return;
@@ -245,6 +276,15 @@ private:
             else if(number_of_goal_joints_ == 7) {
                 if(abs_error > trajectory_constraints_[joint_names_[i+1]]) {
                     ROS_WARN("Aborting because the trajectory constraint was violated");
+                    ROS_WARN("Errors: \n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f,\n%s, %f",
+						joint_names_[0].c_str(),ref_pos_[0] - cur_pos_[0],
+						joint_names_[1].c_str(),ref_pos_[1] - cur_pos_[1],
+						joint_names_[2].c_str(),ref_pos_[2] - cur_pos_[2],
+						joint_names_[3].c_str(),ref_pos_[3] - cur_pos_[3],
+						joint_names_[4].c_str(),ref_pos_[4] - cur_pos_[4],
+						joint_names_[5].c_str(),ref_pos_[5] - cur_pos_[5],
+						joint_names_[6].c_str(),ref_pos_[6] - cur_pos_[6]);
+
                     active_goal_.setAborted();
                     has_active_goal_=false;
                     return;
