@@ -2,14 +2,12 @@
 <launch>
 
     <arg name="ROBOT_COMPLEXITY" default="$(optenv ROBOT_COMPLEXITY complex)" />
+    <arg name="machine" value="$(optenv MACHINE_ARM_NAVIGATION localhost)"/>
 
     <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description_$(arg ROBOT_COMPLEXITY).yaml"/>
 
-    <arg if="$(optenv ROBOT_REAL false)" name="machine" value="amigo3"/>
-    <arg unless="$(optenv ROBOT_REAL false)" name="machine" value="localhost"/> 
-
     <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_action.launch">
-	<arg name="machine" value="$(arg machine)" />
+    	<arg name="machine" value="$(arg machine)" />
     </include>
 
     <include file="$(find amigo_arm_navigation)/launch/environment_server.launch">
