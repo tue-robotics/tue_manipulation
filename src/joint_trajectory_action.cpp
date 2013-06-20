@@ -214,6 +214,11 @@
 	        if(ros::Time::now().toSec() > goal_time_constraint_ + now.toSec())
 	        {
 	            ROS_WARN("Aborting because the time constraint was violated");
+	            for (i = 0; i < (int)joint_names_.size(); ++i)
+	            {
+					abs_error = fabs(ref_pos_[i] - cur_pos_[i]);
+					ROS_WARN("Error %s = %f (intermediate constraint = %f, final constraint = %f",joint_names_[i].c_str(),abs_error,intermediate_goal_constraints_[joint_names_[i]],final_goal_constraints_[joint_names_[i]]);
+				}
 	            active_goal_.setAborted();
 	            has_active_goal_=false;
 	            return;
