@@ -296,6 +296,10 @@ default_collision_operations:
     operation: disable  # Adjacent in collision
   -
     object1: torso
+    object2: torso_dummy
+    operation: disable  # Adjacent in collision
+  -
+    object1: torso_dummy
     object2: torso_laser
     operation: disable  # Adjacent in collision
   -
@@ -1619,10 +1623,6 @@ default_collision_operations:
     object2: omni_sphere9_right_rear
     operation: disable  # Always in collision
   -
-    object1: torso_lasertop
-    object2: torso_slider
-    operation: disable  # Always in collision
-  -
     object1: wrist_to_hand_block_left
     object2: wrist_visual_left
     operation: disable  # Always in collision
@@ -1631,12 +1631,44 @@ default_collision_operations:
     object2: wrist_visual_right
     operation: disable  # Always in collision
   -
-    object1: base_plate
-    object2: omni_sphere8_left_rear
+    object1: base
+    object2: fore_arm_right
     operation: disable  # Default in collision
   -
-    object1: base_plate
-    object2: omni_sphere12_left_front
+    object1: base
+    object2: fore_arm_left
+    operation: disable  # Default in collision
+  -
+    object1: base
+    object2: hand_right
+    operation: disable  # Default in collision
+  -
+    object1: base
+    object2: hand_left
+    operation: disable  # Default in collision
+  -
+    object1: base
+    object2: wrist_to_hand_block_right
+    operation: disable  # Default in collision
+  -
+    object1: base
+    object2: wrist_to_hand_block_left
+    operation: disable  # Default in collision
+  -
+    object1: base
+    object2: wrist_visual_right
+    operation: disable  # Default in collision
+  -
+    object1: base
+    object2: wrist_visual_left
+    operation: disable  # Default in collision
+  -
+    object1: base
+    object2: torso_laser
+    operation: disable  # Default in collision
+  -
+    object1: base
+    object2: torso_lasertop
     operation: disable  # Default in collision
   -
     object1: base_plate
@@ -1644,19 +1676,15 @@ default_collision_operations:
     operation: disable  # Default in collision
   -
     object1: base_plate
+    object2: omni_sphere12_left_front
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
+    object2: omni_sphere8_left_rear
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
     object2: omni_sphere2_left_front
-    operation: disable  # Default in collision
-  -
-    object1: base_plate
-    object2: omni_sphere9_left_rear
-    operation: disable  # Default in collision
-  -
-    object1: base_plate
-    object2: omni_sphere11_left_front
-    operation: disable  # Default in collision
-  -
-    object1: base_plate
-    object2: omni_sphere3_left_front
     operation: disable  # Default in collision
   -
     object1: base_plate
@@ -1664,7 +1692,15 @@ default_collision_operations:
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere11_left_rear
+    object2: omni_sphere11_left_front
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
+    object2: omni_sphere9_left_rear
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
+    object2: omni_sphere3_left_front
     operation: disable  # Default in collision
   -
     object1: base_plate
@@ -1672,11 +1708,15 @@ default_collision_operations:
     operation: disable  # Default in collision
   -
     object1: base_plate
+    object2: omni_sphere3_left_rear
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
     object2: omni_sphere5_left_front
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere3_left_rear
+    object2: omni_sphere11_left_rear
     operation: disable  # Default in collision
   -
     object1: base_plate
@@ -1684,7 +1724,7 @@ default_collision_operations:
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere12_left_rear
+    object2: omni_sphere2_left_rear
     operation: disable  # Default in collision
   -
     object1: base_plate
@@ -1692,15 +1732,23 @@ default_collision_operations:
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere2_left_rear
+    object2: omni_sphere12_left_rear
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere12_right_front
+    object2: finger1_tip_right
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere2_right_front
+    object2: finger1_tip_left
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
+    object2: finger2_tip_right
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
+    object2: finger2_tip_left
     operation: disable  # Default in collision
   -
     object1: base_plate
@@ -1708,7 +1756,15 @@ default_collision_operations:
     operation: disable  # Default in collision
   -
     object1: base_plate
+    object2: omni_sphere12_right_front
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
     object2: omni_sphere8_right_rear
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
+    object2: omni_sphere2_right_front
     operation: disable  # Default in collision
   -
     object1: base_plate
@@ -1720,19 +1776,19 @@ default_collision_operations:
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere3_right_front
-    operation: disable  # Default in collision
-  -
-    object1: base_plate
     object2: omni_sphere9_right_rear
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere3_right_rear
+    object2: omni_sphere3_right_front
     operation: disable  # Default in collision
   -
     object1: base_plate
     object2: omni_sphere9_right_front
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
+    object2: omni_sphere3_right_rear
     operation: disable  # Default in collision
   -
     object1: base_plate
@@ -1744,19 +1800,19 @@ default_collision_operations:
     operation: disable  # Default in collision
   -
     object1: base_plate
-    object2: omni_sphere2_right_rear
-    operation: disable  # Default in collision
-  -
-    object1: base_plate
-    object2: omni_sphere12_right_rear
-    operation: disable  # Default in collision
-  -
-    object1: base_plate
     object2: omni_sphere8_right_front
     operation: disable  # Default in collision
   -
     object1: base_plate
+    object2: omni_sphere2_right_rear
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
     object2: omni_sphere6_right_front
+    operation: disable  # Default in collision
+  -
+    object1: base_plate
+    object2: omni_sphere12_right_rear
     operation: disable  # Default in collision
   -
     object1: omni_sphere7_left_rear
@@ -1767,12 +1823,12 @@ default_collision_operations:
     object2: omni_sphere7_left_front
     operation: disable  # Default in collision
   -
-    object1: omni_sphere10_left_rear
-    object2: omni_sphere4_left_rear
-    operation: disable  # Default in collision
-  -
     object1: omni_sphere10_left_front
     object2: omni_sphere4_left_front
+    operation: disable  # Default in collision
+  -
+    object1: omni_sphere4_left_rear
+    object2: omni_sphere10_left_rear
     operation: disable  # Default in collision
   -
     object1: upper_arm_top_left
@@ -1791,20 +1847,20 @@ default_collision_operations:
     object2: wrist_to_hand_block_left
     operation: disable  # Default in collision
   -
-    object1: omni_sphere1_right_front
-    object2: omni_sphere7_right_front
-    operation: disable  # Default in collision
-  -
     object1: omni_sphere7_right_rear
     object2: omni_sphere1_right_rear
     operation: disable  # Default in collision
   -
-    object1: omni_sphere4_right_rear
-    object2: omni_sphere10_right_rear
+    object1: omni_sphere1_right_front
+    object2: omni_sphere7_right_front
     operation: disable  # Default in collision
   -
     object1: omni_sphere10_right_front
     object2: omni_sphere4_right_front
+    operation: disable  # Default in collision
+  -
+    object1: omni_sphere4_right_rear
+    object2: omni_sphere10_right_rear
     operation: disable  # Default in collision
   -
     object1: fore_arm_left
@@ -1815,8 +1871,76 @@ default_collision_operations:
     object2: hand_right
     operation: disable  # Often in collision
   -
+    object1: back_laser
+    object2: finger1_tip_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: finger2_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: finger2_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: finger2_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: finger2_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: finger2_tip_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: finger2_tip_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: finger2_tip_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: finger2_tip_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: hand_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_laser
+    object2: hand_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: finger1_tip_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: finger1_tip_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
     object1: back_lasertop
     object2: finger1_tip_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: finger1_tip_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: finger2_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: finger2_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: finger2_right
     operation: disable  # Occasionally in collision
   -
     object1: back_lasertop
@@ -1824,7 +1948,19 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: back_lasertop
-    object2: finger2_tip_phalanx_left
+    object2: finger2_tip_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: finger2_tip_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: hand_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: back_lasertop
+    object2: hand_right
     operation: disable  # Occasionally in collision
   -
     object1: base
@@ -1891,164 +2027,168 @@ default_collision_operations:
     object2: finger2_tip_right
     operation: disable  # Occasionally in collision
   -
-    object1: base
+    object1: base_kinect_openni_camera
+    object2: finger1_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger1_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger1_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger1_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger1_tip_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger1_tip_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger1_tip_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger1_tip_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger2_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger2_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger2_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger2_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger2_tip_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger2_tip_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger2_tip_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
+    object2: finger2_tip_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: base_kinect_openni_camera
     object2: fore_arm_left
     operation: disable  # Occasionally in collision
   -
-    object1: base
+    object1: base_kinect_openni_camera
     object2: fore_arm_right
     operation: disable  # Occasionally in collision
   -
-    object1: base
+    object1: base_kinect_openni_camera
     object2: hand_left
     operation: disable  # Occasionally in collision
   -
-    object1: base
+    object1: base_kinect_openni_camera
     object2: hand_right
     operation: disable  # Occasionally in collision
   -
-    object1: base
+    object1: base_kinect_openni_camera
     object2: wrist_to_hand_block_left
     operation: disable  # Occasionally in collision
   -
-    object1: base
+    object1: base_kinect_openni_camera
     object2: wrist_to_hand_block_right
     operation: disable  # Occasionally in collision
   -
-    object1: base
+    object1: base_kinect_openni_camera
     object2: wrist_visual_left
     operation: disable  # Occasionally in collision
   -
-    object1: base
-    object2: wrist_visual_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger1_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger1_phalanx_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger1_phalanx_right
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger1_right
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger1_tip_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger1_tip_phalanx_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger1_tip_phalanx_right
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger1_tip_right
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger2_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger2_phalanx_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger2_phalanx_right
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger2_right
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger2_tip_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger2_tip_phalanx_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger2_tip_phalanx_right
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: finger2_tip_right
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: hand_left
     operation: disable  # Occasionally in collision
   -
-    object1: base_kinect_openni_camera
+    object1: clavicles
     object2: hand_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger1_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger1_phalanx_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger1_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger1_tip_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger1_tip_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger1_tip_phalanx_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger1_tip_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger2_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger2_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger2_phalanx_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger2_tip_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger2_tip_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger2_tip_phalanx_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: clavicles
-    object2: finger2_tip_right
     operation: disable  # Occasionally in collision
   -
     object1: clavicles
@@ -2068,11 +2208,11 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: elbow_extra_block2_left
-    object2: fore_arm_left
+    object2: finger2_tip_right
     operation: disable  # Occasionally in collision
   -
-    object1: elbow_extra_block2_right
-    object2: finger1_tip_left
+    object1: elbow_extra_block2_left
+    object2: fore_arm_left
     operation: disable  # Occasionally in collision
   -
     object1: elbow_extra_block2_right
@@ -2083,24 +2223,16 @@ default_collision_operations:
     object2: fore_arm_right
     operation: disable  # Occasionally in collision
   -
+    object1: elbow_extra_block_left
+    object2: finger2_tip_phalanx_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: elbow_extra_block_left
+    object2: finger2_tip_right
+    operation: disable  # Occasionally in collision
+  -
     object1: elbow_extra_block_right
     object2: finger1_tip_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: elbow_extra_block_right
-    object2: finger1_tip_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: elbow_extra_block_right
-    object2: finger2_tip_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: elbow_extra_block_right
-    object2: finger2_tip_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_left
-    object2: finger1_right
     operation: disable  # Occasionally in collision
   -
     object1: finger1_left
@@ -2116,19 +2248,11 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_left
-    object2: finger2_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_left
     object2: finger2_tip_left
     operation: disable  # Occasionally in collision
   -
     object1: finger1_left
     object2: finger2_tip_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_left
-    object2: finger2_tip_phalanx_right
     operation: disable  # Occasionally in collision
   -
     object1: finger1_left
@@ -2145,6 +2269,10 @@ default_collision_operations:
   -
     object1: finger1_left
     object2: head
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_left
+    object2: neck_tilt
     operation: disable  # Occasionally in collision
   -
     object1: finger1_left
@@ -2184,19 +2312,11 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_phalanx_left
-    object2: finger1_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_phalanx_left
     object2: finger1_tip_right
     operation: disable  # Occasionally in collision
   -
     object1: finger1_phalanx_left
     object2: finger2_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_phalanx_left
-    object2: finger2_right
     operation: disable  # Occasionally in collision
   -
     object1: finger1_phalanx_left
@@ -2217,6 +2337,10 @@ default_collision_operations:
   -
     object1: finger1_phalanx_left
     object2: head
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_phalanx_left
+    object2: neck_tilt
     operation: disable  # Occasionally in collision
   -
     object1: finger1_phalanx_left
@@ -2260,15 +2384,15 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_phalanx_right
-    object2: finger2_tip_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_phalanx_right
     object2: finger2_tip_right
     operation: disable  # Occasionally in collision
   -
     object1: finger1_phalanx_right
     object2: fore_arm_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_phalanx_right
+    object2: front_lasertop
     operation: disable  # Occasionally in collision
   -
     object1: finger1_phalanx_right
@@ -2312,7 +2436,7 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_phalanx_right
-    object2: upper_arm_left
+    object2: wrist_to_hand_block_left
     operation: disable  # Occasionally in collision
   -
     object1: finger1_right
@@ -2328,6 +2452,10 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_right
+    object2: finger2_phalanx_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_right
     object2: finger2_phalanx_right
     operation: disable  # Occasionally in collision
   -
@@ -2340,10 +2468,6 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_right
-    object2: finger2_tip_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_right
     object2: finger2_tip_phalanx_right
     operation: disable  # Occasionally in collision
   -
@@ -2353,6 +2477,10 @@ default_collision_operations:
   -
     object1: finger1_right
     object2: fore_arm_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_right
+    object2: front_lasertop
     operation: disable  # Occasionally in collision
   -
     object1: finger1_right
@@ -2392,11 +2520,11 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_right
-    object2: wrist_visual_left
+    object2: wrist_to_hand_block_left
     operation: disable  # Occasionally in collision
   -
-    object1: finger1_tip_left
-    object2: finger1_tip_phalanx_right
+    object1: finger1_right
+    object2: wrist_visual_left
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_left
@@ -2412,10 +2540,6 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_left
-    object2: finger2_phalanx_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_tip_left
     object2: finger2_right
     operation: disable  # Occasionally in collision
   -
@@ -2428,15 +2552,15 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_left
-    object2: finger2_tip_phalanx_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_tip_left
-    object2: finger2_tip_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_tip_left
     object2: fore_arm_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_left
+    object2: front_laser
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_left
+    object2: front_lasertop
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_left
@@ -2449,6 +2573,18 @@ default_collision_operations:
   -
     object1: finger1_tip_left
     object2: head
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_left
+    object2: neck_tilt
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_left
+    object2: omni_sphere5_left_front
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_left
+    object2: omni_sphere6_left_front
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_left
@@ -2484,7 +2620,15 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_left
+    object2: wheel_right_front
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_left
     object2: wrist_to_hand_block_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_left
+    object2: wrist_visual_right
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_left
@@ -2504,11 +2648,11 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_left
-    object2: finger2_tip_right
+    object2: fore_arm_right
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_left
-    object2: fore_arm_right
+    object2: front_lasertop
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_left
@@ -2521,6 +2665,14 @@ default_collision_operations:
   -
     object1: finger1_tip_phalanx_left
     object2: head
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_phalanx_left
+    object2: omni_sphere5_left_front
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_phalanx_left
+    object2: omni_sphere6_left_front
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_left
@@ -2555,16 +2707,12 @@ default_collision_operations:
     object2: upper_arm_right
     operation: disable  # Occasionally in collision
   -
-    object1: finger1_tip_phalanx_right
-    object2: finger2_left
+    object1: finger1_tip_phalanx_left
+    object2: wrist_to_hand_block_right
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_right
     object2: finger2_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: finger2_tip_left
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_right
@@ -2573,6 +2721,10 @@ default_collision_operations:
   -
     object1: finger1_tip_phalanx_right
     object2: fore_arm_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: front_laser
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_right
@@ -2585,6 +2737,14 @@ default_collision_operations:
   -
     object1: finger1_tip_phalanx_right
     object2: head
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere4_left_rear
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere5_left_rear
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_phalanx_right
@@ -2624,6 +2784,10 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_right
+    object2: finger2_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_right
     object2: finger2_phalanx_right
     operation: disable  # Occasionally in collision
   -
@@ -2636,10 +2800,6 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_right
-    object2: finger2_tip_phalanx_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger1_tip_right
     object2: finger2_tip_phalanx_right
     operation: disable  # Occasionally in collision
   -
@@ -2649,6 +2809,14 @@ default_collision_operations:
   -
     object1: finger1_tip_right
     object2: fore_arm_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_right
+    object2: front_laser
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger1_tip_right
+    object2: front_lasertop
     operation: disable  # Occasionally in collision
   -
     object1: finger1_tip_right
@@ -2712,7 +2880,15 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger2_left
+    object2: finger2_tip_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_left
     object2: fore_arm_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_left
+    object2: front_laser
     operation: disable  # Occasionally in collision
   -
     object1: finger2_left
@@ -2721,6 +2897,10 @@ default_collision_operations:
   -
     object1: finger2_left
     object2: head
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_left
+    object2: neck_tilt
     operation: disable  # Occasionally in collision
   -
     object1: finger2_left
@@ -2764,7 +2944,15 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger2_phalanx_left
+    object2: finger2_tip_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_phalanx_left
     object2: fore_arm_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_phalanx_left
+    object2: front_laser
     operation: disable  # Occasionally in collision
   -
     object1: finger2_phalanx_left
@@ -2808,10 +2996,6 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger2_phalanx_left
-    object2: upper_arm_right
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger2_phalanx_left
     object2: wrist_to_hand_block_right
     operation: disable  # Occasionally in collision
   -
@@ -2829,6 +3013,10 @@ default_collision_operations:
   -
     object1: finger2_phalanx_right
     object2: head
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_phalanx_right
+    object2: neck_tilt
     operation: disable  # Occasionally in collision
   -
     object1: finger2_phalanx_right
@@ -2913,10 +3101,6 @@ default_collision_operations:
   -
     object1: finger2_right
     object2: wrist_to_hand_block_left
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger2_right
-    object2: wrist_visual_left
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_left
@@ -2928,6 +3112,14 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_left
+    object2: front_laser
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_left
+    object2: front_lasertop
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_left
     object2: hand_left
     operation: disable  # Occasionally in collision
   -
@@ -2940,7 +3132,11 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_left
-    object2: neck_tilt
+    object2: omni_sphere6_right_front
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_left
+    object2: omni_sphere7_right_front
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_left
@@ -2976,11 +3172,23 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_left
+    object2: wheel_right_front
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_left
     object2: wrist_to_hand_block_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_left
+    object2: wrist_visual_right
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_phalanx_left
     object2: fore_arm_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_phalanx_left
+    object2: front_laser
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_phalanx_left
@@ -2992,11 +3200,19 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_phalanx_left
+    object2: hand_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_phalanx_left
     object2: head
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_phalanx_left
-    object2: neck_tilt
+    object2: omni_sphere6_right_front
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_phalanx_left
+    object2: omni_sphere7_right_front
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_phalanx_left
@@ -3031,12 +3247,20 @@ default_collision_operations:
     object2: upper_arm_right
     operation: disable  # Occasionally in collision
   -
+    object1: finger2_tip_phalanx_left
+    object2: wrist_to_hand_block_right
+    operation: disable  # Occasionally in collision
+  -
     object1: finger2_tip_phalanx_right
     object2: fore_arm_left
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_phalanx_right
-    object2: hand_left
+    object2: front_laser
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_phalanx_right
+    object2: front_lasertop
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_phalanx_right
@@ -3084,6 +3308,14 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_right
+    object2: front_laser
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_right
+    object2: front_lasertop
+    operation: disable  # Occasionally in collision
+  -
+    object1: finger2_tip_right
     object2: hand_left
     operation: disable  # Occasionally in collision
   -
@@ -3093,10 +3325,6 @@ default_collision_operations:
   -
     object1: finger2_tip_right
     object2: head
-    operation: disable  # Occasionally in collision
-  -
-    object1: finger2_tip_right
-    object2: neck_pan
     operation: disable  # Occasionally in collision
   -
     object1: finger2_tip_right
@@ -3139,10 +3367,6 @@ default_collision_operations:
     object2: wrist_to_hand_block_left
     operation: disable  # Occasionally in collision
   -
-    object1: finger2_tip_right
-    object2: wrist_visual_left
-    operation: disable  # Occasionally in collision
-  -
     object1: fore_arm_left
     object2: fore_arm_right
     operation: disable  # Occasionally in collision
@@ -3165,6 +3389,14 @@ default_collision_operations:
   -
     object1: fore_arm_left
     object2: torso_assist_slider_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: fore_arm_left
+    object2: torso_laser
+    operation: disable  # Occasionally in collision
+  -
+    object1: fore_arm_left
+    object2: torso_lasertop
     operation: disable  # Occasionally in collision
   -
     object1: fore_arm_left
@@ -3233,6 +3465,10 @@ default_collision_operations:
   -
     object1: hand_left
     object2: head
+    operation: disable  # Occasionally in collision
+  -
+    object1: hand_left
+    object2: neck_tilt
     operation: disable  # Occasionally in collision
   -
     object1: hand_left
@@ -3360,10 +3596,6 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: head
-    object2: torso_laser
-    operation: disable  # Occasionally in collision
-  -
-    object1: head
     object2: upper_arm_left
     operation: disable  # Occasionally in collision
   -
@@ -3447,6 +3679,38 @@ default_collision_operations:
     object2: wrist_visual_right
     operation: disable  # Occasionally in collision
   -
+    object1: torso_laser
+    object2: wrist_to_hand_block_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: torso_laser
+    object2: wrist_to_hand_block_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: torso_laser
+    object2: wrist_visual_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: torso_laser
+    object2: wrist_visual_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: torso_lasertop
+    object2: wrist_to_hand_block_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: torso_lasertop
+    object2: wrist_to_hand_block_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: torso_lasertop
+    object2: wrist_visual_left
+    operation: disable  # Occasionally in collision
+  -
+    object1: torso_lasertop
+    object2: wrist_visual_right
+    operation: disable  # Occasionally in collision
+  -
     object1: torso_slider
     object2: wrist_to_hand_block_left
     operation: disable  # Occasionally in collision
@@ -3460,6 +3724,14 @@ default_collision_operations:
     operation: disable  # Occasionally in collision
   -
     object1: torso_slider
+    object2: wrist_visual_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: wrist_to_hand_block_left
+    object2: wrist_to_hand_block_right
+    operation: disable  # Occasionally in collision
+  -
+    object1: wrist_to_hand_block_left
     object2: wrist_visual_right
     operation: disable  # Occasionally in collision
   -
@@ -3528,43 +3800,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: back_laser
-    object2: finger1_tip_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
     object2: finger1_tip_right
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: finger2_left
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: finger2_phalanx_left
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: finger2_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: finger2_right
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: finger2_tip_left
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: finger2_tip_phalanx_left
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: finger2_tip_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: finger2_tip_right
     operation: disable  # Never in collision
   -
     object1: back_laser
@@ -3600,19 +3836,11 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: back_laser
-    object2: hand_left
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
     object2: hand_marker_left
     operation: disable  # Never in collision
   -
     object1: back_laser
     object2: hand_marker_right
-    operation: disable  # Never in collision
-  -
-    object1: back_laser
-    object2: hand_right
     operation: disable  # Never in collision
   -
     object1: back_laser
@@ -3865,6 +4093,10 @@ default_collision_operations:
   -
     object1: back_laser
     object2: torso_assist_slider_right
+    operation: disable  # Never in collision
+  -
+    object1: back_laser
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: back_laser
@@ -3996,39 +4228,11 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: back_lasertop
-    object2: finger1_tip_left
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
-    object2: finger1_tip_phalanx_left
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
-    object2: finger1_tip_right
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
     object2: finger2_left
     operation: disable  # Never in collision
   -
     object1: back_lasertop
-    object2: finger2_phalanx_left
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
-    object2: finger2_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
-    object2: finger2_right
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
-    object2: finger2_tip_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
-    object2: finger2_tip_right
+    object2: finger2_tip_phalanx_left
     operation: disable  # Never in collision
   -
     object1: back_lasertop
@@ -4064,19 +4268,11 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: back_lasertop
-    object2: hand_left
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
     object2: hand_marker_left
     operation: disable  # Never in collision
   -
     object1: back_lasertop
     object2: hand_marker_right
-    operation: disable  # Never in collision
-  -
-    object1: back_lasertop
-    object2: hand_right
     operation: disable  # Never in collision
   -
     object1: back_lasertop
@@ -4329,6 +4525,10 @@ default_collision_operations:
   -
     object1: back_lasertop
     object2: torso_assist_slider_right
+    operation: disable  # Never in collision
+  -
+    object1: back_lasertop
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: back_lasertop
@@ -4696,11 +4896,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: base
-    object2: torso_laser
-    operation: disable  # Never in collision
-  -
-    object1: base
-    object2: torso_lasertop
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: base
@@ -4764,14 +4960,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: base_kinect_openni_camera
-    object2: fore_arm_left
-    operation: disable  # Never in collision
-  -
-    object1: base_kinect_openni_camera
-    object2: fore_arm_right
-    operation: disable  # Never in collision
-  -
-    object1: base_kinect_openni_camera
     object2: fore_arm_top_left
     operation: disable  # Never in collision
   -
@@ -5056,6 +5244,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: base_kinect_openni_camera
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: base_kinect_openni_camera
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -5105,18 +5297,6 @@ default_collision_operations:
   -
     object1: base_kinect_openni_camera
     object2: wrist_link6_right
-    operation: disable  # Never in collision
-  -
-    object1: base_kinect_openni_camera
-    object2: wrist_to_hand_block_left
-    operation: disable  # Never in collision
-  -
-    object1: base_kinect_openni_camera
-    object2: wrist_to_hand_block_right
-    operation: disable  # Never in collision
-  -
-    object1: base_kinect_openni_camera
-    object2: wrist_visual_left
     operation: disable  # Never in collision
   -
     object1: base_kinect_openni_camera
@@ -5516,6 +5696,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: base_link
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: base_link
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -5628,19 +5812,11 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: base_plate
-    object2: finger1_tip_left
-    operation: disable  # Never in collision
-  -
-    object1: base_plate
     object2: finger1_tip_phalanx_left
     operation: disable  # Never in collision
   -
     object1: base_plate
     object2: finger1_tip_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: base_plate
-    object2: finger1_tip_right
     operation: disable  # Never in collision
   -
     object1: base_plate
@@ -5660,19 +5836,11 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: base_plate
-    object2: finger2_tip_left
-    operation: disable  # Never in collision
-  -
-    object1: base_plate
     object2: finger2_tip_phalanx_left
     operation: disable  # Never in collision
   -
     object1: base_plate
     object2: finger2_tip_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: base_plate
-    object2: finger2_tip_right
     operation: disable  # Never in collision
   -
     object1: base_plate
@@ -5781,6 +5949,10 @@ default_collision_operations:
   -
     object1: base_plate
     object2: torso_assist_slider_right
+    operation: disable  # Never in collision
+  -
+    object1: base_plate
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: base_plate
@@ -5876,14 +6048,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: clavicles
-    object2: finger1_left
-    operation: disable  # Never in collision
-  -
-    object1: clavicles
-    object2: finger2_right
-    operation: disable  # Never in collision
-  -
-    object1: clavicles
     object2: fore_arm_left
     operation: disable  # Never in collision
   -
@@ -5916,19 +6080,11 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: clavicles
-    object2: hand_left
-    operation: disable  # Never in collision
-  -
-    object1: clavicles
     object2: hand_marker_left
     operation: disable  # Never in collision
   -
     object1: clavicles
     object2: hand_marker_right
-    operation: disable  # Never in collision
-  -
-    object1: clavicles
-    object2: hand_right
     operation: disable  # Never in collision
   -
     object1: clavicles
@@ -6145,6 +6301,10 @@ default_collision_operations:
   -
     object1: clavicles
     object2: torso_assist_slider_back
+    operation: disable  # Never in collision
+  -
+    object1: clavicles
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: clavicles
@@ -6288,10 +6448,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block2_left
-    object2: finger2_tip_right
-    operation: disable  # Never in collision
-  -
-    object1: elbow_extra_block2_left
     object2: fore_arm_right
     operation: disable  # Never in collision
   -
@@ -6588,6 +6744,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block2_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: elbow_extra_block2_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -6677,6 +6837,10 @@ default_collision_operations:
   -
     object1: elbow_extra_block2_right
     object2: finger1_right
+    operation: disable  # Never in collision
+  -
+    object1: elbow_extra_block2_right
+    object2: finger1_tip_left
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block2_right
@@ -7013,6 +7177,10 @@ default_collision_operations:
   -
     object1: elbow_extra_block2_right
     object2: torso_assist_slider_right
+    operation: disable  # Never in collision
+  -
+    object1: elbow_extra_block2_right
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block2_right
@@ -7148,14 +7316,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block_left
-    object2: finger2_tip_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: elbow_extra_block_left
-    object2: finger2_tip_right
-    operation: disable  # Never in collision
-  -
-    object1: elbow_extra_block_left
     object2: fore_arm_left
     operation: disable  # Never in collision
   -
@@ -7453,6 +7613,10 @@ default_collision_operations:
   -
     object1: elbow_extra_block_left
     object2: torso_assist_slider_right
+    operation: disable  # Never in collision
+  -
+    object1: elbow_extra_block_left
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block_left
@@ -7544,6 +7708,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block_right
+    object2: finger1_tip_phalanx_left
+    operation: disable  # Never in collision
+  -
+    object1: elbow_extra_block_right
     object2: finger1_tip_phalanx_right
     operation: disable  # Never in collision
   -
@@ -7565,6 +7733,14 @@ default_collision_operations:
   -
     object1: elbow_extra_block_right
     object2: finger2_right
+    operation: disable  # Never in collision
+  -
+    object1: elbow_extra_block_right
+    object2: finger2_tip_left
+    operation: disable  # Never in collision
+  -
+    object1: elbow_extra_block_right
+    object2: finger2_tip_phalanx_left
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block_right
@@ -7873,6 +8049,10 @@ default_collision_operations:
   -
     object1: elbow_extra_block_right
     object2: torso_assist_slider_right
+    operation: disable  # Never in collision
+  -
+    object1: elbow_extra_block_right
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: elbow_extra_block_right
@@ -8304,6 +8484,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: elbow_link4_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: elbow_link4_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -8728,6 +8912,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: elbow_link4_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: elbow_link4_right
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -8796,6 +8984,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_left
+    object2: finger1_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_left
     object2: finger1_tip_phalanx_left
     operation: disable  # Never in collision
   -
@@ -8805,6 +8997,14 @@ default_collision_operations:
   -
     object1: finger1_left
     object2: finger2_phalanx_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_left
+    object2: finger2_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_left
+    object2: finger2_tip_phalanx_right
     operation: disable  # Never in collision
   -
     object1: finger1_left
@@ -8849,10 +9049,6 @@ default_collision_operations:
   -
     object1: finger1_left
     object2: neck_pan
-    operation: disable  # Never in collision
-  -
-    object1: finger1_left
-    object2: neck_tilt
     operation: disable  # Never in collision
   -
     object1: finger1_left
@@ -9073,6 +9269,10 @@ default_collision_operations:
   -
     object1: finger1_left
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_left
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: finger1_left
@@ -9128,6 +9328,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_phalanx_left
+    object2: finger1_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_phalanx_left
     object2: finger1_tip_phalanx_left
     operation: disable  # Never in collision
   -
@@ -9141,6 +9345,10 @@ default_collision_operations:
   -
     object1: finger1_phalanx_left
     object2: finger2_phalanx_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_phalanx_left
+    object2: finger2_right
     operation: disable  # Never in collision
   -
     object1: finger1_phalanx_left
@@ -9197,10 +9405,6 @@ default_collision_operations:
   -
     object1: finger1_phalanx_left
     object2: neck_pan
-    operation: disable  # Never in collision
-  -
-    object1: finger1_phalanx_left
-    object2: neck_tilt
     operation: disable  # Never in collision
   -
     object1: finger1_phalanx_left
@@ -9421,6 +9625,10 @@ default_collision_operations:
   -
     object1: finger1_phalanx_left
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_phalanx_left
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: finger1_phalanx_left
@@ -9496,6 +9704,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_phalanx_right
+    object2: finger2_tip_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_phalanx_right
     object2: finger2_tip_phalanx_left
     operation: disable  # Never in collision
   -
@@ -9520,10 +9732,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_phalanx_right
-    object2: front_lasertop
-    operation: disable  # Never in collision
-  -
-    object1: finger1_phalanx_right
     object2: grippoint_left
     operation: disable  # Never in collision
   -
@@ -9772,6 +9980,14 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_phalanx_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: finger1_phalanx_right
+    object2: upper_arm_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_phalanx_right
     object2: upper_arm_right
     operation: disable  # Never in collision
   -
@@ -9805,10 +10021,6 @@ default_collision_operations:
   -
     object1: finger1_phalanx_right
     object2: wrist_link6_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_phalanx_right
-    object2: wrist_to_hand_block_left
     operation: disable  # Never in collision
   -
     object1: finger1_phalanx_right
@@ -9828,7 +10040,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_right
-    object2: finger2_phalanx_left
+    object2: finger2_tip_phalanx_left
     operation: disable  # Never in collision
   -
     object1: finger1_right
@@ -9845,10 +10057,6 @@ default_collision_operations:
   -
     object1: finger1_right
     object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger1_right
-    object2: front_lasertop
     operation: disable  # Never in collision
   -
     object1: finger1_right
@@ -10097,6 +10305,10 @@ default_collision_operations:
   -
     object1: finger1_right
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_right
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: finger1_right
@@ -10140,15 +10352,27 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_right
-    object2: wrist_to_hand_block_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_right
     object2: wrist_to_hand_block_right
     operation: disable  # Never in collision
   -
     object1: finger1_right
     object2: wrist_visual_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_left
+    object2: finger1_tip_phalanx_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_left
+    object2: finger2_phalanx_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_left
+    object2: finger2_tip_phalanx_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_left
+    object2: finger2_tip_right
     operation: disable  # Never in collision
   -
     object1: finger1_tip_left
@@ -10161,14 +10385,6 @@ default_collision_operations:
   -
     object1: finger1_tip_left
     object2: fore_arm_top_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_left
-    object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_left
-    object2: front_lasertop
     operation: disable  # Never in collision
   -
     object1: finger1_tip_left
@@ -10193,10 +10409,6 @@ default_collision_operations:
   -
     object1: finger1_tip_left
     object2: neck_pan
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_left
-    object2: neck_tilt
     operation: disable  # Never in collision
   -
     object1: finger1_tip_left
@@ -10312,10 +10524,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_tip_left
-    object2: omni_sphere5_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_left
     object2: omni_sphere5_left_rear
     operation: disable  # Never in collision
   -
@@ -10325,10 +10533,6 @@ default_collision_operations:
   -
     object1: finger1_tip_left
     object2: omni_sphere5_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_left
-    object2: omni_sphere6_left_front
     operation: disable  # Never in collision
   -
     object1: finger1_tip_left
@@ -10420,6 +10624,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_tip_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_left
     object2: upper_arm_left
     operation: disable  # Never in collision
   -
@@ -10440,10 +10648,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_tip_left
-    object2: wheel_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_left
     object2: wheel_right_rear
     operation: disable  # Never in collision
   -
@@ -10461,10 +10665,6 @@ default_collision_operations:
   -
     object1: finger1_tip_left
     object2: wrist_visual_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_left
-    object2: wrist_visual_right
     operation: disable  # Never in collision
   -
     object1: finger1_tip_phalanx_left
@@ -10488,6 +10688,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_tip_phalanx_left
+    object2: finger2_tip_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_left
     object2: fore_arm_left
     operation: disable  # Never in collision
   -
@@ -10501,10 +10705,6 @@ default_collision_operations:
   -
     object1: finger1_tip_phalanx_left
     object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_left
-    object2: front_lasertop
     operation: disable  # Never in collision
   -
     object1: finger1_tip_phalanx_left
@@ -10648,10 +10848,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_tip_phalanx_left
-    object2: omni_sphere5_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_left
     object2: omni_sphere5_left_rear
     operation: disable  # Never in collision
   -
@@ -10661,10 +10857,6 @@ default_collision_operations:
   -
     object1: finger1_tip_phalanx_left
     object2: omni_sphere5_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_left
-    object2: omni_sphere6_left_front
     operation: disable  # Never in collision
   -
     object1: finger1_tip_phalanx_left
@@ -10753,6 +10945,10 @@ default_collision_operations:
   -
     object1: finger1_tip_phalanx_left
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_left
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: finger1_tip_phalanx_left
@@ -10796,10 +10992,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_tip_phalanx_left
-    object2: wrist_to_hand_block_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_left
     object2: wrist_visual_left
     operation: disable  # Never in collision
   -
@@ -10808,343 +11000,343 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger1_tip_phalanx_right
-    object2: finger2_phalanx_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: finger2_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: finger2_tip_phalanx_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: finger2_tip_phalanx_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: fore_arm_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: fore_arm_top_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: fore_arm_top_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: front_lasertop
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: grippoint_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: grippoint_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: hand_marker_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: hand_marker_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: logo
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: neck_pan
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: neck_tilt
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere10_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere10_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere10_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere10_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere11_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere11_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere11_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere11_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere12_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere12_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere12_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere12_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere1_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere1_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere1_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere1_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere2_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere2_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere2_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere2_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere3_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere3_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere3_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere3_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere4_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere4_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere4_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere4_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere5_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere5_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere5_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere5_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere6_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere6_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere6_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere6_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere7_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere7_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere7_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere7_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere8_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere8_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere8_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere8_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere9_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere9_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere9_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: omni_sphere9_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: openni_camera
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: shoulder_link1_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: shoulder_link1_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: shoulder_link2_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: shoulder_link2_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: shoulder_mount_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: shoulder_mount_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: upper_arm_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: upper_arm_top_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: upper_arm_top_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wheel_left_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wheel_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wheel_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wheel_right_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wrist_link6_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wrist_link6_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wrist_to_hand_block_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wrist_visual_left
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_phalanx_right
-    object2: wrist_visual_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_right
     object2: finger2_left
     operation: disable  # Never in collision
   -
+    object1: finger1_tip_phalanx_right
+    object2: finger2_phalanx_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: finger2_phalanx_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: finger2_tip_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: finger2_tip_phalanx_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: finger2_tip_phalanx_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: fore_arm_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: fore_arm_top_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: fore_arm_top_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: front_lasertop
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: grippoint_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: grippoint_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: hand_marker_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: hand_marker_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: logo
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: neck_pan
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: neck_tilt
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere10_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere10_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere10_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere10_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere11_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere11_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere11_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere11_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere12_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere12_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere12_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere12_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere1_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere1_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere1_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere1_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere2_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere2_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere2_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere2_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere3_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere3_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere3_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere3_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere4_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere4_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere4_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere5_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere5_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere5_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere6_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere6_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere6_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere6_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere7_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere7_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere7_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere7_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere8_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere8_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere8_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere8_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere9_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere9_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere9_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: omni_sphere9_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: openni_camera
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: shoulder_link1_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: shoulder_link1_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: shoulder_link2_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: shoulder_link2_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: shoulder_mount_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: upper_arm_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: upper_arm_top_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: upper_arm_top_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wheel_left_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wheel_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wheel_right_front
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wheel_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wrist_link6_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wrist_link6_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wrist_to_hand_block_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wrist_visual_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_phalanx_right
+    object2: wrist_visual_right
+    operation: disable  # Never in collision
+  -
     object1: finger1_tip_right
     object2: finger2_phalanx_left
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_right
+    object2: finger2_tip_phalanx_left
     operation: disable  # Never in collision
   -
     object1: finger1_tip_right
@@ -11157,14 +11349,6 @@ default_collision_operations:
   -
     object1: finger1_tip_right
     object2: fore_arm_top_right
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_right
-    object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger1_tip_right
-    object2: front_lasertop
     operation: disable  # Never in collision
   -
     object1: finger1_tip_right
@@ -11413,6 +11597,10 @@ default_collision_operations:
   -
     object1: finger1_tip_right
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger1_tip_right
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: finger1_tip_right
@@ -11468,10 +11656,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_left
-    object2: finger2_tip_right
-    operation: disable  # Never in collision
-  -
-    object1: finger2_left
     object2: fore_arm_left
     operation: disable  # Never in collision
   -
@@ -11481,10 +11665,6 @@ default_collision_operations:
   -
     object1: finger2_left
     object2: fore_arm_top_right
-    operation: disable  # Never in collision
-  -
-    object1: finger2_left
-    object2: front_laser
     operation: disable  # Never in collision
   -
     object1: finger2_left
@@ -11513,10 +11693,6 @@ default_collision_operations:
   -
     object1: finger2_left
     object2: neck_pan
-    operation: disable  # Never in collision
-  -
-    object1: finger2_left
-    object2: neck_tilt
     operation: disable  # Never in collision
   -
     object1: finger2_left
@@ -11737,6 +11913,10 @@ default_collision_operations:
   -
     object1: finger2_left
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger2_left
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: finger2_left
@@ -11800,10 +11980,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_phalanx_left
-    object2: finger2_tip_right
-    operation: disable  # Never in collision
-  -
-    object1: finger2_phalanx_left
     object2: fore_arm_left
     operation: disable  # Never in collision
   -
@@ -11813,10 +11989,6 @@ default_collision_operations:
   -
     object1: finger2_phalanx_left
     object2: fore_arm_top_right
-    operation: disable  # Never in collision
-  -
-    object1: finger2_phalanx_left
-    object2: front_laser
     operation: disable  # Never in collision
   -
     object1: finger2_phalanx_left
@@ -12072,7 +12244,15 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_phalanx_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: finger2_phalanx_left
     object2: upper_arm_left
+    operation: disable  # Never in collision
+  -
+    object1: finger2_phalanx_left
+    object2: upper_arm_right
     operation: disable  # Never in collision
   -
     object1: finger2_phalanx_left
@@ -12176,10 +12356,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_phalanx_right
-    object2: neck_tilt
-    operation: disable  # Never in collision
-  -
-    object1: finger2_phalanx_right
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   -
@@ -12397,6 +12573,10 @@ default_collision_operations:
   -
     object1: finger2_phalanx_right
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger2_phalanx_right
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: finger2_phalanx_right
@@ -12724,6 +12904,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: finger2_right
     object2: upper_arm_left
     operation: disable  # Never in collision
   -
@@ -12765,6 +12949,10 @@ default_collision_operations:
   -
     object1: finger2_right
     object2: wrist_to_hand_block_right
+    operation: disable  # Never in collision
+  -
+    object1: finger2_right
+    object2: wrist_visual_left
     operation: disable  # Never in collision
   -
     object1: finger2_right
@@ -12788,14 +12976,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_left
-    object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_left
-    object2: front_lasertop
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_left
     object2: grippoint_left
     operation: disable  # Never in collision
   -
@@ -12817,6 +12997,10 @@ default_collision_operations:
   -
     object1: finger2_tip_left
     object2: neck_pan
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_left
+    object2: neck_tilt
     operation: disable  # Never in collision
   -
     object1: finger2_tip_left
@@ -12956,10 +13140,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_left
-    object2: omni_sphere6_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_left
     object2: omni_sphere6_right_rear
     operation: disable  # Never in collision
   -
@@ -12969,10 +13149,6 @@ default_collision_operations:
   -
     object1: finger2_tip_left
     object2: omni_sphere7_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_left
-    object2: omni_sphere7_right_front
     operation: disable  # Never in collision
   -
     object1: finger2_tip_left
@@ -13040,6 +13216,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_left
     object2: upper_arm_left
     operation: disable  # Never in collision
   -
@@ -13060,10 +13240,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_left
-    object2: wheel_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_left
     object2: wheel_right_rear
     operation: disable  # Never in collision
   -
@@ -13081,10 +13257,6 @@ default_collision_operations:
   -
     object1: finger2_tip_left
     object2: wrist_visual_left
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_left
-    object2: wrist_visual_right
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
@@ -13108,10 +13280,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
-    object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_phalanx_left
     object2: grippoint_left
     operation: disable  # Never in collision
   -
@@ -13128,15 +13296,15 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
-    object2: hand_right
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_phalanx_left
     object2: logo
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
     object2: neck_pan
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_phalanx_left
+    object2: neck_tilt
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
@@ -13276,10 +13444,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
-    object2: omni_sphere6_right_front
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_phalanx_left
     object2: omni_sphere6_right_rear
     operation: disable  # Never in collision
   -
@@ -13289,10 +13453,6 @@ default_collision_operations:
   -
     object1: finger2_tip_phalanx_left
     object2: omni_sphere7_left_rear
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_phalanx_left
-    object2: omni_sphere7_right_front
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
@@ -13360,6 +13520,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_phalanx_left
     object2: upper_arm_left
     operation: disable  # Never in collision
   -
@@ -13400,10 +13564,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_left
-    object2: wrist_to_hand_block_right
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_phalanx_left
     object2: wrist_visual_left
     operation: disable  # Never in collision
   -
@@ -13424,19 +13584,15 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_right
-    object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_phalanx_right
-    object2: front_lasertop
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_phalanx_right
     object2: grippoint_left
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_right
     object2: grippoint_right
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_phalanx_right
+    object2: hand_left
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_right
@@ -13677,6 +13833,10 @@ default_collision_operations:
   -
     object1: finger2_tip_phalanx_right
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_phalanx_right
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: finger2_tip_phalanx_right
@@ -13744,14 +13904,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_right
-    object2: front_laser
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_right
-    object2: front_lasertop
-    operation: disable  # Never in collision
-  -
-    object1: finger2_tip_right
     object2: grippoint_left
     operation: disable  # Never in collision
   -
@@ -13769,6 +13921,10 @@ default_collision_operations:
   -
     object1: finger2_tip_right
     object2: logo
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_right
+    object2: neck_pan
     operation: disable  # Never in collision
   -
     object1: finger2_tip_right
@@ -13992,6 +14148,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: finger2_tip_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_right
     object2: upper_arm_right
     operation: disable  # Never in collision
   -
@@ -14029,6 +14189,10 @@ default_collision_operations:
   -
     object1: finger2_tip_right
     object2: wrist_to_hand_block_right
+    operation: disable  # Never in collision
+  -
+    object1: finger2_tip_right
+    object2: wrist_visual_left
     operation: disable  # Never in collision
   -
     object1: finger2_tip_right
@@ -14300,11 +14464,7 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: fore_arm_left
-    object2: torso_laser
-    operation: disable  # Never in collision
-  -
-    object1: fore_arm_left
-    object2: torso_lasertop
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: fore_arm_left
@@ -14608,6 +14768,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: fore_arm_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: fore_arm_right
     object2: upper_arm_left
     operation: disable  # Never in collision
   -
@@ -14932,6 +15096,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: fore_arm_top_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: fore_arm_top_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -15284,6 +15452,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: fore_arm_top_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: fore_arm_top_right
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -15624,6 +15796,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: front_laser
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: front_laser
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -15968,6 +16144,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: front_lasertop
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: front_lasertop
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -16300,6 +16480,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: grippoint_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: grippoint_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -16628,6 +16812,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: grippoint_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: grippoint_right
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -16712,10 +16900,6 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: hand_left
-    object2: neck_tilt
-    operation: disable  # Never in collision
-  -
-    object1: hand_left
     object2: omni_sphere10_left_front
     operation: disable  # Never in collision
   -
@@ -16933,6 +17117,10 @@ default_collision_operations:
   -
     object1: hand_left
     object2: shoulder_mount_right
+    operation: disable  # Never in collision
+  -
+    object1: hand_left
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: hand_left
@@ -17232,6 +17420,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: hand_marker_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: hand_marker_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -17556,6 +17748,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: hand_marker_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: hand_marker_right
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -17856,6 +18052,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: hand_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: hand_right
     object2: upper_arm_left
     operation: disable  # Never in collision
   -
@@ -18089,6 +18289,14 @@ default_collision_operations:
   -
     object1: head
     object2: omni_sphere9_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: head
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: head
+    object2: torso_laser
     operation: disable  # Never in collision
   -
     object1: head
@@ -18368,6 +18576,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: logo
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: logo
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -18672,6 +18884,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: neck_pan
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: neck_pan
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -18972,6 +19188,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: neck_tilt
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: neck_tilt
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -19228,6 +19448,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere10_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere10_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -19476,6 +19700,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere10_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere10_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -19720,6 +19948,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere10_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere10_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -19960,6 +20192,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere10_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere10_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -20204,6 +20440,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere11_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere11_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -20444,6 +20684,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere11_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere11_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -20680,6 +20924,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere11_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere11_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -20912,6 +21160,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere11_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere11_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -21144,6 +21396,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere12_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere12_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -21372,6 +21628,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere12_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere12_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -21596,6 +21856,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere12_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere12_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -21816,6 +22080,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere12_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere12_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -22032,6 +22300,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere1_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere1_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -22244,6 +22516,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere1_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere1_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -22452,6 +22728,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere1_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere1_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -22656,6 +22936,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere1_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere1_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -22864,6 +23148,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere2_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere2_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -23068,6 +23356,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere2_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere2_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -23268,6 +23560,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere2_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere2_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -23464,6 +23760,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere2_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere2_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -23660,6 +23960,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere3_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere3_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -23852,6 +24156,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere3_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere3_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -24040,6 +24348,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere3_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere3_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -24224,6 +24536,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere3_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere3_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -24404,6 +24720,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere4_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere4_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -24580,6 +24900,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere4_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere4_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -24752,6 +25076,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere4_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere4_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -24920,6 +25248,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere4_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere4_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -25088,6 +25420,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere5_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere5_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -25252,6 +25588,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere5_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere5_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -25412,6 +25752,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere5_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere5_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -25568,6 +25912,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere5_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere5_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -25724,6 +26072,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere6_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere6_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -25876,6 +26228,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere6_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere6_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -26024,6 +26380,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere6_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere6_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -26168,6 +26528,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere6_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere6_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -26312,6 +26676,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere7_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere7_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -26452,6 +26820,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere7_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere7_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -26588,6 +26960,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere7_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere7_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -26720,6 +27096,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere7_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere7_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -26852,6 +27232,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere8_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere8_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -26980,6 +27364,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere8_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere8_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27104,6 +27492,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere8_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere8_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27224,6 +27616,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere8_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere8_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27344,6 +27740,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere9_left_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere9_left_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27460,6 +27860,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere9_left_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere9_left_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27572,6 +27976,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere9_right_front
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere9_right_front
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27680,6 +28088,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: omni_sphere9_right_rear
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: omni_sphere9_right_rear
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27784,6 +28196,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: openni_camera
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: openni_camera
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27880,6 +28296,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: shoulder_link1_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: shoulder_link1_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -27969,6 +28389,10 @@ default_collision_operations:
   -
     object1: shoulder_link1_right
     object2: torso_assist_slider_right
+    operation: disable  # Never in collision
+  -
+    object1: shoulder_link1_right
+    object2: torso_dummy
     operation: disable  # Never in collision
   -
     object1: shoulder_link1_right
@@ -28068,6 +28492,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: shoulder_link2_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: shoulder_link2_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -28152,6 +28580,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: shoulder_link2_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: shoulder_link2_right
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -28228,6 +28660,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: shoulder_mount_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: shoulder_mount_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -28308,6 +28744,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: shoulder_mount_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: shoulder_mount_right
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -28373,6 +28813,10 @@ default_collision_operations:
   -
     object1: shoulder_mount_right
     object2: wrist_visual_right
+    operation: disable  # Never in collision
+  -
+    object1: torso
+    object2: torso_laser
     operation: disable  # Never in collision
   -
     object1: torso
@@ -28428,6 +28872,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: torso_assist_slider_back
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: torso_assist_slider_back
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -28484,6 +28932,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: torso_assist_slider_left
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: torso_assist_slider_left
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -28544,6 +28996,10 @@ default_collision_operations:
     operation: disable  # Never in collision
   -
     object1: torso_assist_slider_right
+    object2: torso_dummy
+    operation: disable  # Never in collision
+  -
+    object1: torso_assist_slider_right
     object2: torso_laser
     operation: disable  # Never in collision
   -
@@ -28603,6 +29059,70 @@ default_collision_operations:
     object2: wrist_visual_left
     operation: disable  # Never in collision
   -
+    object1: torso_dummy
+    object2: torso_lasertop
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: torso_slider
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: upper_arm_left
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: upper_arm_right
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: upper_arm_top_left
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: upper_arm_top_right
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wheel_left_front
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wheel_left_rear
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wheel_right_front
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wheel_right_rear
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wrist_link6_left
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wrist_link6_right
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wrist_to_hand_block_left
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wrist_to_hand_block_right
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wrist_visual_left
+    operation: disable  # Never in collision
+  -
+    object1: torso_dummy
+    object2: wrist_visual_right
+    operation: disable  # Never in collision
+  -
     object1: torso_laser
     object2: torso_slider
     operation: disable  # Never in collision
@@ -28647,20 +29167,8 @@ default_collision_operations:
     object2: wrist_link6_right
     operation: disable  # Never in collision
   -
-    object1: torso_laser
-    object2: wrist_to_hand_block_left
-    operation: disable  # Never in collision
-  -
-    object1: torso_laser
-    object2: wrist_to_hand_block_right
-    operation: disable  # Never in collision
-  -
-    object1: torso_laser
-    object2: wrist_visual_left
-    operation: disable  # Never in collision
-  -
-    object1: torso_laser
-    object2: wrist_visual_right
+    object1: torso_lasertop
+    object2: torso_slider
     operation: disable  # Never in collision
   -
     object1: torso_lasertop
@@ -28701,22 +29209,6 @@ default_collision_operations:
   -
     object1: torso_lasertop
     object2: wrist_link6_right
-    operation: disable  # Never in collision
-  -
-    object1: torso_lasertop
-    object2: wrist_to_hand_block_left
-    operation: disable  # Never in collision
-  -
-    object1: torso_lasertop
-    object2: wrist_to_hand_block_right
-    operation: disable  # Never in collision
-  -
-    object1: torso_lasertop
-    object2: wrist_visual_left
-    operation: disable  # Never in collision
-  -
-    object1: torso_lasertop
-    object2: wrist_visual_right
     operation: disable  # Never in collision
   -
     object1: torso_slider
@@ -29073,14 +29565,6 @@ default_collision_operations:
   -
     object1: wrist_link6_right
     object2: wrist_visual_left
-    operation: disable  # Never in collision
-  -
-    object1: wrist_to_hand_block_left
-    object2: wrist_to_hand_block_right
-    operation: disable  # Never in collision
-  -
-    object1: wrist_to_hand_block_left
-    object2: wrist_visual_right
     operation: disable  # Never in collision
   -
     object1: wrist_to_hand_block_right
