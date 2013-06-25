@@ -162,7 +162,7 @@
     <origin rpy="3.14159265 -1.5708 0" xyz="0.0 0.0 0.58"/>
     <dynamics damping="3" friction="0.0"/>
     <!--*-->
-    <limit effort="30" lower="0.0" upper="0.41" velocity="1.0"/>
+    <limit effort="30" lower="0.075" upper="0.41" velocity="1.0"/>
     <!--*-->
   </joint>
   <joint name="base_link_joint" type="fixed">
