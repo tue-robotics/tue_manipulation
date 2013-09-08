@@ -8,7 +8,7 @@
 
     <arg name="machine" default="localhost"/>
 
-    <node pkg="arm_kinematics_constraint_aware" type="arm_kinematics_constraint_aware" name="amigo_left_arm_kinematics"  output="screen" machine="$(arg machine)">
+    <node pkg="arm_kinematics_constraint_aware" type="arm_kinematics_constraint_aware" name="amigo_left_arm_kinematics"  output="screen" machine="$(arg machine)" ns="amigo">
         <param name="group" type="string" value="left_arm" />
         <param name="left_arm/root_name" type="string" value="base_link" />
         <param name="left_arm/tip_name" type="string" value="grippoint_left" />
@@ -16,7 +16,7 @@
         <param name="left_arm/max_search_iterations" value="3" />
         <param name="left_arm/max_solver_iterations" value="500" />
     </node>
-    <node pkg="arm_kinematics_constraint_aware" type="arm_kinematics_constraint_aware" name="amigo_right_arm_kinematics"  output="screen" machine="$(arg machine)">
+    <node pkg="arm_kinematics_constraint_aware" type="arm_kinematics_constraint_aware" name="amigo_right_arm_kinematics"  output="screen" machine="$(arg machine)" ns="amigo">
         <param name="group" type="string" value="right_arm" />
         <param name="right_arm/root_name" type="string" value="base_link" />
         <param name="right_arm/tip_name" type="string" value="grippoint_right" />

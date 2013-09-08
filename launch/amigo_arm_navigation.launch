@@ -2,7 +2,7 @@
 <launch>
     <!--<include file="$(find amigo_arm_navigation)/launch/amigo_planning_environment.launch" />-->
     <!-- load arm planning config file -->
-    <rosparam command="load" ns="robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml" />
+    <rosparam command="load" ns="/amigo/robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml" />
     <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_action.launch" />
     <include file="$(find planning_environment)/launch/environment_server.launch">
         <arg name="use_monitor" value="true" />

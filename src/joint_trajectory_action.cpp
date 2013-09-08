@@ -4,12 +4,13 @@
 	#include <actionlib/server/action_server.h>
 	
 	#include <control_msgs/FollowJointTrajectoryAction.h>
-	#include <amigo_msgs/arm_joints.h>
-	#include <amigo_msgs/spindle_setpoint.h>
+    //#include <amigo_msgs/arm_joints.h>
+    //#include <amigo_msgs/spindle_setpoint.h>
+    #include <sensor_msgs/JointState.h>
 	#include <std_msgs/Float64.h>
 	
 	using namespace std;
-	
+
 	class JointTrajectoryExecuter
 	{
 	private:
@@ -51,7 +52,9 @@
 	                exit(1);
 	            }
 	
-	            joint_names_.push_back((std::string)name_value);
+                joint_index_[(std::string)name_value] = joint_names_.size();
+                joint_names_.push_back((std::string)name_value);
+
 	        }
 	
 	        pn.param("constraints/goal_time", goal_time_constraint_, 0.0);
@@ -73,11 +76,11 @@
 	        ///ROS_INFO("Trajectory constraints        %f, %f, %f, %f, %f, %f, %f, %f", trajectory_constraints_[0], trajectory_constraints_[1], trajectory_constraints_[2], trajectory_constraints_[3], trajectory_constraints_[4], trajectory_constraints_[5], trajectory_constraints_[6], trajectory_constraints_[7]);
 	
 	        // Here we start sending the references
-	        pub = node_.advertise<amigo_msgs::arm_joints>("joint_references", 1);
-	        torso_pub = node_.advertise<amigo_msgs::spindle_setpoint>("/spindle_controller/spindle_coordinates",1);
+            pub = node_.advertise<sensor_msgs::JointState>("/references", 1);
+            torso_pub = node_.advertise<sensor_msgs::JointState>("/amigo/torso/references",1);
 	        // Here we start listening for the measured positions
-	        sub = node_.subscribe("joint_measurements", 1, &JointTrajectoryExecuter::armCB, this);
-	        torso_sub = node_.subscribe("/spindle_position", 1, &JointTrajectoryExecuter::torsoCB, this);
+            sub = node_.subscribe("/measurements", 1, &JointTrajectoryExecuter::armCB, this);
+            torso_sub = node_.subscribe("/amigo/torso/measurements", 1, &JointTrajectoryExecuter::torsoCB, this);
 	
 	        ref_pos_.resize(joint_names_.size());
 	        cur_pos_.resize(joint_names_.size());
@@ -102,13 +105,20 @@
 	        if (has_active_goal_)
 	        {
 	            // Stops the controller.
-	            amigo_msgs::spindle_setpoint torso_msg;
-	            amigo_msgs::arm_joints arm_msg;
-	
-	            torso_msg.pos = cur_pos_[0];
-	            for (uint i = 0; i < 7; i++) arm_msg.pos[i].data = cur_pos_[i+1];
-	            torso_pub.publish(torso_msg);
-	            pub.publish(arm_msg);
+
+                // spindle
+                sensor_msgs::JointState torso_msg;
+                torso_msg.name.push_back(joint_names_[0]);
+                torso_msg.position.push_back(cur_pos_[0]);
+                torso_pub.publish(torso_msg);
+
+                // arm
+                sensor_msgs::JointState arm_msg;
+                for (uint i = 0; i < 7; i++) {
+                    arm_msg.name.push_back(joint_names_[i+1]);
+                    arm_msg.position.push_back(cur_pos_[i+1]);
+                }
+                pub.publish(arm_msg);
 	
 	            // Marks the current goal as canceled.
 	            active_goal_.setCanceled();
@@ -134,13 +144,20 @@
 	        if (active_goal_ == gh)
 	        {
 	            // Stops the controller.
-	            amigo_msgs::spindle_setpoint torso_msg;
-	            amigo_msgs::arm_joints arm_msg;
-	
-	            torso_msg.pos = cur_pos_[0];
-	            for (uint i = 0; i < 7; i++) arm_msg.pos[i].data = cur_pos_[i+1];
-	            torso_pub.publish(torso_msg);
-	            pub.publish(arm_msg);
+
+                //spindle
+                sensor_msgs::JointState torso_msg;
+                torso_msg.name.push_back(joint_names_[0]);
+                torso_msg.position.push_back(cur_pos_[0]);
+                torso_pub.publish(torso_msg);
+
+                // arm
+                sensor_msgs::JointState arm_msg;
+                for (uint i = 0; i < 7; i++) {
+                    arm_msg.name.push_back(joint_names_[i+1]);
+                    arm_msg.position.push_back(cur_pos_[i+1]);
+                }
+                pub.publish(arm_msg);
 	
 	            // Marks the current goal as canceled.
 	            active_goal_.setCanceled();
@@ -166,34 +183,35 @@
 	    uint number_of_goal_joints_;
 	
 	    std::vector<std::string> joint_names_;
+        std::map<std::string, unsigned int> joint_index_;
 	    std::map<std::string,double> intermediate_goal_constraints_;
 	    std::map<std::string,double> final_goal_constraints_;
 	    std::map<std::string,double> trajectory_constraints_;
 	    double goal_time_constraint_;
 	
-	    void armCB(const amigo_msgs::arm_jointsConstPtr &joint_meas)
+        void armCB(const sensor_msgs::JointState& joint_meas)
 	    {
-	
-	        ///ROS_INFO("Arm message received");
-	        for (uint i = 0; i < 7; i++) {
-	            cur_pos_[i+1] = joint_meas->pos[i].data;
-	        }
-	        ///ROS_INFO("Arm message copied");
-	
+
+            for(unsigned int i = 0; i < joint_meas.name.size(); ++i) {
+                std::map<std::string, unsigned int>::iterator it_joint = joint_index_.find(joint_meas.name[i]);
+                if (it_joint != joint_index_.end()) {
+                    cur_pos_[it_joint->second] = joint_meas.position[i];
+                } else {
+                    ROS_ERROR("Unknown joint name: %s", joint_meas.name[i].c_str());
+                }
+            }
+
 	        // If no active goal --> Do nothing
 	        if (!has_active_goal_)
 	            return;
 	
 	        controllerCB();
-	
-	        ///amigo_msgs::arm_joints joint_ref;
-	
-	
+
 	    }
 	
-	    void torsoCB(const std_msgs::Float64ConstPtr &torso_meas) {
+        void torsoCB(const sensor_msgs::JointState& torso_meas) {
 	
-	        cur_pos_[0] = torso_meas->data;
+            cur_pos_[0] = torso_meas.position[0];
 	        ///ROS_INFO("Torso message copied");
 	
 	        ///ROS_INFO("Torso message received");
@@ -278,26 +296,25 @@
 	                }
 	            }
 	        }
-	
-	        // Joint trajectory action should work for both seven (old situation, only arm) and eight (new situation, incl torso) joints
-	        amigo_msgs::spindle_setpoint torso_msg;
-	        amigo_msgs::arm_joints arm_msg;
-	        
-	        torso_msg.pos = ref_pos_[0];
-	        torso_msg.vel = 0.0;
-	        torso_msg.acc = 0.0;
-	        torso_msg.stop = 0;
-	        
-	        for (uint i = 0; i < 7; i++) {
-	            arm_msg.pos[i].data = ref_pos_[i+1];
-	        }
-	        // Always publish arm msg
-	        pub.publish(arm_msg);
-	        // Only publish torso if requested
-	        if(number_of_goal_joints_ == 8) {
-				torso_pub.publish(torso_msg);
-			}
-	
+
+            // Joint trajectory action should work for both seven (old situation, only arm) and eight (new situation, incl torso) joints
+
+            // Only publish torso if requested
+            if( number_of_goal_joints_ == 8) {
+                sensor_msgs::JointState torso_msg;
+                torso_msg.name.push_back("torso_joint");
+                torso_msg.position.push_back(ref_pos_[0]);
+                torso_pub.publish(torso_msg);
+            }
+
+            // Always publish arm msg
+            sensor_msgs::JointState arm_msg;
+            for (unsigned int i = 0; i < 7; i++) {
+                arm_msg.name.push_back(joint_names_[i+1]);
+                arm_msg.position.push_back(ref_pos_[i+1]);
+            }
+            pub.publish(arm_msg);
+
 	        ///ROS_INFO("Publishing done");
 	
 	        //if(converged_joints==(int)number_of_goal_joints_)
