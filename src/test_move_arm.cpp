@@ -70,7 +70,7 @@ int main(int argc, char** argv)
   goal.planner_service_name = "ompl_planning/plan_kinematic_path";
 
   arm_navigation_msgs::PositionConstraint position_constraint;
-  position_constraint.header.frame_id = "base_link";
+  position_constraint.header.frame_id = "/amigo/base_link";
   position_constraint.link_name = "grippoint_left";
   position_constraint.position.x = 0.5;
   position_constraint.position.y = 0.08;
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
   goal.motion_plan_request.goal_constraints.position_constraints.push_back(position_constraint);
 
   arm_navigation_msgs::OrientationConstraint orientation_constraint;
-  orientation_constraint.header.frame_id = "base_link";
+  orientation_constraint.header.frame_id = "/amigo/base_link";
   orientation_constraint.link_name = "grippoint_left";
   orientation_constraint.orientation.x = 0.0;
   orientation_constraint.orientation.y = 0.0;

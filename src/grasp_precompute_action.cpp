@@ -16,7 +16,7 @@
 #include <kinematics_msgs/GetConstraintAwarePositionIK.h>
 #include <arm_navigation_msgs/SetPlanningSceneDiff.h>
 
-#include <amigo_msgs/arm_joints.h>
+//#include <amigo_msgs/arm_joints.h>
 
 #include <visualization_msgs/MarkerArray.h>
 
@@ -47,17 +47,17 @@ ros::ServiceClient set_planning_scene_diff_client;
 
 tf::TransformListener* TF_LISTENER;
 
-amigo_msgs::arm_joints arm_joints;
+sensor_msgs::JointState arm_joints;
 double spindle_position;
 
-void armcontrollerCB(const amigo_msgs::arm_jointsConstPtr &joint_meas)
+void armcontrollerCB(const sensor_msgs::JointState& joint_meas)
 {
-    arm_joints = *joint_meas;
+    arm_joints = joint_meas;
 }
 
-void spindlecontrollerCB(const std_msgs::Float64ConstPtr &spindle_meas)
+void spindlecontrollerCB(const sensor_msgs::JointState& spindle_meas)
 {
-    spindle_position = spindle_meas->data;
+    spindle_position = spindle_meas.position[0];
 }
 
 void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, Server* as, Client* ac)
@@ -207,13 +207,23 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
     gpik_req.ik_request.pose_stamped.header.frame_id = stamped_in.header.frame_id;
 
     // Define joint names and seed positions
-    for(unsigned int i=0; i< response.kinematic_solver_info.joint_names.size(); ++i)
+    for(unsigned int i = 0; i < response.kinematic_solver_info.joint_names.size(); ++i)
     {
+
+        string joint_name = response.kinematic_solver_info.joint_names[i];
+
         //double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
         double joint_seed;
-        if (i == 0) joint_seed = spindle_position;
-        else joint_seed = arm_joints.pos[i-1].data;
-        string joint_name = response.kinematic_solver_info.joint_names[i];
+        if (i == 0) {
+            joint_seed = spindle_position;
+        } else {
+            for(unsigned int j = 0; j < arm_joints.name.size(); ++j) {
+                if (joint_name == arm_joints.name[j]) {
+                    joint_seed = arm_joints.position[j];
+                }
+            }
+        }
+
         gpik_req.ik_request.ik_seed_state.joint_state.name.push_back(joint_name);
         gpik_req.ik_request.ik_seed_state.joint_state.position.push_back(joint_seed);
         jtagoal.trajectory.joint_names.push_back(joint_name);
