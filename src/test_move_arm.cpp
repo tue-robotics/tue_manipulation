@@ -46,7 +46,7 @@ int main(int argc, char** argv)
   // Get Kinematic solver info
   kinematics_msgs::GetKinematicSolverInfo::Request request;
   kinematics_msgs::GetKinematicSolverInfo::Response response;
-  ros::ServiceClient query_client = nh.serviceClient<kinematics_msgs::GetKinematicSolverInfo>("/amigo_left_arm_kinematics/get_ik_solver_info");
+  ros::ServiceClient query_client = nh.serviceClient<kinematics_msgs::GetKinematicSolverInfo>("/amigo/left_arm_kinematics/get_ik_solver_info");
   if(query_client.call(request,response))
   {
 	  printf("IK test call succesfull\n");

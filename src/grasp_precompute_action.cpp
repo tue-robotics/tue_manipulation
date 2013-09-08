@@ -42,7 +42,7 @@ ros::Publisher *IKpospub;
 ros::ServiceClient query_client;
 ros::ServiceClient ik_client;
 
-static const std::string SET_PLANNING_SCENE_DIFF_NAME = "/environment_server/set_planning_scene_diff";
+static const std::string SET_PLANNING_SCENE_DIFF_NAME = "/amigo/environment_server/set_planning_scene_diff";
 ros::ServiceClient set_planning_scene_diff_client;
 
 tf::TransformListener* TF_LISTENER;
@@ -124,24 +124,24 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
 
 
     // If input frame is not /base_link, convert to base_link so that sampling over the yaw indicates the z-axes pointing up (whereas it wouldn't with e.g. '/torso')
-    if(stamped_in.header.frame_id.compare("/base_link"))
+    if(stamped_in.header.frame_id.compare("/amigo/base_link"))
     {
         ROS_DEBUG("Frame id was not BASE_LINK");
         // Create tmp variable
         geometry_msgs::PoseStamped tmp;
 
         // Perform the transformation to /base_link
-        if(TF_LISTENER->waitForTransform("/base_link", stamped_in.header.frame_id, stamped_in.header.stamp, ros::Duration(1.0)))
+        if(TF_LISTENER->waitForTransform("/amigo/base_link", stamped_in.header.frame_id, stamped_in.header.stamp, ros::Duration(1.0)))
         {
             try
-            {TF_LISTENER->transformPose("/base_link", stamped_in, tmp);}
+            {TF_LISTENER->transformPose("/amigo/base_link", stamped_in, tmp);}
             catch (tf::TransformException ex){
                 as->setAborted();
                 ROS_ERROR("%s",ex.what());
                 return;}
         }else{
             as->setAborted();
-            ROS_ERROR("grasp_precompute_action: TF_LISTENER could not find transform from /base_link to %s:",stamped_in.header.frame_id.c_str());
+            ROS_ERROR("grasp_precompute_action: TF_LISTENER could not find transform from /amigo/base_link to %s:",stamped_in.header.frame_id.c_str());
             return;
 
         }

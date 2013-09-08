@@ -21,7 +21,7 @@ right_arm:
     - LBKPIECEkConfig1
   projection_evaluator: joint_state
 left_arm_cartesian:
-  parent_frame: base_link
+  parent_frame: /amigo/base_link
   physical_group: left_arm
   planner_type: RPYIKTaskSpacePlanner
   state_spaces:
@@ -58,7 +58,7 @@ left_arm_cartesian:
   projection_evaluator: joint_state
   longest_valid_segment_fraction: 0.001
 right_arm_cartesian:
-  parent_frame: base_link
+  parent_frame: /amigo/base_link
   physical_group: right_arm
   planner_type: RPYIKTaskSpacePlanner
   state_spaces:

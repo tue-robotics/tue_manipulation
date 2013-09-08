@@ -1,10 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="ROBOT_COMPLEXITY" default="$(optenv ROBOT_COMPLEXITY complex)" />
     <arg name="machine" value="$(optenv MACHINE_ARM_NAVIGATION localhost)"/>
 
-    <rosparam command="load" ns="/amigo/robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description_$(arg ROBOT_COMPLEXITY).yaml"/>
+    <rosparam command="load" ns="/amigo/robot_description_planning" file="$(find amigo_arm_navigation)/config/amigo_planning_description.yaml"/>
 
     <include file="$(find amigo_arm_navigation)/launch/joint_trajectory_action.launch">
     	<arg name="machine" value="$(arg machine)" />
@@ -17,7 +16,7 @@
     </include>
 
     <include file="$(find amigo_arm_navigation)/launch/constraint_aware_kinematics.launch" >
-	<arg name="machine" value="$(arg machine)" />
+    	<arg name="machine" value="$(arg machine)" />
     </include>
 <!--
     <include file="$(find amigo_arm_navigation)/launch/ompl_planning.launch" >
@@ -38,7 +37,7 @@
 -->
     
     <include file="$(find amigo_arm_navigation)/launch/grasp_precompute_action.launch" >
-	<arg name="machine" value="$(arg machine)" />
+	    <arg name="machine" value="$(arg machine)" />
     </include>
 
     <!--<include file="$(find amigo_arm_navigation)/launch/collision_monitor.launch" >

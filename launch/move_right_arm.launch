@@ -16,8 +16,8 @@
 
         <!--<remap from="move_right_arm/goal" to="move_right_arm/pre_grasp/goal" />-->
         <remap from="joint_state" to="joint_states" />
-        <remap from="arm_ik" to="amigo_right_arm_kinematics/get_constraint_aware_ik" />
-        <remap from="arm_fk" to="amigo_right_arm_kinematics/get_fk" />
+        <remap from="arm_ik" to="/amigo/right_arm_kinematics/get_constraint_aware_ik" />
+        <remap from="arm_fk" to="/amigo/right_arm_kinematics/get_fk" />
         <remap from="filter_trajectory" to="trajectory_filter/filter_trajectory_with_constraints" />
         <remap from="get_trajectory_validity" to="environment_server/get_trajectory_validity" />	
     	<remap from="get_environment_safety" to="environment_server/get_environment_safety" />	

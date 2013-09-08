@@ -13,9 +13,11 @@
   <node pkg="planning_environment" type="environment_server" output="screen" name="environment_server" machine="$(arg machine)" ns="amigo">      
     <param name="use_monitor" type="bool" value="$(arg use_monitor)"/>
     <param name="use_collision_map" type="bool" value="$(arg use_collision_map)"/>
+    <param name="tf_prefix" value="amigo"/>
   </node>
 
-  <node pkg="planning_environment" type="planning_scene_validity_server" output="screen" name="planning_scene_validity_server" machine="$(arg machine)" ns="amigo">      
-  </node>
+  <!--node pkg="planning_environment" type="planning_scene_validity_server" output="screen" name="planning_scene_validity_server" machine="$(arg machine)" ns="amigo">      
+    <param name="tf_prefix" value="amigo"/>
+  </node-->
 
 </launch>

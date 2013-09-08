@@ -8,7 +8,7 @@
 
   <arg name="machine" default="localhost"/>
   
-  <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen" machine="$(arg machine)">
+  <node pkg="collider" type="collider_node" name="collider_node" respawn="true" output="screen" machine="$(arg machine)" ns="amigo">
      <param name="fixed_frame" type="string" value="/map" />
      <param name="resolution" type="double" value="0.025" />
      <param name="max_range" type="double" value="2.0" />
@@ -24,5 +24,6 @@
      <rosparam command="load" file="$(find amigo_arm_navigation)/config/collision_map_sources.yaml" />
      <rosparam command="load" file="$(find amigo_self_filter)/parameters/self_filter.yaml" />
 
+     <param name="tf_prefix" value="amigo"/>
    </node>
 </launch>
