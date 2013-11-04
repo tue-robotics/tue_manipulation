@@ -130,9 +130,9 @@
 	        ///goal_includes_spindle_ = false;
 	        number_of_goal_joints_ = 7;
 	        for (uint i = 0; i < gh.getGoal()->trajectory.joint_names.size(); i++) {
-	            if (std::strcmp(gh.getGoal()->trajectory.joint_names[i].c_str(),"spindle_joint")) number_of_goal_joints_ = 8;
+                if (!std::strcmp(gh.getGoal()->trajectory.joint_names[i].c_str(),"torso_joint")) number_of_goal_joints_ = 8;
 	        }
-	        //ROS_INFO("Number of goal joints = %i",number_of_goal_joints_);
+                //ROS_INFO("Number of goal joints = %i",number_of_goal_joints_);
 	        gh.setAccepted();
 	        active_goal_ = gh;
 	        has_active_goal_ = true;
