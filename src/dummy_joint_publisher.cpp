@@ -1,13 +1,6 @@
 #include "ros/ros.h"
 
-#include "amigo_msgs/arm_joints.h"
-#include "std_msgs/Float64.h"
-
-//std_msgs/Float64 time
-//std_msgs/Float64[7] pos
-//std_msgs/Float64[7] vel
-//std_msgs/Float64[7] acc
-
+#include <sensor_msgs/JointState.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -24,43 +17,43 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
-	amigo_msgs::arm_joints joints;
+	sensor_msgs::JointState left_msg;
+	left_msg.name.push_back("shoulder_yaw_joint_left");
+    left_msg.name.push_back("shoulder_pitch_joint_left");
+	left_msg.name.push_back("shoulder_roll_joint_left");
+    left_msg.name.push_back("elbow_pitch_joint_left");
+    left_msg.name.push_back("elbow_roll_joint_left");
+    left_msg.name.push_back("wrist_pitch_joint_left");
+    left_msg.name.push_back("wrist_yaw_joint_left");
+	
+	sensor_msgs::JointState right_msg;
+	right_msg.name.push_back("shoulder_yaw_joint_right");
+    right_msg.name.push_back("shoulder_pitch_joint_right");
+	right_msg.name.push_back("shoulder_roll_joint_right");
+    right_msg.name.push_back("elbow_pitch_joint_right");
+    right_msg.name.push_back("elbow_roll_joint_right");
+    right_msg.name.push_back("wrist_pitch_joint_right");
+    right_msg.name.push_back("wrist_yaw_joint_right");
 
 	//joints.time.data =  atof(argv[2]);
-    joints.time.data =  0.0;
     
 	int i_arg = 1;
 	for(int i = 0; i < num_joints; ++i) {
-		std_msgs::Float64 f;
-		f.data = atof(argv[i_arg++]);
-		joints.pos[i] = f;
-	}
-
-	for(int i = 0; i < num_joints; ++i) {
-		std_msgs::Float64 f;
-		//f.data = atof(argv[i_arg++]);
-		f.data = 0.0;
-		joints.vel[i] = f;
-	}
-
-	for(int i = 0; i < num_joints; ++i) {
-		std_msgs::Float64 f;
-		//f.data = atof(argv[i_arg++]);
-		f.data = 0.0;
-		joints.acc[i] = f;
+		left_msg.position.push_back(atof(argv[i+1]));
+		right_msg.position.push_back(atof(argv[i+1]));
 	}
 
 	// Publisher
-	ros::Publisher pub_left  = n.advertise<amigo_msgs::arm_joints>("/arm_left_controller/joint_references", 100);
-    ros::Publisher pub_right = n.advertise<amigo_msgs::arm_joints>("/arm_right_controller/joint_references", 100);
+	ros::Publisher pub_left  = n.advertise<sensor_msgs::JointState>("/amigo/left_arm/references", 1);
+    ros::Publisher pub_right = n.advertise<sensor_msgs::JointState>("/amigo/right_arm/references", 1);
     
 	// Loop 20 Hz
 	int rate = 1;
 	ros::Rate r(rate);
 
 	while(n.ok()) {
-		pub_left.publish(joints);
-		pub_right.publish(joints);
+		pub_left.publish(left_msg);
+		pub_right.publish(right_msg);
 		r.sleep();
 	}
 	//ros::spin();
