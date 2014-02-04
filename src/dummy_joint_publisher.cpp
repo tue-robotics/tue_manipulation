@@ -48,15 +48,18 @@ int main(int argc, char **argv) {
     ros::Publisher pub_right = n.advertise<sensor_msgs::JointState>("/amigo/right_arm/references", 1);
     
 	// Loop 20 Hz
-	int rate = 1;
+	int rate = 20;
 	ros::Rate r(rate);
+	
+	unsigned int nr_msgs = 20;
+	unsigned int nr = 0;
 
-	while(n.ok()) {
+	while(n.ok() && nr <= nr_msgs) {
 		pub_left.publish(left_msg);
 		pub_right.publish(right_msg);
+		++nr;
 		r.sleep();
 	}
-	//ros::spin();
 
 }
 
