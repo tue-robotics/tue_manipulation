@@ -7,7 +7,7 @@
 
 #include <kinematics_msgs/GetKinematicSolverInfo.h>
 
-#include <amigo_msgs/arm_joints.h>
+//#include <amigo_msgs/arm_joints.h>
 
 using namespace std;
 
