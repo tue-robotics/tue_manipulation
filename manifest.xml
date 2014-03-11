@@ -17,6 +17,7 @@
   <depend package="amigo_msgs"/>
   <depend package="amigo_actions"/>
   <depend package="visualization_msgs"/>
+  <depend package="diagnostic_msgs"/>
 
 </package>
 

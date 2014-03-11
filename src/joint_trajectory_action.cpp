@@ -4,10 +4,11 @@
 	#include <actionlib/server/action_server.h>
 	
 	#include <control_msgs/FollowJointTrajectoryAction.h>
-    //#include <amigo_msgs/arm_joints.h>
-    //#include <amigo_msgs/spindle_setpoint.h>
+
     #include <sensor_msgs/JointState.h>
 	#include <std_msgs/Float64.h>
+
+    #include <diagnostic_msgs/DiagnosticArray.h>
 	
 	using namespace std;
 
@@ -81,9 +82,29 @@
 	        // Here we start listening for the measured positions
             sub = node_.subscribe("/measurements", 1, &JointTrajectoryExecuter::armCB, this);
             torso_sub = node_.subscribe("/amigo/torso/measurements", 1, &JointTrajectoryExecuter::torsoCB, this);
+
+            // Diagnostics sub
+            diag_sub = node_.subscribe("/hardware_status", 1, &JointTrajectoryExecuter::diagnosticsCB, this);
 	
 	        ref_pos_.resize(joint_names_.size());
 	        cur_pos_.resize(joint_names_.size());
+
+            // Start with hardware status OK
+            torso_status = 2;
+            arm_status = 2;
+            torso_diag_name = "spindle"; // ToDo: don't hardcode
+            std::string leftstr = "left";
+            std::string rightstr= "right";
+            for (unsigned int i = 0; i < joint_names_.size(); i++ ) {
+                if (joint_names_[i].find(leftstr) != std::string::npos) {
+                    arm_diag_name = "left_arm";
+                    break;
+                } else if (joint_names_[i].find(rightstr) != std::string::npos) {
+                    arm_diag_name = "right_arm";
+                    break;
+                }
+            }
+            ROS_INFO("Torso diag name = %s, arm diag name = %s", torso_diag_name.c_str(), arm_diag_name.c_str());
 	
 	        action_server_.start();
 	    }
@@ -136,6 +157,10 @@
 	        gh.setAccepted();
 	        active_goal_ = gh;
 	        has_active_goal_ = true;
+
+            // Start by assuming hardware works
+            arm_status = 2;
+            torso_status = 2;
 	
 	    }
 	
@@ -173,6 +198,11 @@
 	
 	    ros::Publisher torso_pub;
 	    ros::Subscriber torso_sub;
+        ros::Subscriber diag_sub;
+
+        unsigned int torso_status, arm_status;
+        std::string torso_diag_name; // Name of the torso in the diagnostics message array
+        std::string arm_diag_name; // Name of the arm in the diagnostics message array
 	
 	    ros::Time now;
 	
@@ -227,6 +257,29 @@
 	
 	        int i=0,converged_joints=0;
 	        float abs_error=0.0;
+
+            // Check hardware status
+            // ToDo: are we happy with this?
+            if ( arm_status == 2 && torso_status == 2 ) {
+                //ROS_INFO("Hardware status OK");
+            } else if ( arm_status == 4 || torso_status == 4 ) {
+                ROS_WARN("Arm (%u) or torso (%u) is in error, joint trajectory goal cannot be reached, aborting", arm_status, torso_status);
+                active_goal_.setAborted();
+                has_active_goal_=false;
+                return;
+            } else if ( arm_status == 0 || torso_status == 0 ) {
+                ROS_WARN("Arm (%u) or torso (%u) is stale, joint trajectory goal cannot be reached, aborting", arm_status, torso_status);
+                active_goal_.setAborted();
+                has_active_goal_=false;
+                return;
+            } else if ( arm_status == 3 || torso_status == 3 ) {
+                ROS_WARN("Arm (%u) or torso (%u) is still homing, joint trajectory goal may not be reached", arm_status, torso_status);
+            } else if ( arm_status == 1 || torso_status == 1 ) {
+                ROS_WARN("Arm (%u) or torso (%u) is in idle, joint trajectory goal cannot be reached, aborting", arm_status, torso_status);
+                active_goal_.setAborted();
+                has_active_goal_=false;
+                return;
+            }
 	
 	        // Check if the time constraint is not violated
 	        if(ros::Time::now().toSec() > goal_time_constraint_ + now.toSec())
@@ -332,6 +385,22 @@
 	
 		ROS_DEBUG("Converged joints = %i of %i, current_point = %i of %i", converged_joints, (int)number_of_goal_joints_, current_point, (int)active_goal_.getGoal()->trajectory.points.size());
 	    }
+
+        void diagnosticsCB(const diagnostic_msgs::DiagnosticArray& diag_array) {
+            // Only process data if there is an active goal
+            if (has_active_goal_) {
+                // Loop through message
+                for (unsigned int i = 0; i < diag_array.status.size(); i++ ) {
+                    // Check if there is a torso or an arm status status
+                    if (diag_array.status[i].name == torso_diag_name) {
+                        torso_status = diag_array.status[i].level;
+                    } else if (diag_array.status[i].name == arm_diag_name) {
+                        arm_status = diag_array.status[i].level;
+                    }
+                }
+            //ROS_INFO("Arm status %s = %u, torso status %s = %u", arm_diag_name.c_str(), arm_status, torso_diag_name.c_str(), torso_status);
+            }
+        }
 	
 	};
 	
