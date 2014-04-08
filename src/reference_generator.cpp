@@ -375,7 +375,7 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
         
         ROS_INFO("max time = %f", max_time);
 
-        double dt = 0.01;
+        double dt = 0.001;
 
         unsigned int num_points = max_time / dt;
         jt_interpolated.points.resize(num_points);
@@ -392,13 +392,15 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
         for(unsigned int j = 0; j < goal_pos.size(); ++j) {
             double time_factor = max_time / times[j];
 
+			ROS_INFO("Time factor for joint %d = %f", j, time_factor);
+
             double max_acc = max_accs[j] / (time_factor * time_factor);
             double max_vel = max_vels[j] / time_factor;
+            double t_acc = max_vel / max_acc;
+            
             if (goal_pos[j] < pos[j]) {
 		        max_acc = -max_acc;
-			}
-
-            double t_acc = max_vel / max_acc;
+			}           
 
             unsigned int k = 0;
             double t = 0;
@@ -413,7 +415,7 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
                 v += max_acc * dt;
                 x += v * dt;
                 jt_interpolated.points[k].positions[j] = x;
-                ROS_INFO("acc: a = %f, v = %f, x = %f", max_acc, v, x);
+                // ROS_INFO("acc: a = %f, v = %f, x = %f", max_acc, v, x);
                 ++k;
             }
             
@@ -423,7 +425,7 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
             for(; t < (max_time - t_acc) && k < num_points; t += dt) {
                 x += v * dt;
                 jt_interpolated.points[k].positions[j] = x;
-                ROS_INFO("con: a = %f, v = %f, x = %f", 0.0, v, x);
+                // ROS_INFO("con: a = %f, v = %f, x = %f", 0.0, v, x);
                 ++k;
             }
             
@@ -434,7 +436,7 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
                 v -= max_acc * dt;
                 x += v * dt;
                 jt_interpolated.points[k].positions[j] = x;
-                ROS_INFO("dec: a = %f, v = %f, x = %f", -max_acc, v, x);
+                // ROS_INFO("dec: a = %f, v = %f, x = %f", -max_acc, v, x);
                 ++k;
             }
             
