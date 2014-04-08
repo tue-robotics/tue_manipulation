@@ -64,7 +64,7 @@ JointTrajectoryExecuter::JointTrajectoryExecuter(ros::NodeHandle &n) :
 
     // Here we start sending the references
     arm_pub = node_.advertise<trajectory_msgs::JointTrajectory>("/references", 1);
-    torso_pub = node_.advertise<trajectory_msgs::JointTrajectory>("/amigo/torso/references",1);
+    torso_pub = node_.advertise<trajectory_msgs::JointTrajectory>("/amigo/torso/ref_trajectory",1);
     // Here we start listening for the measured positions
     arm_sub_ = node_.subscribe("/measurements", 1, &JointTrajectoryExecuter::measurementCB, this);
     torso_sub = node_.subscribe("/amigo/torso/measurements", 1, &JointTrajectoryExecuter::measurementCB, this);

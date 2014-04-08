@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find amigo_machine_files)/machines/amigo1.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo2.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo3.machine" />
+    <include file="$(find amigo_machine_files)/machines/amigo4.machine" />
+    <include file="$(find amigo_machine_files)/machines/localhost.machine" />
+
+    <arg name="machine" default="localhost"/>
+
+    <node pkg="amigo_arm_navigation" type="reference_generator" name="joint_trajectory_action_left" output="screen" machine="$(arg machine)">
+    	<rosparam command="load" file="$(find amigo_arm_navigation)/config/joints_left.yaml" />
+        <remap from="joint_trajectory_action" to="joint_trajectory_action_left" />
+        <remap from="measurements" to="/amigo/left_arm/measurements" />
+        <remap from="references" to="/amigo/left_arm/ref_trajectory" />
+        <param name="tf_prefix" value="amigo"/>
+    </node>
+
+    <node pkg="amigo_arm_navigation" type="reference_generator" name="joint_trajectory_action_right" output="screen" machine="$(arg machine)">
+	    <rosparam command="load" file="$(find amigo_arm_navigation)/config/joints_right.yaml" />
+        <remap from="joint_trajectory_action" to="joint_trajectory_action_right" />
+        <remap from="measurements" to="/amigo/right_arm/measurements" />
+	    <remap from="references" to="/amigo/right_arm/ref_trajectory" />
+        <param name="tf_prefix" value="amigo"/>
+    </node>
+
+</launch>
