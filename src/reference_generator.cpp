@@ -138,9 +138,6 @@ void JointTrajectoryExecuter::sendStop() {
 // --------------------------------------------------------------------------------
 
 void JointTrajectoryExecuter::goalCB(GoalHandle gh) {
-
-    ROS_INFO("GOAL CALLBACK");
-
     t_start_ = ros::Time::now();
 
     // Cancels the currently active goal.
@@ -148,12 +145,8 @@ void JointTrajectoryExecuter::goalCB(GoalHandle gh) {
         // Stops the controller.
         sendStop();
     }
-    
-    ROS_INFO("A");
 
     trajectory_input_ = gh.getGoal()->trajectory;
-
-	ROS_INFO("B");
 
     JointState cur_pos_ordered;
     JointState max_vel_ordered;
@@ -189,14 +182,10 @@ void JointTrajectoryExecuter::goalCB(GoalHandle gh) {
             return;
         }
     }
-    
-    ROS_INFO("C");
 
     gh.setAccepted();
     active_goal_ = gh;
     has_active_goal_ = true;
-
-	ROS_INFO("D");
 
     // Start by assuming hardware works
     arm_status = 2;
@@ -206,12 +195,8 @@ void JointTrajectoryExecuter::goalCB(GoalHandle gh) {
     trajectory_msgs::JointTrajectory trajectory_interpolated_msg;
     interpolateTrajectory(cur_pos_ordered, max_vel_ordered, max_acc_ordered, trajectory_input_, trajectory_interpolated_msg);
 
-	ROS_INFO("E");
-
     // send trajectory to controllers
     publishReference(trajectory_interpolated_msg);
-    
-	ROS_INFO("F");
 }
 
 // --------------------------------------------------------------------------------
@@ -309,6 +294,7 @@ void JointTrajectoryExecuter::measurementCB(const sensor_msgs::JointState& joint
     ROS_DEBUG("Converged joints = %i of %i", converged_joints, (int)trajectory_input_.joint_names.size());
 
     if (converged_joints == trajectory_input_.joint_names.size()) {
+		ROS_INFO("Joints converged!");
         active_goal_.setSucceeded();
         has_active_goal_ = false;
     }
@@ -349,9 +335,7 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
         // find out how long it will take to reach the goal
         // taking into account acceleration and deceleration
         double max_time = 0;
-        for(unsigned int j = 0; j < goal_pos.size(); ++j) {
-            ROS_INFO("max time, joint %d", j);
-            
+        for(unsigned int j = 0; j < goal_pos.size(); ++j) {           
             double diff = std::abs(goal_pos[j] - pos[j]);
 
             double t_acc = max_vels[j] / max_accs[j];
@@ -373,7 +357,7 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
             max_time = std::max(max_time, time);
         }
         
-        ROS_INFO("max time = %f", max_time);
+        ROS_INFO("--------------- Point %d ---------------", i);
 
         double dt = 0.001;
 
@@ -387,15 +371,11 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
             t += dt;
         }
         
-        ROS_INFO("resize complete");
-
         for(unsigned int j = 0; j < goal_pos.size(); ++j) {
-            double time_factor = max_time / times[j];
+            double time_factor = times[j] / max_time;
 
-			ROS_INFO("Time factor for joint %d = %f", j, time_factor);
-
-            double max_acc = max_accs[j] / (time_factor * time_factor);
-            double max_vel = max_vels[j] / time_factor;
+            double max_acc = max_accs[j] * time_factor * time_factor;
+            double max_vel = max_vels[j] * time_factor;
             double t_acc = max_vel / max_acc;
             
             if (goal_pos[j] < pos[j]) {
@@ -404,12 +384,9 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
 
             unsigned int k = 0;
             double t = 0;
-            //double a = 0;
             double v = 0;
             double x = pos[j];
             
-            ROS_INFO("acceleration");
-
             // accelerate
             for(; t < t_acc && t < max_time / 2 && k < num_points; t += dt) {
                 v += max_acc * dt;
@@ -419,8 +396,6 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
                 ++k;
             }
             
-            ROS_INFO("constant vel");
-
             // constant velocity
             for(; t < (max_time - t_acc) && k < num_points; t += dt) {
                 x += v * dt;
@@ -429,8 +404,6 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
                 ++k;
             }
             
-            ROS_INFO("deceleration");
-
             // decelerate
             for(; t < max_time && k < num_points; t += dt) {
                 v -= max_acc * dt;
@@ -440,24 +413,20 @@ void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_po
                 ++k;
             }
             
-            ROS_INFO("fill up");
-
             for(; k < num_points; ++k) {
                 jt_interpolated.points[k].positions[j] = x;
-            }
+            }                       
             
-            ROS_INFO("done");           
-            
+            ROS_INFO("Joint %d: pos = %f, goal = %f, time_factor = %f", j, x, goal_pos[j], time_factor);
+            pos[j] = x;
         }
 
-        pos = goal_pos;
+        //pos = goal_pos;
     }
 }
 
 void JointTrajectoryExecuter::publishReference(const trajectory_msgs::JointTrajectory& jt) {
-    
-    ROS_INFO("publishReference");
-    
+       
     trajectory_msgs::JointTrajectory arm_msg, torso_msg;
 
     arm_msg.points.resize(jt.points.size());
