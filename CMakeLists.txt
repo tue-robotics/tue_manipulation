@@ -34,6 +34,7 @@ rosbuild_genmsg()
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(joint_trajectory_action src/joint_trajectory_action.cpp)
+rosbuild_add_executable(reference_generator src/reference_generator.cpp)
 rosbuild_add_executable(dummy_joint_publisher src/dummy_joint_publisher.cpp)
 rosbuild_add_executable(grasp_precompute_action src/grasp_precompute_action.cpp)
 #rosbuild_add_executable(test_move_arm src/test_move_arm.cpp)
