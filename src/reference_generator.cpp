@@ -45,15 +45,17 @@ JointTrajectoryExecuter::JointTrajectoryExecuter(ros::NodeHandle &n) :
     // Gets the constraints for each joint.
     for (size_t i = 0; i < joint_names.size(); ++i) {
         std::string ns = std::string("constraints/") + joint_names[i];
-        double ig, fg,t, max_vel;
+        double ig, fg,t, max_vel, max_acc;
         pn.param(ns + "/intermediate_goal", ig, -1.0);
         pn.param(ns + "/final_goal", fg, -1.0);
         pn.param(ns + "/trajectory", t, -1.0);
         pn.param(ns + "/max_vel", max_vel, 1.0);
+        pn.param(ns + "/max_acc", max_acc, 1.0);
         intermediate_goal_constraints_[joint_names[i]] = ig;
         final_goal_constraints_[joint_names[i]] = fg;
         trajectory_constraints_[joint_names[i]] = t;
         max_vel_constraints_[joint_names_param[i]] = max_vel;
+        max_acc_constraints_[joint_names_param[i]] = max_acc;
     }
 
     ///ROS_INFO("Intermediate goal constraints %f, %f, %f, %f, %f, %f, %f, %f", intermediate_goal_constraints_[0], intermediate_goal_constraints_[1], intermediate_goal_constraints_[2], intermediate_goal_constraints_[3], intermediate_goal_constraints_[4], intermediate_goal_constraints_[5], intermediate_goal_constraints_[6], intermediate_goal_constraints_[7]);
@@ -146,8 +148,9 @@ void JointTrajectoryExecuter::goalCB(GoalHandle gh) {
 
     trajectory_input_ = gh.getGoal()->trajectory;
 
-    JointPosState cur_pos_ordered;
-    JointPosState max_vel_ordered;
+    JointState cur_pos_ordered;
+    JointState max_vel_ordered;
+    JointState max_acc_ordered;
 
     for (unsigned int i = 0; i < trajectory_input_.joint_names.size(); ++i) {
         const std::string& joint_name = trajectory_input_.joint_names[i];
@@ -169,6 +172,15 @@ void JointTrajectoryExecuter::goalCB(GoalHandle gh) {
             gh.setRejected();
             return;
         }
+
+        std::map<std::string, double>::iterator it_joint3 = max_vel_constraints_.find(joint_name);
+        if (it_joint != max_acc_constraints_.end()) {
+            max_acc_ordered.push_back(it_joint3->second);
+        } else {
+            ROS_ERROR("No max acceleration constraint for joint %s", joint_name.c_str());
+            gh.setRejected();
+            return;
+        }
     }
 
     gh.setAccepted();
@@ -181,7 +193,7 @@ void JointTrajectoryExecuter::goalCB(GoalHandle gh) {
 
     // generate interpolated trajectory
     trajectory_msgs::JointTrajectory trajectory_interpolated_msg;
-    interpolateTrajectory(cur_pos_ordered, max_vel_ordered, trajectory_input_, trajectory_interpolated_msg);
+    interpolateTrajectory(cur_pos_ordered, max_vel_ordered, max_acc_ordered, trajectory_input_, trajectory_interpolated_msg);
 
     // send trajectory to controllers
     publishReference(trajectory_interpolated_msg);
@@ -307,36 +319,97 @@ void JointTrajectoryExecuter::diagnosticsCB(const diagnostic_msgs::DiagnosticArr
 
 // --------------------------------------------------------------------------------
 
-void JointTrajectoryExecuter::interpolateTrajectory(const JointPosState& current_pos, const JointVelState& max_vel,
+void JointTrajectoryExecuter::interpolateTrajectory(const JointState& current_pos, const JointState& max_vels, const JointState& max_accs,
                                                     const trajectory_msgs::JointTrajectory& jt,
                                                     trajectory_msgs::JointTrajectory& jt_interpolated) {
 
     jt_interpolated.joint_names = jt.joint_names;
 
-    JointPosState pos = current_pos;
+    JointState pos = current_pos;
     for(unsigned int i = 0; i < jt.points.size(); ++i) {
-        const JointPosState& goal_pos = jt.points[i].positions;
+        const JointState& goal_pos = jt.points[i].positions;
+
+        std::vector<double> times(goal_pos.size());
 
         // find out how long it will take to reach the goal
+        // taking into account acceleration and deceleration
         double max_time = 0;
         for(unsigned int j = 0; j < goal_pos.size(); ++i) {
             double diff = std::abs(goal_pos[j] - pos[j]);
-            double time = diff / max_vel[j];
+
+            double t_acc = max_vels[j] / max_accs[j];
+            double x_acc = max_accs[j] * t_acc * t_acc / 2;
+
+            double time;
+            if (x_acc < diff / 2) {
+                // reach full velocity
+                double x_max_vel = diff - (2 * x_acc);
+                time = x_max_vel / max_vels[j] + 2 * t_acc;
+            } else {
+                // do not reach full velocity
+                double t_half = sqrt(2 * (diff / 2) / max_accs[j]);
+                time = 2 * t_half;
+            }
+
+            times[j] = time;
+
             max_time = std::max(max_time, time);
         }
 
         double dt = 0.001;
 
-        // perform linear interpolation on all joints
-        for(double t = 0; t < max_time; t += dt) {
-            trajectory_msgs::JointTrajectoryPoint ref;
-            ref.time_from_start = ros::Duration(t);
-            ref.positions.resize(goal_pos.size());
+        unsigned int num_points = max_time / dt;
+        jt_interpolated.points.resize(num_points);
 
-            for(unsigned int j = 0; j < goal_pos.size(); ++i) {
-                ref.positions[j] = (goal_pos[j] - pos[j]) * t / max_time;
+        double t = 0;
+        for(unsigned int k = 0; k < num_points; ++k) {
+            jt_interpolated.points[k].positions.resize(goal_pos.size());
+            jt_interpolated.points[k].time_from_start = ros::Duration(t);
+            t += dt;
+        }
+
+        for(unsigned int j = 0; j < goal_pos.size(); ++i) {
+            double time_factor = max_time / times[j];
+
+            double max_acc = 1 / (time_factor * time_factor);
+            double max_vel = max_vels[j] / time_factor;
+
+            double t_acc = max_vel / max_acc;
+
+            unsigned int k = 0;
+            double t = 0;
+            double a = 0;
+            double v = 0;
+            double x = 0;
+
+            // accelerate
+            for(; t < t_acc && t < max_time / 2 && k < num_points; t += dt) {
+                a += max_acc;
+                v += a;
+                x += v;
+                jt_interpolated.points[k].positions[j] = x;
+                ++k;
             }
-            jt_interpolated.points.push_back(ref);
+
+            // constant velocity
+            for(; t < (max_time - t_acc) && k < num_points; t += dt) {
+                x += v;
+                jt_interpolated.points[k].positions[j] = x;
+                ++k;
+            }
+
+            // decelerate
+            for(; t < max_time && k < num_points; t += dt) {
+                a -= max_acc;
+                v += a;
+                x += v;
+                jt_interpolated.points[k].positions[j] = x;
+                ++k;
+            }
+
+            for(; k < num_points; ++k) {
+                jt_interpolated.points[k].positions[j] = x;
+            }
         }
 
         pos = goal_pos;
@@ -383,7 +456,6 @@ void JointTrajectoryExecuter::publishReference(const trajectory_msgs::JointTraje
 }
 
 // --------------------------------------------------------------------------------
-
 // --------------------------------------------------------------------------------
 
 int main(int argc, char** argv)

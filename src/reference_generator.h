@@ -18,9 +18,8 @@
 
 using namespace std;
 
-typedef std::vector<double> JointVelState;
-typedef std::vector<double> JointPosState;
-typedef std::vector<JointPosState > JointTrajectory;
+typedef std::vector<double> JointState;
+typedef std::vector<JointState > JointTrajectory;
 typedef actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction> JTAS;
 typedef JTAS::GoalHandle GoalHandle;
 
@@ -58,6 +57,7 @@ private:
     std::map<std::string, double> final_goal_constraints_;
     std::map<std::string, double> trajectory_constraints_;
     std::map<std::string, double> max_vel_constraints_;
+    std::map<std::string, double> max_acc_constraints_;
     double goal_time_constraint_;
 
     trajectory_msgs::JointTrajectory trajectory_input_;
@@ -72,7 +72,7 @@ private:
 
     void diagnosticsCB(const diagnostic_msgs::DiagnosticArray& diag_array);
 
-    void interpolateTrajectory(const JointPosState& current_pos, const JointVelState& max_vel,
+    void interpolateTrajectory(const JointState& current_pos, const JointState& max_vel, const JointState& max_acc,
                                const trajectory_msgs::JointTrajectory& joint_trajectory,
                                trajectory_msgs::JointTrajectory& joint_trajectory_interpolated);
 
