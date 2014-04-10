@@ -117,8 +117,8 @@ double abs(double v, double& s) {
 void JointTrajectoryExecuter::fillStop(trajectory_msgs::JointTrajectory& traj_msg, double dt, std::vector<JointState>& end_joint_states) {
 
     bool error = false;
-    for(std::vector<std::string>::const_iterator it = traj_msg.joint_names.begin(); it != traj_msg.joint_names.end(); ++it) {
-        const std::string& joint_name = *it;
+    for(unsigned int j = 0; j < traj_msg.joint_names.size(); ++j) {
+        const std::string& joint_name = traj_msg.joint_names[j];
 
         std::map<std::string, JointState>::iterator it_joint = joint_measurements_.find(joint_name);
         if (it_joint != joint_measurements_.end()) {
@@ -137,6 +137,12 @@ void JointTrajectoryExecuter::fillStop(trajectory_msgs::JointTrajectory& traj_ms
 
     if (error) {
         return;
+    }
+
+    ROS_INFO("--------------- START ---------------");
+    for(unsigned int j = 0; j < end_joint_states.size(); ++j) {
+        const JointState& state = end_joint_states[j];
+        ROS_INFO("Joint %d: pos = %f, vel = %f", j, state.pos, state.vel);
     }
 
     while (true) {
@@ -159,13 +165,13 @@ void JointTrajectoryExecuter::fillStop(trajectory_msgs::JointTrajectory& traj_ms
             state.vel = v_sign * v_abs;
             state.pos += state.vel * dt;
 
-            p.positions.push_back(state.vel);
-            p.velocities.push_back(state.pos);
+            p.positions.push_back(state.pos);
+            p.velocities.push_back(state.vel);
         }
 
 //        ROS_INFO("Converged: %d / %d", num_converged, end_joint_states.size());
 
-        traj_msg.points.push_back(p);        
+        traj_msg.points.push_back(p);
 
         if (num_converged == end_joint_states.size()) {
             break;
@@ -369,13 +375,16 @@ void JointTrajectoryExecuter::interpolateTrajectory(const std::vector<JointState
                                                     const trajectory_msgs::JointTrajectory& jt,
                                                     trajectory_msgs::JointTrajectory& jt_interpolated) {
 
-    jt_interpolated.joint_names = jt.joint_names;
-    double t_traj_start = 0;
-    if (!jt.points.empty()) {
-        t_traj_start = jt.points.back().time_from_start.toSec();
+
+    ROS_INFO("--------------- STILL ---------------");
+    for(unsigned int j = 0; j < joint_states_start.size(); ++j) {
+        const JointState& state = joint_states_start[j];
+        ROS_INFO("Joint %d: pos = %f, vel = %f", j, state.pos, state.vel);
     }
 
+    jt_interpolated.joint_names = jt.joint_names;
     std::vector<JointState> joint_states = joint_states_start;
+
     for(unsigned int i = 0; i < jt.points.size(); ++i) {
         const std::vector<double>& goal_pos = jt.points[i].positions;
 
@@ -452,7 +461,6 @@ void JointTrajectoryExecuter::interpolateTrajectory(const std::vector<JointState
                 p.velocities.push_back(state.vel);
             }
 
-            p.time_from_start = ros::Duration(t_traj_start + t);
             jt_interpolated.points.push_back(p);
         }
 
@@ -482,16 +490,18 @@ void JointTrajectoryExecuter::publishReference(const trajectory_msgs::JointTraje
         }
     }
 
+    double t = 0;
     for(unsigned int i = 0; i < jt.points.size(); ++i) {
         for(unsigned int j = 0; j < jt.joint_names.size(); ++j) {
             if (j == torso_joint_index) {
                 torso_msg.points[i].positions.push_back(jt.points[i].positions[j]);
-                torso_msg.points[i].time_from_start = jt.points[i].time_from_start;
+                torso_msg.points[i].time_from_start = ros::Duration(t);
             } else {
                 arm_msg.points[i].positions.push_back(jt.points[i].positions[j]);
-                arm_msg.points[i].time_from_start = jt.points[i].time_from_start;
+                arm_msg.points[i].time_from_start = ros::Duration(t);
             }
         }
+        t += DT;
     }
 
     if (!arm_msg.joint_names.empty()) {
