@@ -64,17 +64,23 @@
 	        for (size_t i = 0; i < joint_names_.size(); ++i)
 	        {
 	            std::string ns = std::string("constraints/") + joint_names_[i];
-	            double ig, fg,t;
+	            double ig, fg, t, mip, map;
 	            pn.param(ns + "/intermediate_goal", ig, -1.0);
 	            pn.param(ns + "/final_goal", fg, -1.0);
 	            pn.param(ns + "/trajectory", t, -1.0);
+	            pn.param(ns + "/min_pos", mip, -1.0);
+	            pn.param(ns + "/max_pos", map, -1.0);
 	            intermediate_goal_constraints_[joint_names_[i]] = ig;
 	            final_goal_constraints_[joint_names_[i]] = fg;
 	            trajectory_constraints_[joint_names_[i]] = t;
+	            joint_min_constraints_[joint_names_[i]] = mip;
+	            joint_max_constraints_[joint_names_[i]] = map;
 	        }
 	        ///ROS_INFO("Intermediate goal constraints %f, %f, %f, %f, %f, %f, %f, %f", intermediate_goal_constraints_[0], intermediate_goal_constraints_[1], intermediate_goal_constraints_[2], intermediate_goal_constraints_[3], intermediate_goal_constraints_[4], intermediate_goal_constraints_[5], intermediate_goal_constraints_[6], intermediate_goal_constraints_[7]);
 	        ///ROS_INFO("Final goal constraints        %f, %f, %f, %f, %f, %f, %f, %f", final_goal_constraints_[0], final_goal_constraints_[1], final_goal_constraints_[2], final_goal_constraints_[3], final_goal_constraints_[4], final_goal_constraints_[5], final_goal_constraints_[6], final_goal_constraints_[7]);
 	        ///ROS_INFO("Trajectory constraints        %f, %f, %f, %f, %f, %f, %f, %f", trajectory_constraints_[0], trajectory_constraints_[1], trajectory_constraints_[2], trajectory_constraints_[3], trajectory_constraints_[4], trajectory_constraints_[5], trajectory_constraints_[6], trajectory_constraints_[7]);
+	        ROS_INFO("Joint min constraints         %f, %f, %f, %f, %f, %f, %f, %f", joint_min_constraints_[joint_names_[0]], joint_min_constraints_[joint_names_[1]], joint_min_constraints_[joint_names_[2]], joint_min_constraints_[joint_names_[3]], joint_min_constraints_[joint_names_[4]], joint_min_constraints_[joint_names_[5]], joint_min_constraints_[joint_names_[6]], joint_min_constraints_[joint_names_[7]]);
+	        ROS_INFO("Joint max constraints         %f, %f, %f, %f, %f, %f, %f, %f", joint_max_constraints_[joint_names_[0]], joint_max_constraints_[joint_names_[1]], joint_max_constraints_[joint_names_[2]], joint_max_constraints_[joint_names_[3]], joint_max_constraints_[joint_names_[4]], joint_max_constraints_[joint_names_[5]], joint_max_constraints_[joint_names_[6]], joint_max_constraints_[joint_names_[7]]);
 	
 	        // Here we start sending the references
             pub = node_.advertise<sensor_msgs::JointState>("/references", 1);
@@ -159,13 +165,14 @@
 	        for (uint i = number_of_goal_joints_-7; i < number_of_goal_joints_; ++i) { // Check only last 7 items (arm joints)
 				for (uint j = 0; j < gh.getGoal()->trajectory.points.size(); j++) {
 					double ref = gh.getGoal()->trajectory.points[j].positions[i];
-					if (ref > 3.14 || ref < -3.14) {
-						ROS_WARN("Reference for joint %i is %f but should be between %f and %f.",i,ref,-3.14,3.14);
+					if (ref < joint_min_constraints_[joint_names_[m]] || ref > joint_max_constraints_[joint_names_[m]]) {
+						ROS_WARN("Reference for joint %s is %f but should be between %f and %f.",joint_names_[m].c_str(),ref,joint_min_constraints_[joint_names_[m]],joint_max_constraints_[joint_names_[m]]);
 						gh.setRejected();
 						has_active_goal_=false;
 						return;
 					}
 				}
+				++m;
 			}
 				
 				
@@ -235,6 +242,8 @@
 	    std::map<std::string,double> intermediate_goal_constraints_;
 	    std::map<std::string,double> final_goal_constraints_;
 	    std::map<std::string,double> trajectory_constraints_;
+	    std::map<std::string,double> joint_min_constraints_;
+	    std::map<std::string,double> joint_max_constraints_;
 	    double goal_time_constraint_;
 	
         void armCB(const sensor_msgs::JointState& joint_meas)
