@@ -19,55 +19,55 @@ constraints:
         intermediate_goal: 0.02
         trajectory: 10.0
         final_goal: 0.02
-        min_pos: -3.142
-        max_pos: 3.142
+        min_pos: -1.57
+        max_pos: 0.0
         max_vel: 0.4
         max_acc: 0.2
    shoulder_pitch_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
         final_goal: 0.02
-        min_pos: -3.143
-        max_pos: 3.143
+        min_pos: -1.57
+        max_pos: 1.57
         max_vel: 0.4
         max_acc: 0.2
    shoulder_roll_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
         final_goal: 0.02
-        min_pos: -3.144
-        max_pos: 3.144
+        min_pos: -1.57
+        max_pos: 1.57
         max_vel: 0.6
         max_acc: 0.3
    elbow_pitch_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
         final_goal: 0.02
-        min_pos: -3.145
-        max_pos: 3.145
+        min_pos: 0.0
+        max_pos: 2.23
         max_vel: 0.8
         max_acc: 0.5
    elbow_roll_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
         final_goal: 0.02
-        min_pos: -3.146
-        max_pos: 3.146
+        min_pos: -1.83
+        max_pos: 1.83
         max_vel: 0.8
         max_acc: 0.5
    wrist_pitch_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
         final_goal: 0.02
-        min_pos: -3.147
-        max_pos: 3.147
+        min_pos: -0.95
+        max_pos: 0.95
         max_vel: 1.0
         max_acc: 0.5
    wrist_yaw_joint_left:
         intermediate_goal: 0.02
         trajectory: 10.0
         final_goal: 0.02
-        min_pos: -3.148
-        max_pos: 3.148
+        min_pos: -0.61
+        max_pos: 0.61
         max_vel: 1.0
         max_acc: 0.5
