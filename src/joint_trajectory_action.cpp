@@ -153,6 +153,22 @@
 	        for (uint i = 0; i < gh.getGoal()->trajectory.joint_names.size(); i++) {
                 if (!std::strcmp(gh.getGoal()->trajectory.joint_names[i].c_str(),"torso_joint")) number_of_goal_joints_ = 8;
 	        }
+	        
+	        // Check feasibility of arm joint goals
+	        uint m = 1;
+	        for (uint i = number_of_goal_joints_-7; i < joint_names_.size(); ++i) {
+				double ref = gh.getGoal()->trajectory.points[0].positions[i];
+				if (ref > 3.14 || ref < -3.14) {
+					ROS_WARN("Reference for joint %i is %f but should be between %f and %f.",i,ref,-3.14,3.14);
+					gh.setRejected();
+	                has_active_goal_=false;
+	                return;
+				}
+			}
+				
+				
+				
+				
                 //ROS_INFO("Number of goal joints = %i",number_of_goal_joints_);
 	        gh.setAccepted();
 	        active_goal_ = gh;
@@ -309,7 +325,6 @@
 				}
 				else if (number_of_goal_joints_ == 7) {
 					ref_pos_[i+1] = active_goal_.getGoal()->trajectory.points[current_point].positions[i];
-					
 					// Set ref_pos_[0] to cur_pos_[0] to make sure the error equals zero
 					ref_pos_[0] = cur_pos_[0];
 				}
