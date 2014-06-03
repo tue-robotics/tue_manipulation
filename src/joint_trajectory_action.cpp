@@ -156,13 +156,15 @@
 	        
 	        // Check feasibility of arm joint goals
 	        uint m = 1;
-	        for (uint i = number_of_goal_joints_-7; i < joint_names_.size(); ++i) {
-				double ref = gh.getGoal()->trajectory.points[0].positions[i];
-				if (ref > 3.14 || ref < -3.14) {
-					ROS_WARN("Reference for joint %i is %f but should be between %f and %f.",i,ref,-3.14,3.14);
-					gh.setRejected();
-	                has_active_goal_=false;
-	                return;
+	        for (uint i = number_of_goal_joints_-7; i < number_of_goal_joints_; ++i) { // Check only last 7 items (arm joints)
+				for (uint j = 0; j < gh.getGoal()->trajectory.points.size(); j++) {
+					double ref = gh.getGoal()->trajectory.points[j].positions[i];
+					if (ref > 3.14 || ref < -3.14) {
+						ROS_WARN("Reference for joint %i is %f but should be between %f and %f.",i,ref,-3.14,3.14);
+						gh.setRejected();
+						has_active_goal_=false;
+						return;
+					}
 				}
 			}
 				
