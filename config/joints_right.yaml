@@ -67,3 +67,7 @@ constraints:
         intermediate_goal: 0.02
         trajectory: 10.0
         final_goal: 0.02
+        min_pos: -0.61
+        max_pos: 0.61
+        max_vel: 1.0
+        max_acc: 0.5
