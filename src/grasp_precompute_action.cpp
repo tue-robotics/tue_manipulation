@@ -33,7 +33,8 @@ const double EPS = 1e-6;
 using namespace std;
 
 double MAX_YAW_DELTA,YAW_SAMPLING_STEP,PRE_GRASP_DELTA;
-string SIDE;
+//string SIDE;
+std::string ROOT_LINK, TIP_LINK;
 
 int NUM_GRASP_POINTS = 0, PRE_GRASP_INBETWEEN_SAMPLING_STEPS = 0;
 
@@ -98,10 +99,10 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
         tf::StampedTransform tmp;
 
         // Lookup the current vector of the desired TF to the grippoint
-        if(TF_LISTENER->waitForTransform(goal_in->delta.header.frame_id, "grippoint_" + SIDE, goal_in->delta.header.stamp, ros::Duration(1.0)))
+        if(TF_LISTENER->waitForTransform(goal_in->delta.header.frame_id, TIP_LINK, goal_in->delta.header.stamp, ros::Duration(1.0)))
         {
             try
-            {TF_LISTENER->lookupTransform(goal_in->delta.header.frame_id, "grippoint_" + SIDE, goal_in->delta.header.stamp, tmp);
+            {TF_LISTENER->lookupTransform(goal_in->delta.header.frame_id, TIP_LINK, goal_in->delta.header.stamp, tmp);
             }
             catch (tf::TransformException ex){
                 as->setAborted();
@@ -383,21 +384,26 @@ int main(int argc, char** argv)
     TF_LISTENER = new tf::TransformListener();
 
     // Get the parameters
-    n.param<string>("side", SIDE, "left"); //determine for which side this node operates
+    std::string side;
+    n.param<string>("side", side, ""); //determine for which side this node operates
+    if (side.empty()){
+        ROS_ERROR("Missing parameter 'root_link'.");
+        return 1;
+    }
+
     n.param("max_yaw_delta", MAX_YAW_DELTA, 2.0); // maximum sampling offset from desired yaw [rad]
     n.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); // step-size for yaw sampling [rad]
     n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
     n.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
 
-    std::string root_link, tip_link;
-    n.param<std::string>("root_link", root_link, "");
-    if (root_link.empty()){
+    n.param<std::string>("root_link", ROOT_LINK, "");
+    if (ROOT_LINK.empty()){
         ROS_ERROR("Missing parameter 'root_link'.");
         return 1;
     }
 
-    n.param<std::string>("tip_link", tip_link, "");
-    if (tip_link.empty()){
+    n.param<std::string>("tip_link", TIP_LINK, "");
+    if (TIP_LINK.empty()){
         ROS_ERROR("Missing parameter 'tip_link'.");
         return 1;
     }
@@ -405,13 +411,13 @@ int main(int argc, char** argv)
     ROS_INFO("Waiting for joint trajectory action");
 
     // Wait for the joint trajectory action server
-    Client client("joint_trajectory_action_" + SIDE, true);
+    Client client("joint_trajectory_action_" + side, true);
     client.waitForServer();
 
     ROS_INFO("Initialize grasp precompute server");
 
     // Initialize the grasp_precompute server
-    Server server(n, "/grasp_precompute_" + SIDE, boost::bind(&execute, _1, &server, &client), false);
+    Server server(n, "/grasp_precompute_" + side, boost::bind(&execute, _1, &server, &client), false);
     server.start();
 
     ROS_INFO("Initialize IK clients");
@@ -421,7 +427,7 @@ int main(int argc, char** argv)
     n.param<std::string>("robot_description", urdf_description, "");
 
     std::string error;
-    if (!ik_solver.initFromURDF(urdf_description, root_link, tip_link, error))
+    if (!ik_solver.initFromURDF(urdf_description, ROOT_LINK, TIP_LINK, error))
     {
         ROS_ERROR_STREAM("Could not initialize IK solver:\n\n    " << error);
         return 1;
