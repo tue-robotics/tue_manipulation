@@ -90,10 +90,12 @@ target_link_libraries(grasp_precompute_action tue_manipulation)
 #                                              TESTS
 # ------------------------------------------------------------------------------------------------
 
-add_executable(test_amigo_ik
-    test/test_amigo_ik
-)
+add_executable(test_amigo_ik test/test_amigo_ik)
 target_link_libraries(test_amigo_ik tue_manipulation)
+
+add_executable(test_amigo_grasp_precompute test/test_amigo_grasp_precompute.cpp)
+target_link_libraries(test_amigo_grasp_precompute tue_manipulation)
+
 
 
 
