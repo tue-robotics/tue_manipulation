@@ -44,7 +44,7 @@ public:
 
     inline const KDL::JntArray& jointUpperLimits() const { return q_max_; }
 
-    inline const std::vector<std::string> jointNames() const { return joint_names_; }
+    inline const std::vector<std::string>& jointNames() const { return joint_names_; }
 
     inline unsigned int numJoints() const { return joint_names_.size(); }
 
