@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     tue::IKSolver solver;
 
     std::string error;
-    if (!solver.initFromURDF(urdf_xml, "shoulder_mount_right", "hand_right", error))
+    if (!solver.initFromURDF(urdf_xml, "base_link", "grippoint_right", error))
     {
         std::cout << error << std::endl;
         return 1;
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     // - - - - - - - - - - - Test the solver - - - - - - - - - - -
 
     KDL::JntArray q;
-    std::cout << solver.cartesianToJoints(createKDLFrame(-0.307198, 0.306954, 0.265816, -1.70643e-05, -1.11499, 2.3566), q) << std::endl;
+    std::cout << solver.cartesianToJoints(createKDLFrame(0.5, -0.2, 0.8, 0, 0, 0), q) << std::endl;
 
     return 0;
 }

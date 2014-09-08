@@ -69,26 +69,33 @@ bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name
 
     q_seed_.resize(chain_.getNrOfJoints());
 
-    for(unsigned int i = 0; i < chain_.getNrOfJoints(); ++i)
+    unsigned int j = 0;
+    for(unsigned int i = 0; i < chain_.getNrOfSegments(); ++i)
     {
-        boost::shared_ptr<const urdf::Joint> joint = robot_model.getJoint(chain_.getSegment(i).getJoint().getName());
-        if (joint && joint->limits)
+        const KDL::Joint& kdl_joint = chain_.getSegment(i).getJoint();
+        if (kdl_joint.getType() != KDL::Joint::None)
         {
-            q_min_(i) = joint->limits->lower;
-            q_max_(i) = joint->limits->upper;
-            q_seed_(i) = (q_min_(i) + q_max_(i)) / 2;
+//            std::cout << chain_.getSegment(i).getName() << " -> " << kdl_joint.getName() << " -> " << chain_.getSegment(i + 1).getName() << std::endl;
 
-        }
-        else
-        {
-            q_min_(i) = -1e9;
-            q_max_(i) = 1e9;
-            q_seed_(i) = 0;
+            boost::shared_ptr<const urdf::Joint> joint = robot_model.getJoint(kdl_joint.getName());
+            if (joint && joint->limits)
+            {
+                q_min_(j) = joint->limits->lower;
+                q_max_(j) = joint->limits->upper;
+                q_seed_(j) = (q_min_(j) + q_max_(j)) / 2;
+            }
+            else
+            {
+                q_min_(j) = -1e9;
+                q_max_(j) = 1e9;
+                q_seed_(j) = 0;
 
+            }
+//            std::cout << j << ": " << q_min_(j) << " - " << q_max_(j) << std::endl;
+
+            ++j;
         }
-//        std::cout << q_min_(i) << " - " << q_max_(i) << std::endl;
     }
-
 
     // Construct the IK solver
     fksolver_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
@@ -118,7 +125,5 @@ int IKSolver::cartesianToJoints(const KDL::Frame& f_in, KDL::JntArray& q_out, co
 {
     return ik_solver_->CartToJnt(q_seed, f_in, q_out);
 }
-
-
 
 }
