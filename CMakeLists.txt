@@ -85,6 +85,7 @@ target_link_libraries(joint_trajectory_action tue_manipulation)
 
 add_executable(grasp_precompute_action src/grasp_precompute_action.cpp)
 target_link_libraries(grasp_precompute_action tue_manipulation)
+add_dependencies(grasp_precompute_action ${PROJECT_NAME}_generate_messages_cpp)
 
 # ------------------------------------------------------------------------------------------------
 #                                              TESTS
