@@ -105,6 +105,7 @@ bool DWA::initFromURDF(const std::string& urdf, const std::string root_name,
 
             joint_names_[j] = kdl_joint.getName();
             joint_index_to_segment_index_[j] = i;
+            joint_name_to_index_[kdl_joint.getName()] = j;
             ++j;
         }
     }
@@ -114,9 +115,26 @@ bool DWA::initFromURDF(const std::string& urdf, const std::string root_name,
 
 // ----------------------------------------------------------------------------------------------------
 
+bool DWA::getJointIndex(const std::string& name, unsigned int& i_joint) const
+{
+    std::map<std::string, unsigned int>::const_iterator it = joint_name_to_index_.find(name);
+    if (it == joint_name_to_index_.end())
+        return false;
+
+    i_joint = it->second;
+    return true;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 double testObjective(const geo::Pose3D& pose, const geo::Pose3D& goal)
 {
-    return -(goal.t - pose.t).length2();
+    double dist_sq = (goal.t - pose.t).length2();
+
+    double rot1 = std::abs((pose.R * geo::Vector3(0.1, 0, 0)).z);
+    double rot2 = std::abs((pose.R * geo::Vector3(0, 0.1, 0)).z);
+
+    return -dist_sq - rot1 - rot2;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -158,7 +176,7 @@ double DWA::calculateVelocity(const KDL::JntArray& q_current, unsigned int i_joi
     double best_vel = 0;
 
     double pos = q_current(i_joint);
-    for(double vel = -0.1; vel < 0.11; vel += 0.05)
+    for(double vel = -0.4; vel < 0.41; vel += 0.05)
     {
         double p = pos + vel;
 
@@ -168,7 +186,7 @@ double DWA::calculateVelocity(const KDL::JntArray& q_current, unsigned int i_joi
         {
             KDL::Frame f = f_before * q_seg->pose(p) * f_after;
 
-            double fitness = testObjective(toGeo(f), geo::Pose3D(1, -1, 0));
+            double fitness = testObjective(toGeo(f), geo::Pose3D(0.5, -0.3, 0.5));
             if (fitness > best_fitness)
             {
                 best_fitness = fitness;
