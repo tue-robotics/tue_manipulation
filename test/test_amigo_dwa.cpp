@@ -1,4 +1,4 @@
-#include <tue/manipulation/ik_solver.h>
+#include <tue/manipulation/dwa.h>
 
 #include <iostream>
 #include <fstream>
@@ -26,23 +26,36 @@ int main(int argc, char **argv)
 
     // - - - - - - - - - - - Initialize the solver - - - - - - - - - - -
 
-    tue::IKSolver solver;
+    tue::manipulation::DWA dwa;
 
     std::string error;
-    if (!solver.initFromURDF(urdf_xml, "base_link", "grippoint_right", error))
+    if (!dwa.initFromURDF(urdf_xml, "base_link", "grippoint_right", error))
     {
         std::cout << error << std::endl;
         return 1;
     }
 
-    // - - - - - - - - - - - Test the solver - - - - - - - - - - -
+    KDL::JntArray q(8);
+    for(unsigned int i = 0; i < q.rows(); ++i)
+        q(i) = 0;
 
-    KDL::JntArray q;
-    if (solver.cartesianToJoints(KDL::Frame(KDL::Rotation::EulerZYX(0, 0, 0), KDL::Vector(0.5, -0.2, 0.8)), q))
+
+    double dt = 0.01;
+    while(true)
+    {
         for(unsigned int i = 0; i < q.rows(); ++i)
-            std::cout << "Joint " << i << ": " << q(i) << std::endl;
-    else
-        std::cout << "No joint solution found." << std::endl;
+        {
+            double vel = dwa.calculateVelocity(q, i);
+            q(i) += (vel * dt);
+        }
+
+        for(unsigned int i = 0; i< q.rows(); ++i)
+            std::cout << q(i) << " ";
+        std::cout << std::endl;
+
+        usleep(dt * 1000000);
+    }
+
 
     return 0;
 }

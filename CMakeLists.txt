@@ -11,6 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
 
     # For testing
     roslib
+
+    # Temp
+    geolib2
 )
 
 # find_package(Boost REQUIRED COMPONENTS system program_options)
@@ -76,6 +79,7 @@ include_directories(
 
 add_library(tue_manipulation
     src/ik_solver.cpp    include/tue/manipulation/ik_solver.h
+    src/dwa.cpp          include/tue/manipulation/dwa.h
 )
 target_link_libraries(tue_manipulation ${catkin_LIBRARIES})
 
@@ -97,7 +101,5 @@ target_link_libraries(test_amigo_ik tue_manipulation)
 add_executable(test_amigo_grasp_precompute test/test_amigo_grasp_precompute.cpp)
 target_link_libraries(test_amigo_grasp_precompute tue_manipulation)
 
-
-
-
-
+add_executable(test_amigo_dwa test/test_amigo_dwa.cpp)
+target_link_libraries(test_amigo_dwa tue_manipulation)
