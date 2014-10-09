@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
     amigo_msgs
     tf
     tf_conversions
+    control_msgs
 
     # For testing
     roslib
