@@ -27,7 +27,7 @@ IKSolver::~IKSolver()
 // ----------------------------------------------------------------------------------------------------
 
 bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name,
-                            const std::string& tip_name, std::string& error)
+                            const std::string& tip_name, unsigned int max_iter, std::string& error)
 {
     urdf::Model robot_model;
     KDL::Tree tree;
@@ -103,7 +103,7 @@ bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name
     // Construct the IK solver
     fksolver_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
     ik_vel_solver_.reset(new KDL::ChainIkSolverVel_pinv(chain_));
-    ik_solver_.reset(new KDL::ChainIkSolverPos_NR_JL(chain_, q_min_, q_max_, *fksolver_, *ik_vel_solver_, 500));
+    ik_solver_.reset(new KDL::ChainIkSolverPos_NR_JL(chain_, q_min_, q_max_, *fksolver_, *ik_vel_solver_, max_iter));
 
     return true;
 }

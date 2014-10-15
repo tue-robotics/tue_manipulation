@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     tue::IKSolver solver;
 
     std::string error;
-    if (!solver.initFromURDF(urdf_xml, "base_link", "grippoint_right", error))
+    if (!solver.initFromURDF(urdf_xml, "base_link", "grippoint_right", 500, error))
     {
         std::cout << error << std::endl;
         return 1;

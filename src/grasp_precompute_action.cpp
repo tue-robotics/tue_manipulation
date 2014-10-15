@@ -387,7 +387,7 @@ int main(int argc, char** argv)
     std::string side;
     n.param<string>("side", side, ""); //determine for which side this node operates
     if (side.empty()){
-        ROS_ERROR("Missing parameter 'root_link'.");
+        ROS_ERROR("Missing parameter 'side'.");
         return 1;
     }
 
@@ -395,6 +395,9 @@ int main(int argc, char** argv)
     n.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); // step-size for yaw sampling [rad]
     n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
     n.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
+
+    int ik_max_iterations;
+    n.param("ik_max_iterations", ik_max_iterations, 500);
 
     n.param<std::string>("root_link", ROOT_LINK, "");
     if (ROOT_LINK.empty()){
@@ -427,7 +430,7 @@ int main(int argc, char** argv)
     n.param<std::string>("robot_description", urdf_description, "");
 
     std::string error;
-    if (!ik_solver.initFromURDF(urdf_description, ROOT_LINK, TIP_LINK, error))
+    if (!ik_solver.initFromURDF(urdf_description, ROOT_LINK, TIP_LINK, ik_max_iterations, error))
     {
         ROS_ERROR_STREAM("Could not initialize IK solver:\n\n    " << error);
         return 1;
