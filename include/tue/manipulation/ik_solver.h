@@ -32,7 +32,8 @@ public:
     virtual ~IKSolver();
 
     bool initFromURDF(const std::string& urdf, const std::string root_name,
-                      const std::string& tip_name, unsigned int max_iter, std::string& error);
+                      const std::string& tip_name, unsigned int max_iter, std::string& error,
+                      bool use_constrained_solver);
 
     bool jointsToCartesian(const KDL::JntArray& q_in, KDL::Frame& f_out);
 

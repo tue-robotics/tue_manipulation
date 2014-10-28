@@ -78,16 +78,25 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
+# Constrained IK solver
+add_library(constrained_ik_solver
+    src/constrained_chainiksolvervel_pinv.cpp   include/tue/manipulation/constrained_chainiksolvervel_pinv.h
+    src/constrained_chainiksolverpos_nr_jl.cpp  include/tue/manipulation/constrained_chainiksolverpos_nr_jl.hpp
+)
+target_link_libraries(constrained_ik_solver ${catkin_LIBRARIES})
+
+# IK solver
 add_library(tue_manipulation
     src/ik_solver.cpp    include/tue/manipulation/ik_solver.h
     src/dwa.cpp          include/tue/manipulation/dwa.h
 )
-target_link_libraries(tue_manipulation ${catkin_LIBRARIES})
+target_link_libraries(tue_manipulation constrained_ik_solver ${catkin_LIBRARIES})
 
 # Joint trajectory action
 add_executable(joint_trajectory_action src/joint_trajectory_action.cpp)
 target_link_libraries(joint_trajectory_action tue_manipulation)
 
+# Grasp precompute
 add_executable(grasp_precompute_action src/grasp_precompute_action.cpp)
 target_link_libraries(grasp_precompute_action tue_manipulation)
 add_dependencies(grasp_precompute_action ${PROJECT_NAME}_generate_messages_cpp)
@@ -96,8 +105,8 @@ add_dependencies(grasp_precompute_action ${PROJECT_NAME}_generate_messages_cpp)
 #                                              TESTS
 # ------------------------------------------------------------------------------------------------
 
-add_executable(test_amigo_ik test/test_amigo_ik)
-target_link_libraries(test_amigo_ik tue_manipulation)
+add_executable(test_robot_ik test/test_robot_ik)
+target_link_libraries(test_robot_ik tue_manipulation)
 
 add_executable(test_amigo_grasp_precompute test/test_amigo_grasp_precompute.cpp)
 target_link_libraries(test_amigo_grasp_precompute tue_manipulation)

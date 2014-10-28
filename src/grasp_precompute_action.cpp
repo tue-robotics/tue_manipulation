@@ -428,9 +428,11 @@ int main(int argc, char** argv)
     // Initialize the IK solver
     std::string urdf_description;
     n.param<std::string>("robot_description", urdf_description, "");
+    bool use_constrained_solver;
+    n.param("use_constrained_solver", use_constrained_solver, false); // Indicates whether to use the constrained IK solver developed for SERGIO
 
     std::string error;
-    if (!ik_solver.initFromURDF(urdf_description, ROOT_LINK, TIP_LINK, ik_max_iterations, error))
+    if (!ik_solver.initFromURDF(urdf_description, ROOT_LINK, TIP_LINK, ik_max_iterations, error, use_constrained_solver))
     {
         ROS_ERROR_STREAM("Could not initialize IK solver:\n\n    " << error);
         return 1;

@@ -9,6 +9,9 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainiksolvervel_pinv.hpp>
 
+#include <tue/manipulation/constrained_chainiksolverpos_nr_jl.hpp>
+#include <tue/manipulation/constrained_chainiksolvervel_pinv.h>
+
 namespace tue
 {
 
@@ -27,7 +30,8 @@ IKSolver::~IKSolver()
 // ----------------------------------------------------------------------------------------------------
 
 bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name,
-                            const std::string& tip_name, unsigned int max_iter, std::string& error)
+                            const std::string& tip_name, unsigned int max_iter, std::string& error,
+                            bool use_constrained_solver)
 {
     urdf::Model robot_model;
     KDL::Tree tree;
@@ -102,8 +106,16 @@ bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name
 
     // Construct the IK solver
     fksolver_.reset(new KDL::ChainFkSolverPos_recursive(chain_));
-    ik_vel_solver_.reset(new KDL::ChainIkSolverVel_pinv(chain_));
-    ik_solver_.reset(new KDL::ChainIkSolverPos_NR_JL(chain_, q_min_, q_max_, *fksolver_, *ik_vel_solver_, max_iter));
+
+    if (!use_constrained_solver) {
+        ik_vel_solver_.reset(new KDL::ChainIkSolverVel_pinv(chain_));
+        ik_solver_.reset(new KDL::ChainIkSolverPos_NR_JL(chain_, q_min_, q_max_, *fksolver_, *ik_vel_solver_, max_iter));
+        std::cout << "Using normal solver" << std::endl;
+    } else {
+        ik_vel_solver_.reset(new KDL::ConstrainedChainIkSolverVel_pinv(chain_));
+        ik_solver_.reset(new KDL::ConstrainedChainIkSolverPos_NR_JL(chain_, q_min_, q_max_, *fksolver_, *ik_vel_solver_, max_iter));
+        std::cout << "Using constrained IK solver" << std::endl;
+    }
 
     return true;
 }

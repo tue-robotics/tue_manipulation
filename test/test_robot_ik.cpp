@@ -9,14 +9,30 @@
 
 int main(int argc, char **argv)
 {
-    // - - - - - - - - - - - Read the AMIGO URDF description into a string - - - - - - - - - - -
+    // - - - - - - - - - - - Read the robot URDF description into a string - - - - - - - - - - -
 
-    std::string amigo_urdf_path = ros::package::getPath("amigo_description") + "/urdf/amigo.urdf";
-    std::ifstream f(amigo_urdf_path.c_str());
+    if (argc < 2) {
+        std::cout << "Usage: 'rosrun test_robot_ik [robot_name]', with robot name either amigo or sergio" << std::endl;
+        return 1;
+    }
+
+    std::string robot_name(argv[1]);
+    bool use_constrained_solver;
+    if (robot_name == "amigo") {
+        use_constrained_solver = false;
+    } else if (robot_name == "sergio") {
+        use_constrained_solver = true;
+    } else {
+        std::cout << "Robot name must be either amigo or sergio" << std::endl;
+        return 1;
+    }
+
+    std::string robot_urdf_path = ros::package::getPath(robot_name+"_description") + "/urdf/"+robot_name+".urdf";
+    std::ifstream f(robot_urdf_path.c_str());
 
     if (!f.is_open())
     {
-        std::cout << "Could not load AMIGO's URDF description: '" << amigo_urdf_path << "'." << std::endl;
+        std::cout << "Could not load URDF description: '" << robot_urdf_path << "'." << std::endl;
         return 1;
     }
 
@@ -29,7 +45,7 @@ int main(int argc, char **argv)
     tue::IKSolver solver;
 
     std::string error;
-    if (!solver.initFromURDF(urdf_xml, "base_link", "grippoint_right", 500, error))
+    if (!solver.initFromURDF(urdf_xml, "base_link", "grippoint_right", 500, error, use_constrained_solver))
     {
         std::cout << error << std::endl;
         return 1;
