@@ -112,7 +112,7 @@ bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name
         ik_solver_.reset(new KDL::ChainIkSolverPos_NR_JL(chain_, q_min_, q_max_, *fksolver_, *ik_vel_solver_, max_iter));
         std::cout << "Using normal solver" << std::endl;
     } else {
-        ik_vel_solver_.reset(new KDL::ConstrainedChainIkSolverVel_pinv(chain_));
+        ik_vel_solver_.reset(new KDL::ConstrainedChainIkSolverVel_pinv(chain_, 0.00001, 150, 1));
         ik_solver_.reset(new KDL::ConstrainedChainIkSolverPos_NR_JL(chain_, q_min_, q_max_, *fksolver_, *ik_vel_solver_, max_iter));
         std::cout << "Using constrained IK solver" << std::endl;
     }
