@@ -17,7 +17,7 @@ class JointTrajectoryExecuter
 private:
     typedef actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction> JTAS;
     typedef JTAS::GoalHandle GoalHandle;
-    std::vector<double> ref_pos_, cur_pos_;
+
 public:
     JointTrajectoryExecuter(ros::NodeHandle &n) :
         node_(n),
@@ -63,6 +63,7 @@ public:
         // Gets the constraints for each joint.
         for (size_t i = 0; i < joint_names_.size(); ++i)
         {
+            ROS_WARN_ONCE("ToDo: parse from URDF as much as possible");
             std::string ns = std::string("constraints/") + joint_names_[i];
             double ig, fg, t, mip, map;
             pn.param(ns + "/intermediate_goal", ig, -1.0);
@@ -75,25 +76,19 @@ public:
             trajectory_constraints_[joint_names_[i]] = t;
             joint_min_constraints_[joint_names_[i]] = mip;
             joint_max_constraints_[joint_names_[i]] = map;
+            ROS_INFO("Joint %s, min = %f, max = %f, int = %f, final = %f, traj = %f", joint_names_[i].c_str(), mip, map, ig, fg, t);
         }
-        ///ROS_INFO("Intermediate goal constraints %f, %f, %f, %f, %f, %f, %f, %f", intermediate_goal_constraints_[0], intermediate_goal_constraints_[1], intermediate_goal_constraints_[2], intermediate_goal_constraints_[3], intermediate_goal_constraints_[4], intermediate_goal_constraints_[5], intermediate_goal_constraints_[6], intermediate_goal_constraints_[7]);
-        ///ROS_INFO("Final goal constraints        %f, %f, %f, %f, %f, %f, %f, %f", final_goal_constraints_[0], final_goal_constraints_[1], final_goal_constraints_[2], final_goal_constraints_[3], final_goal_constraints_[4], final_goal_constraints_[5], final_goal_constraints_[6], final_goal_constraints_[7]);
-        ///ROS_INFO("Trajectory constraints        %f, %f, %f, %f, %f, %f, %f, %f", trajectory_constraints_[0], trajectory_constraints_[1], trajectory_constraints_[2], trajectory_constraints_[3], trajectory_constraints_[4], trajectory_constraints_[5], trajectory_constraints_[6], trajectory_constraints_[7]);
-        ROS_INFO("Joint min constraints         %f, %f, %f, %f, %f, %f, %f, %f", joint_min_constraints_[joint_names_[0]], joint_min_constraints_[joint_names_[1]], joint_min_constraints_[joint_names_[2]], joint_min_constraints_[joint_names_[3]], joint_min_constraints_[joint_names_[4]], joint_min_constraints_[joint_names_[5]], joint_min_constraints_[joint_names_[6]], joint_min_constraints_[joint_names_[7]]);
-        ROS_INFO("Joint max constraints         %f, %f, %f, %f, %f, %f, %f, %f", joint_max_constraints_[joint_names_[0]], joint_max_constraints_[joint_names_[1]], joint_max_constraints_[joint_names_[2]], joint_max_constraints_[joint_names_[3]], joint_max_constraints_[joint_names_[4]], joint_max_constraints_[joint_names_[5]], joint_max_constraints_[joint_names_[6]], joint_max_constraints_[joint_names_[7]]);
+        nr_torso_joints_ = joint_names.size() - 7;// Assume 7 DoF arm... // ToDo: make nice
 
         // Here we start sending the references
         pub = node_.advertise<sensor_msgs::JointState>("/references", 1);
-        torso_pub = node_.advertise<sensor_msgs::JointState>("/amigo/torso/references",1);
+        torso_pub = node_.advertise<sensor_msgs::JointState>("/torso/references",1);
         // Here we start listening for the measured positions
         sub = node_.subscribe("/measurements", 1, &JointTrajectoryExecuter::armCB, this);
-        torso_sub = node_.subscribe("/amigo/torso/measurements", 1, &JointTrajectoryExecuter::torsoCB, this);
+        torso_sub = node_.subscribe("/torso/measurements", 1, &JointTrajectoryExecuter::armCB, this);
 
         // Diagnostics sub
         diag_sub = node_.subscribe("/hardware_status", 1, &JointTrajectoryExecuter::diagnosticsCB, this);
-
-        ref_pos_.resize(joint_names_.size());
-        cur_pos_.resize(joint_names_.size());
 
         // Start with hardware status OK
         torso_status = 2;
@@ -133,17 +128,19 @@ private:
         {
             // Stops the controller.
 
-            // spindle
+            // Torso
             sensor_msgs::JointState torso_msg;
-            torso_msg.name.push_back(joint_names_[0]);
-            torso_msg.position.push_back(cur_pos_[0]);
+            for (uint i = 0; i < nr_torso_joints_; i++) {
+                torso_msg.name.push_back(joint_names_[i]);
+                torso_msg.position.push_back(cur_pos_[joint_names_[i]]);
+            }
             torso_pub.publish(torso_msg);
 
             // arm
             sensor_msgs::JointState arm_msg;
             for (uint i = 0; i < 7; i++) {
-                arm_msg.name.push_back(joint_names_[i+1]);
-                arm_msg.position.push_back(cur_pos_[i+1]);
+                arm_msg.name.push_back(joint_names_[i+nr_torso_joints_]);
+                arm_msg.position.push_back(cur_pos_[joint_names_[i+nr_torso_joints_]]);
             }
             pub.publish(arm_msg);
 
@@ -153,32 +150,23 @@ private:
             ROS_WARN("Canceling previous goal");
         }
 
-        // By default: spindle is not used, only if explicitly stated in message
-        ///goal_includes_spindle_ = false;
-        number_of_goal_joints_ = 7;
-        for (uint i = 0; i < gh.getGoal()->trajectory.joint_names.size(); i++) {
-            if (!std::strcmp(gh.getGoal()->trajectory.joint_names[i].c_str(),"torso_joint")) number_of_goal_joints_ = 8;
-        }
+        number_of_goal_joints_ = gh.getGoal()->trajectory.joint_names.size();
 
         // Check feasibility of arm joint goals
-        uint m = 1;
-        for (uint i = number_of_goal_joints_-7; i < number_of_goal_joints_; ++i) { // Check only last 7 items (arm joints)
+        for (uint i = 0; i < number_of_goal_joints_; i++) {
+            std::string joint_name = gh.getGoal()->trajectory.joint_names[i];
             for (uint j = 0; j < gh.getGoal()->trajectory.points.size(); j++) {
                 double ref = gh.getGoal()->trajectory.points[j].positions[i];
-                if (ref < joint_min_constraints_[joint_names_[m]] || ref > joint_max_constraints_[joint_names_[m]]) {
-                    ROS_WARN("Reference for joint %s is %f but should be between %f and %f.",joint_names_[m].c_str(),ref,joint_min_constraints_[joint_names_[m]],joint_max_constraints_[joint_names_[m]]);
+                if (ref < joint_min_constraints_[joint_name] || ref > joint_max_constraints_[joint_name]) {
+                    ROS_WARN("Reference for joint %s is %f but should be between %f and %f.",joint_name.c_str(),ref,joint_min_constraints_[joint_name],joint_max_constraints_[joint_name]);
                     gh.setRejected();
                     has_active_goal_=false;
                     return;
                 }
             }
-            ++m;
         }
 
-
-
-
-        //ROS_INFO("Number of goal joints = %i",number_of_goal_joints_);
+        ///ROS_INFO("Number of goal joints = %i",number_of_goal_joints_);
         gh.setAccepted();
         active_goal_ = gh;
         has_active_goal_ = true;
@@ -197,15 +185,17 @@ private:
 
             //spindle
             sensor_msgs::JointState torso_msg;
-            torso_msg.name.push_back(joint_names_[0]);
-            torso_msg.position.push_back(cur_pos_[0]);
+            for (uint i = 0; i < nr_torso_joints_; i++) {
+                torso_msg.name.push_back(joint_names_[i]);
+                torso_msg.position.push_back(cur_pos_[joint_names_[i]]);
+            }
             torso_pub.publish(torso_msg);
 
             // arm
             sensor_msgs::JointState arm_msg;
             for (uint i = 0; i < 7; i++) {
-                arm_msg.name.push_back(joint_names_[i+1]);
-                arm_msg.position.push_back(cur_pos_[i+1]);
+                arm_msg.name.push_back(joint_names_[i+nr_torso_joints_]);
+                arm_msg.position.push_back(cur_pos_[joint_names_[i+nr_torso_joints_]]);
             }
             pub.publish(arm_msg);
 
@@ -236,6 +226,7 @@ private:
     GoalHandle active_goal_;
     ///bool goal_includes_spindle_;
     uint number_of_goal_joints_;
+    uint nr_torso_joints_;
 
     std::vector<std::string> joint_names_;
     std::map<std::string, unsigned int> joint_index_;
@@ -244,6 +235,8 @@ private:
     std::map<std::string,double> trajectory_constraints_;
     std::map<std::string,double> joint_min_constraints_;
     std::map<std::string,double> joint_max_constraints_;
+    std::map<std::string,double> cur_pos_;                          // Current position
+    std::map<std::string,double> ref_pos_;                          // Desired position
     double goal_time_constraint_;
 
     void armCB(const sensor_msgs::JointState& joint_meas)
@@ -252,7 +245,7 @@ private:
         for(unsigned int i = 0; i < joint_meas.name.size(); ++i) {
             std::map<std::string, unsigned int>::iterator it_joint = joint_index_.find(joint_meas.name[i]);
             if (it_joint != joint_index_.end()) {
-                cur_pos_[it_joint->second] = joint_meas.position[i];
+                cur_pos_[joint_meas.name[i]] = joint_meas.position[i];
             } else {
                 ROS_ERROR("Unknown joint name: %s", joint_meas.name[i].c_str());
             }
@@ -266,23 +259,9 @@ private:
 
     }
 
-    void torsoCB(const sensor_msgs::JointState& torso_meas) {
-
-        cur_pos_[0] = torso_meas.position[0];
-        ///ROS_INFO("Torso message copied");
-
-        ///ROS_INFO("Torso message received");
-        // If no active goal --> do nothing
-        if (!has_active_goal_)
-            return;
-
-        controllerCB();
-
-    }
-
     void controllerCB() {
 
-        int i=0,converged_joints=0;
+        int converged_joints=0;
         float abs_error=0.0;
 
         // Check hardware status
@@ -312,11 +291,6 @@ private:
         if(ros::Time::now().toSec() > goal_time_constraint_ + now.toSec())
         {
             ROS_WARN("Aborting because the time constraint was violated");
-            for (i = 0; i < (int)joint_names_.size(); ++i)
-            {
-                abs_error = fabs(ref_pos_[i] - cur_pos_[i]);
-                ROS_WARN("Error %s = %f (intermediate constraint = %f, final constraint = %f",joint_names_[i].c_str(),abs_error,intermediate_goal_constraints_[joint_names_[i]],final_goal_constraints_[joint_names_[i]]);
-            }
             active_goal_.setAborted();
             has_active_goal_=false;
             return;
@@ -325,76 +299,61 @@ private:
         ///ROS_INFO("Number of joints received goal = %i",active_goal_.getGoal()->trajectory.joint_names.size());
         ///for (uint ii = 0; ii < active_goal_.getGoal()->trajectory.joint_names.size(); ii++) ROS_INFO("Joint name = %s",active_goal_.getGoal()->trajectory.joint_names[ii].c_str());
 
-        for (i = 0; i < (int)joint_names_.size(); ++i)
-        {
-            ///joint_ref.time.data   = ros::Time::now().toSec() + active_goal_.getGoal()->trajectory.points[current_point].time_from_start.toSec();
-            ///joint_ref.pos[i].data = active_goal_.getGoal()->trajectory.points[current_point].positions[i];
-            //joint_ref.vel[i].data = active_goal_.getGoal()->trajectory.points[current_point].velocities[i];
-            //joint_ref.acc[i].data = active_goal_.getGoal()->trajectory.points[current_point].accelerations[i];
-            if (number_of_goal_joints_ == 8) {
-                ref_pos_[i] = active_goal_.getGoal()->trajectory.points[current_point].positions[i];
-            }
-            else if (number_of_goal_joints_ == 7) {
-                ref_pos_[i+1] = active_goal_.getGoal()->trajectory.points[current_point].positions[i];
-                // Set ref_pos_[0] to cur_pos_[0] to make sure the error equals zero
-                ref_pos_[0] = cur_pos_[0];
-            }
+        for (unsigned int i = 0; i < active_goal_.getGoal()->trajectory.joint_names.size(); i++) {
+            std::string joint_name = active_goal_.getGoal()->trajectory.joint_names[i];
 
-            abs_error = fabs(ref_pos_[i] - cur_pos_[i]);
-            ROS_DEBUG("%s: r: %f\t q: %f\t e: %f",joint_names_[i].c_str(), ref_pos_[i], cur_pos_[i], abs_error);
+            // Compute absolute error
+            double ref_pos = active_goal_.getGoal()->trajectory.points[current_point].positions[i];
+            ref_pos_[joint_name] = ref_pos; // Required to push reference
+            double cur_pos = cur_pos_[joint_name];
+            abs_error = fabs(ref_pos - cur_pos);
+            ROS_DEBUG("%s: r: %f\t q: %f\t e: %f",joint_name.c_str(), ref_pos_[joint_name], cur_pos_[joint_name], abs_error);
 
-            if(abs_error > trajectory_constraints_[joint_names_[i]]) {
-                ROS_WARN("Aborting because the trajectory constraint was violated");
-                for (unsigned int j = 0; j < number_of_goal_joints_; j++) {
-                    if ( fabs(ref_pos_[j] - cur_pos_[j]) > intermediate_goal_constraints_[joint_names_[j]]) {
-                        ROS_WARN("Error joint %s = %f exceeds intermediate joint constraint (%f)",joint_names_[j].c_str(),ref_pos_[j] - cur_pos_[j],intermediate_goal_constraints_[joint_names_[j]]);
-                    }
-                    else if ( fabs(ref_pos_[j] - cur_pos_[j]) > final_goal_constraints_[joint_names_[j]]) {
-                        ROS_WARN("Error joint %s = %f exceeds final joint contraint (%f)",joint_names_[j].c_str(),ref_pos_[j] - cur_pos_[j],final_goal_constraints_[joint_names_[j]]);
-                    }
-
-                    active_goal_.setAborted();
-                    has_active_goal_=false;
-                    return;
-                }
+            // Check trajectory constraint
+            if(abs_error > trajectory_constraints_[joint_name]) {
+                ROS_WARN("Aborting because the trajectory constraint of %s (%f) was violated (%f)", joint_name.c_str(), trajectory_constraints_[joint_name], abs_error);
+                active_goal_.setAborted();
+                has_active_goal_=false;
+                return;
             }
 
             // Check if this joint has converged
             if(current_point < ((int)active_goal_.getGoal()->trajectory.points.size()-1))
             {
-                if(abs_error < intermediate_goal_constraints_[joint_names_[i]])
+                if(abs_error < intermediate_goal_constraints_[joint_name])
                 {
-                    converged_joints = converged_joints + 1;
+                    converged_joints += 1;
                 }
             }
             else
             {
-                if(abs_error < final_goal_constraints_[joint_names_[i]])
+                if(abs_error < final_goal_constraints_[joint_name])
                 {
-                    converged_joints = converged_joints + 1;
+                    converged_joints += 1;
                 }
             }
+
         }
 
         // Joint trajectory action should work for both seven (old situation, only arm) and eight (new situation, incl torso) joints
 
         // Only publish torso if requested
-        if( number_of_goal_joints_ == 8) {
+        if( number_of_goal_joints_ > 7) {
             sensor_msgs::JointState torso_msg;
-            torso_msg.name.push_back("torso_joint");
-            torso_msg.position.push_back(ref_pos_[0]);
+            for (unsigned int i = 0; i < nr_torso_joints_; i++) {
+                torso_msg.name.push_back(joint_names_[i]);
+                torso_msg.position.push_back(ref_pos_[joint_names_[i]]);
+            }
             torso_pub.publish(torso_msg);
         }
 
         // Always publish arm msg
         sensor_msgs::JointState arm_msg;
         for (unsigned int i = 0; i < 7; i++) {
-            arm_msg.name.push_back(joint_names_[i+1]);
-            arm_msg.position.push_back(ref_pos_[i+1]);
+            arm_msg.name.push_back(joint_names_[i+nr_torso_joints_]);
+            arm_msg.position.push_back(ref_pos_[joint_names_[i+nr_torso_joints_]]);
         }
         pub.publish(arm_msg);
-
-        ///ROS_INFO("Publishing done");
 
         //if(converged_joints==(int)number_of_goal_joints_)
         if (converged_joints==(int)joint_names_.size())
