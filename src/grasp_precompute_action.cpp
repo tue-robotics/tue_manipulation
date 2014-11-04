@@ -15,14 +15,6 @@
 
 #include <tf_conversions/tf_kdl.h>
 
-//#include <arm_navigation_msgs/MoveArmAction.h>
-/////#include <amigo_actions/AmigoSpindleCommandAction.h>
-
-
-//#include <arm_navigation_msgs/SetPlanningSceneDiff.h>
-
-//#include <amigo_msgs/arm_joints.h>
-
 #include <visualization_msgs/MarkerArray.h>
 
 #include <tf/tf.h>
@@ -41,17 +33,9 @@ int NUM_GRASP_POINTS = 0, PRE_GRASP_INBETWEEN_SAMPLING_STEPS = 0;
 tue::IKSolver ik_solver;
 
 typedef actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction> Server;
-//typedef actionlib::SimpleActionClient<arm_navigation_msgs::MoveArmAction> Clientfake;
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> Client;
-/////typedef actionlib::SimpleActionClient<amigo_actions::AmigoSpindleCommandAction> SpindleClient;
 
 ros::Publisher *IKpospub;
-
-//ros::ServiceClient query_client;
-//ros::ServiceClient ik_client;
-
-//static const std::string SET_PLANNING_SCENE_DIFF_NAME = "/amigo/environment_server/set_planning_scene_diff";
-//ros::ServiceClient set_planning_scene_diff_client;
 
 tf::TransformListener* TF_LISTENER;
 

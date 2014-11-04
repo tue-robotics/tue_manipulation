@@ -108,8 +108,8 @@ add_dependencies(grasp_precompute_action ${PROJECT_NAME}_generate_messages_cpp)
 add_executable(test_robot_ik test/test_robot_ik)
 target_link_libraries(test_robot_ik tue_manipulation)
 
-add_executable(test_amigo_grasp_precompute test/test_amigo_grasp_precompute.cpp)
-target_link_libraries(test_amigo_grasp_precompute tue_manipulation)
+add_executable(test_grasp_precompute test/test_grasp_precompute.cpp)
+target_link_libraries(test_grasp_precompute tue_manipulation)
 
 add_executable(test_amigo_dwa test/test_amigo_dwa.cpp)
 target_link_libraries(test_amigo_dwa tue_manipulation)
