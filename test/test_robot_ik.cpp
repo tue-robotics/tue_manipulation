@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     // - - - - - - - - - - - Read the robot URDF description into a string - - - - - - - - - - -
 
     if (argc < 2) {
-        std::cout << "Usage: 'rosrun test_robot_ik [robot_name]', with robot name either amigo or sergio" << std::endl;
+        std::cout << "Usage: 'rosrun tue_manipulation test_robot_ik [robot_name]', with robot name either amigo or sergio" << std::endl;
         return 1;
     }
 
