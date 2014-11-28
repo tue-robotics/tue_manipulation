@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
     kdl_parser
     urdf
     actionlib
+    amigo_msgs
     tf
     tf_conversions
     control_msgs
@@ -27,22 +28,22 @@ find_package(catkin REQUIRED COMPONENTS
 add_action_files(
   FILES
     GraspPrecompute.action
-    GripperCommand.action
-)
-
-# Generate messages
-add_message_files(
-   FILES
-   GripperCommand.msg
-   GripperMeasurement.msg
-   cart_pos.msg
 )
 
 # Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
     actionlib_msgs
+    amigo_msgs
 )
+
+
+# Generate messages
+# add_message_files(
+#    FILES
+#    message1.msg
+#    ...
+# )
 
 # Generate services
 # add_service_files(
@@ -100,11 +101,6 @@ add_executable(grasp_precompute_action src/grasp_precompute_action.cpp)
 target_link_libraries(grasp_precompute_action tue_manipulation)
 add_dependencies(grasp_precompute_action ${PROJECT_NAME}_generate_messages_cpp)
 
-# Gripper server
-add_executable(gripper_server src/gripper_server.cpp)
-target_link_libraries(gripper_server tue_manipulation)
-add_dependencies(gripper_server ${PROJECT_NAME}_generate_messages_cpp)
-
 # ------------------------------------------------------------------------------------------------
 #                                              TESTS
 # ------------------------------------------------------------------------------------------------
@@ -117,6 +113,3 @@ target_link_libraries(test_grasp_precompute tue_manipulation)
 
 add_executable(test_amigo_dwa test/test_amigo_dwa.cpp)
 target_link_libraries(test_amigo_dwa tue_manipulation)
-
-add_executable(test_gripper_server test/test_gripper_server.cpp)
-target_link_libraries(test_gripper_server tue_manipulation)
