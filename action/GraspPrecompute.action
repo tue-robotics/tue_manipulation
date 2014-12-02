@@ -1,7 +1,7 @@
 #goal definition
 bool PERFORM_PRE_GRASP
-tue_msgs/cart_pos goal
-tue_msgs/cart_pos delta
+tue_manipulation/cart_pos goal
+tue_manipulation/cart_pos delta
 
 # In case of PERFORM_PRE_GRASP
 bool FIRST_JOINT_POS_ONLY # If TRUE, only the first JointTrajectoryPoint
@@ -11,7 +11,7 @@ bool FIRST_JOINT_POS_ONLY # If TRUE, only the first JointTrajectoryPoint
                           # If FALSE, the entire trajectory is executed
 ---
 #result definition
-tue_msgs/cart_pos result
+tue_manipulation/cart_pos result
 ---
 #feedback
-tue_msgs/cart_pos feedback
+tue_manipulation/cart_pos feedback

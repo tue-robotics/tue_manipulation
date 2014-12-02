@@ -25,16 +25,16 @@ find_package(catkin REQUIRED COMPONENTS
 #                                     ROS MESSAGES AND SERVICES
 # ------------------------------------------------------------------------------------------------
 
-add_action_files(
-  FILES
-    GraspPrecompute.action
-    GripperCommand.action
-)
-
 # Generate messages
 add_message_files(
    FILES
    cart_pos.msg
+)
+
+add_action_files(
+  FILES
+    GraspPrecompute.action
+    GripperCommand.action
 )
 
 # Generate added messages and services with any dependencies listed here
@@ -64,7 +64,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES bla
-#  CATKIN_DEPENDS other_catkin_pkg
+ CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
