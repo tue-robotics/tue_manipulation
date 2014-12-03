@@ -66,8 +66,9 @@ bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name
 
     q_min_.resize(chain_.getNrOfJoints());
     q_max_.resize(chain_.getNrOfJoints());
-
     q_seed_.resize(chain_.getNrOfJoints());
+
+    joint_names_.resize(chain_.getNrOfJoints());
 
     unsigned int j = 0;
     for(unsigned int i = 0; i < chain_.getNrOfSegments(); ++i)
@@ -91,6 +92,8 @@ bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name
                 q_seed_(j) = 0;
 
             }
+
+            joint_names_[j] = kdl_joint.getName();
 //            std::cout << j << ": " << q_min_(j) << " - " << q_max_(j) << std::endl;
 
             ++j;
@@ -107,23 +110,25 @@ bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name
 
 // ----------------------------------------------------------------------------------------------------
 
-int IKSolver::jointsToCartesian(const KDL::JntArray& q_in, KDL::Frame& f_out)
+bool IKSolver::jointsToCartesian(const KDL::JntArray& q_in, KDL::Frame& f_out)
 {
-    return fksolver_->JntToCart(q_in, f_out);
+    int status = fksolver_->JntToCart(q_in, f_out);
+    return (status == 0);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-int IKSolver::cartesianToJoints(const KDL::Frame& f_in, KDL::JntArray& q_out)
+bool IKSolver::cartesianToJoints(const KDL::Frame& f_in, KDL::JntArray& q_out)
 {
     return cartesianToJoints(f_in, q_out, q_seed_);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-int IKSolver::cartesianToJoints(const KDL::Frame& f_in, KDL::JntArray& q_out, const KDL::JntArray& q_seed)
+bool IKSolver::cartesianToJoints(const KDL::Frame& f_in, KDL::JntArray& q_out, const KDL::JntArray& q_seed)
 {
-    return ik_solver_->CartToJnt(q_seed, f_in, q_out);
+    int status = ik_solver_->CartToJnt(q_seed, f_in, q_out);
+    return (status == 0);
 }
 
 }

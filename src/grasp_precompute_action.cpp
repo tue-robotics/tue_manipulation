@@ -5,16 +5,21 @@
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 
-#include <amigo_arm_navigation/grasp_precomputeAction.h>
+#include <tue_manipulation/GraspPrecomputeAction.h>
 
 #include <control_msgs/FollowJointTrajectoryAction.h>
 
-#include <arm_navigation_msgs/MoveArmAction.h>
+#include <sensor_msgs/JointState.h>
+
+#include <tue/manipulation/ik_solver.h>
+
+#include <tf_conversions/tf_kdl.h>
+
+//#include <arm_navigation_msgs/MoveArmAction.h>
 /////#include <amigo_actions/AmigoSpindleCommandAction.h>
 
-#include <kinematics_msgs/GetKinematicSolverInfo.h>
-#include <kinematics_msgs/GetConstraintAwarePositionIK.h>
-#include <arm_navigation_msgs/SetPlanningSceneDiff.h>
+
+//#include <arm_navigation_msgs/SetPlanningSceneDiff.h>
 
 //#include <amigo_msgs/arm_joints.h>
 
@@ -32,18 +37,20 @@ string SIDE;
 
 int NUM_GRASP_POINTS = 0, PRE_GRASP_INBETWEEN_SAMPLING_STEPS = 0;
 
-typedef actionlib::SimpleActionServer<amigo_arm_navigation::grasp_precomputeAction> Server;
-typedef actionlib::SimpleActionClient<arm_navigation_msgs::MoveArmAction> Clientfake;
+tue::IKSolver ik_solver;
+
+typedef actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction> Server;
+//typedef actionlib::SimpleActionClient<arm_navigation_msgs::MoveArmAction> Clientfake;
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> Client;
 /////typedef actionlib::SimpleActionClient<amigo_actions::AmigoSpindleCommandAction> SpindleClient;
 
 ros::Publisher *IKpospub;
 
-ros::ServiceClient query_client;
-ros::ServiceClient ik_client;
+//ros::ServiceClient query_client;
+//ros::ServiceClient ik_client;
 
-static const std::string SET_PLANNING_SCENE_DIFF_NAME = "/amigo/environment_server/set_planning_scene_diff";
-ros::ServiceClient set_planning_scene_diff_client;
+//static const std::string SET_PLANNING_SCENE_DIFF_NAME = "/amigo/environment_server/set_planning_scene_diff";
+//ros::ServiceClient set_planning_scene_diff_client;
 
 tf::TransformListener* TF_LISTENER;
 
@@ -60,7 +67,7 @@ void spindlecontrollerCB(const sensor_msgs::JointState& spindle_meas)
     spindle_position = spindle_meas.position[0];
 }
 
-void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, Server* as, Client* ac)
+void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Server* as, Client* ac)
 {
     // Check for absolute or delta (and ambiqious goals)
     bool absolute_requested=false, delta_requested=false;
@@ -158,32 +165,6 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
 
     ROS_DEBUG("Frame=%s \t X=%f \t Y=%f \t Z=%f",stamped_in.header.frame_id.c_str(),stamped_in.pose.position.x,stamped_in.pose.position.y,stamped_in.pose.position.z);
 
-    // Test if the planning scene is up and running (required for the Kinematics node)
-    arm_navigation_msgs::SetPlanningSceneDiff::Request planning_scene_req;
-    arm_navigation_msgs::SetPlanningSceneDiff::Response planning_scene_res;
-    if(!set_planning_scene_diff_client.call(planning_scene_req, planning_scene_res)) {
-        ROS_WARN("Grasp not executed: cannot call planning scene");
-        as->setAborted();
-        return;
-    }
-
-    // Get Kinematics solver info for seed state
-    kinematics_msgs::GetKinematicSolverInfo::Request request;
-    kinematics_msgs::GetKinematicSolverInfo::Response response;
-    if(query_client.call(request,response))
-    {
-        for(unsigned int i=0; i<response.kinematic_solver_info.joint_names.size(); i++)
-        {
-            ROS_DEBUG("Joint: %d %s",i,response.kinematic_solver_info.joint_names[i].c_str());
-        }
-    }
-    else
-    {
-        ROS_WARN("Grasp precompute action: Getting IK solver information failed");
-        as->setAborted();
-        return;
-    }
-
     // Define general joint trajectory action info
     control_msgs::FollowJointTrajectoryGoal jtagoal;
 
@@ -193,59 +174,45 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
     // Define stringstream for IK pos ID
     ostringstream ss;
 
-    //Call IK
-    kinematics_msgs::GetConstraintAwarePositionIK::Request  gpik_req;
-    kinematics_msgs::GetConstraintAwarePositionIK::Response gpik_res;
-
     // Store the solutions
-    arm_navigation_msgs::RobotState grasp_solution;
-    vector<arm_navigation_msgs::RobotState> pre_grasp_solution;
-
-    // Fill in the IK request
-    gpik_req.timeout = ros::Duration(5.0);
-    gpik_req.ik_request.ik_link_name = "grippoint_" + SIDE;
-    gpik_req.ik_request.pose_stamped.header.frame_id = stamped_in.header.frame_id;
+    KDL::JntArray grasp_solution;
+    vector<KDL::JntArray> pre_grasp_solution;
 
     // Define joint names and seed positions
-    for(unsigned int i = 0; i < response.kinematic_solver_info.joint_names.size(); ++i)
+    KDL::JntArray joint_seeds(ik_solver.numJoints());
+    for(unsigned int i = 0; i < ik_solver.numJoints(); ++i)
     {
+        const std::string& joint_name = ik_solver.jointNames()[i];
 
-        string joint_name = response.kinematic_solver_info.joint_names[i];
-
-        //double joint_seed = (response.kinematic_solver_info.limits[i].max_position + response.kinematic_solver_info.limits[i].min_position)/2.0;
-        double joint_seed;
         if (i == 0) {
-            joint_seed = spindle_position;
+            joint_seeds(i) = spindle_position;
         } else {
             for(unsigned int j = 0; j < arm_joints.name.size(); ++j) {
                 if (joint_name == arm_joints.name[j]) {
-                    joint_seed = arm_joints.position[j];
+                    joint_seeds(i) = arm_joints.position[j];
                 }
             }
         }
 
-        gpik_req.ik_request.ik_seed_state.joint_state.name.push_back(joint_name);
-        gpik_req.ik_request.ik_seed_state.joint_state.position.push_back(joint_seed);
         jtagoal.trajectory.joint_names.push_back(joint_name);
-        //magoal.planning_scene_diff.robot_state.joint_state.name.push_back(joint_name);
-        //magoal.planning_scene_diff.robot_state.joint_state.position.push_back(joint_seed);
-        ROS_DEBUG("Joint name = %s",joint_name.c_str());
     }
 
     // Check if a pre-grasp is required, resize Joint Trajectory Action
-    if(!goal_in->PERFORM_PRE_GRASP)
+    if (!goal_in->PERFORM_PRE_GRASP)
     {
         NUM_GRASP_POINTS = 1;
     }
     else
     {
-        NUM_GRASP_POINTS = PRE_GRASP_INBETWEEN_SAMPLING_STEPS+2; // Inbetween sample points + Pre-grasp + Grasp point
+        NUM_GRASP_POINTS = PRE_GRASP_INBETWEEN_SAMPLING_STEPS + 2; // Inbetween sample points + Pre-grasp + Grasp point
     }
 
     // Resize the Joint Trajectory Action goal according to the number of grasp points or to one if FIRST_JOINT_POS_ONLY is TRUE
-    int num_jta_points = 0;
-    if (goal_in->FIRST_JOINT_POS_ONLY) num_jta_points = 1;
-    else num_jta_points = NUM_GRASP_POINTS;
+    int num_jta_points;
+    if (goal_in->FIRST_JOINT_POS_ONLY)
+        num_jta_points = 1;
+    else
+        num_jta_points = NUM_GRASP_POINTS;
 
     jtagoal.trajectory.points.resize(num_jta_points);
     IKPosMarkerArray.markers.resize(NUM_GRASP_POINTS);
@@ -254,9 +221,9 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
     {
         if (i < num_jta_points)
         {
-            jtagoal.trajectory.points[i].positions.resize(response.kinematic_solver_info.joint_names.size());
-            jtagoal.trajectory.points[i].velocities.resize(response.kinematic_solver_info.joint_names.size());
-            jtagoal.trajectory.points[i].accelerations.resize(response.kinematic_solver_info.joint_names.size());
+            jtagoal.trajectory.points[i].positions.resize(ik_solver.numJoints());
+            jtagoal.trajectory.points[i].velocities.resize(ik_solver.numJoints());
+            jtagoal.trajectory.points[i].accelerations.resize(ik_solver.numJoints());
         }
 
         IKPosMarkerArray.markers[i].type = 2; // 2=SPHERE
@@ -292,41 +259,39 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
 
         // Check if all grasp points are feasible
         GRASP_FEASIBLE = true;
-        int k=0;
-        for(int i=(NUM_GRASP_POINTS-1);i>=0;--i)
+        int k = 0;
+        for(int i = NUM_GRASP_POINTS - 1; i >= 0; --i)
         {
             //cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
             tf::Transform pre_grasp_offset(tf::Quaternion(0,0,0,1),tf::Point(-PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0),0,0));
             new_pre_grasp_pose = new_grasp_pose * pre_grasp_offset;
-            tf::poseTFToMsg(new_pre_grasp_pose, gpik_req.ik_request.pose_stamped.pose);
-            gpik_req.ik_request.pose_stamped.header.stamp = ros::Time::now();
-            if(ik_client.call(gpik_req, gpik_res))
+
+            KDL::Frame new_pre_grasp_pose_kdl;
+            tf::poseTFToKDL(new_pre_grasp_pose, new_pre_grasp_pose_kdl);
+
+            KDL::JntArray joint_solution;
+            if (ik_solver.cartesianToJoints(new_pre_grasp_pose_kdl, joint_solution, joint_seeds))
             {
-                if(gpik_res.error_code.val == gpik_res.error_code.SUCCESS)
-                {
-                    //printf("Pre_grasp_pose feasible\n");
-                    pre_grasp_solution[k] = gpik_res.solution;
-                    ++k;
-                    // Set the seed state for the next point to the solution of the previous point
-                    gpik_req.ik_request.ik_seed_state = gpik_res.solution;
-                    // Fill the IK markers
-                    IKPosMarkerArray.markers[i].id = i;
-                    tf::poseTFToMsg(grasp_pose * yaw_offset * pre_grasp_offset, IKPosMarkerArray.markers[i].pose);
-                }
-                else{
-                    GRASP_FEASIBLE = false;
-                    break;
-                }
+                pre_grasp_solution[k] = joint_solution;
+                ++k;
+
+                // Set the seed state for the next point to the solution of the previous point
+                joint_seeds = joint_solution;
+
+                // Fill the IK markers
+                IKPosMarkerArray.markers[i].id = i;
+                tf::poseTFToMsg(grasp_pose * yaw_offset * pre_grasp_offset, IKPosMarkerArray.markers[i].pose);
             }
-            else{
-                ROS_WARN("Grasp not executed: IK service cannot be called");
-                as->setAborted();
-                return;}
+            else
+            {
+                GRASP_FEASIBLE = false;
+                break;
+            }
         }
 
         //ROS_INFO("Yaw delta %f ",YAW_SAMPLING_DIRECTION * YAW_DELTA);
         // If the grasp is not feasible, change the yaw and the sampling direction
-        if(!GRASP_FEASIBLE)
+        if (!GRASP_FEASIBLE)
         {
             ROS_DEBUG("Not all grasp points feasible: resampling yaw");
             YAW_DELTA = YAW_DELTA + YAW_SAMPLING_STEP;
@@ -364,9 +329,9 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
             // Fill in all the solutions to the JTA goal
             if (goal_in->FIRST_JOINT_POS_ONLY)
             {
-                for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
+                for(unsigned int i = 0; i < ik_solver.numJoints(); ++i)
                 {
-                    jtagoal.trajectory.points[0].positions[i] = pre_grasp_solution[0].joint_state.position[i];
+                    jtagoal.trajectory.points[0].positions[i] = pre_grasp_solution[0](i);
                     //jtagoal.trajectory.points[0].positions[i]   = pre_grasp_solution[0].joint_state.position[i];
                     //jtagoal.trajectory.points[0].velocities[i] = pre_grasp_solution.joint_state.velocity[i];
                     //jtagoal.trajectory.points[0].accelerations[i] = 0.0;
@@ -374,11 +339,11 @@ void execute(const amigo_arm_navigation::grasp_precomputeGoalConstPtr& goal_in, 
             }
             else if (!goal_in->FIRST_JOINT_POS_ONLY)
             {
-                for(int j=0;j<NUM_GRASP_POINTS;++j)
+                for(int j = 0; j < NUM_GRASP_POINTS; ++j)
                 {
-                    for(unsigned int i=0;i<response.kinematic_solver_info.joint_names.size();++i)
+                    for(unsigned int i = 0; i < ik_solver.numJoints(); ++i)
                     {
-                        jtagoal.trajectory.points[j].positions[i] = pre_grasp_solution[j].joint_state.position[i];
+                        jtagoal.trajectory.points[j].positions[i] = pre_grasp_solution[j](i);
                         //jtagoal.trajectory.points[j].positions[i]   = pre_grasp_solution[j].joint_state.position[i];
                         //jtagoal.trajectory.points[0].velocities[i] = pre_grasp_solution.joint_state.velocity[i];
                         //jtagoal.trajectory.points[0].accelerations[i] = 0.0;
@@ -424,6 +389,19 @@ int main(int argc, char** argv)
     n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
     n.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
 
+    std::string root_link, tip_link;
+    n.param<std::string>("root_link", root_link, "");
+    if (root_link.empty()){
+        ROS_ERROR("Missing parameter 'root_link'.");
+        return 1;
+    }
+
+    n.param<std::string>("tip_link", tip_link, "");
+    if (tip_link.empty()){
+        ROS_ERROR("Missing parameter 'tip_link'.");
+        return 1;
+    }
+
     ROS_INFO("Waiting for joint trajectory action");
 
     // Wait for the joint trajectory action server
@@ -438,10 +416,16 @@ int main(int argc, char** argv)
 
     ROS_INFO("Initialize IK clients");
 
-    // Initialize the IK clients
-    query_client = n.serviceClient<kinematics_msgs::GetKinematicSolverInfo>("/get_ik_solver_info");
-    ik_client = n.serviceClient<kinematics_msgs::GetConstraintAwarePositionIK>("/get_constraint_aware_ik");
-    set_planning_scene_diff_client = n.serviceClient<arm_navigation_msgs::SetPlanningSceneDiff>(SET_PLANNING_SCENE_DIFF_NAME);
+    // Initialize the IK solver
+    std::string urdf_description;
+    n.param<std::string>("robot_description", urdf_description, "");
+
+    std::string error;
+    if (!ik_solver.initFromURDF(urdf_description, root_link, tip_link, error))
+    {
+        ROS_ERROR_STREAM("Could not initialize IK solver:\n\n    " << error);
+        return 1;
+    }
 
     // Start listening to the current joint measurements
     ros::Subscriber armsub = n.subscribe("/joint_measurements", 1, armcontrollerCB);

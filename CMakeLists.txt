@@ -4,6 +4,10 @@ project(tue_manipulation)
 find_package(catkin REQUIRED COMPONENTS
     kdl_parser
     urdf
+    actionlib
+    amigo_msgs
+    tf
+    tf_conversions
 
     # For testing
     roslib
@@ -16,6 +20,19 @@ find_package(catkin REQUIRED COMPONENTS
 # ------------------------------------------------------------------------------------------------
 #                                     ROS MESSAGES AND SERVICES
 # ------------------------------------------------------------------------------------------------
+
+add_action_files(
+  FILES
+    GraspPrecompute.action
+)
+
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+    actionlib_msgs
+    amigo_msgs
+)
+
 
 # Generate messages
 # add_message_files(
@@ -31,7 +48,6 @@ find_package(catkin REQUIRED COMPONENTS
 #    ...
 # )
 
-# Generate added messages and services with any dependencies listed here
 # generate_messages(
 #    DEPENDENCIES
 #    geometry_msgs
@@ -63,9 +79,22 @@ add_library(tue_manipulation
 )
 target_link_libraries(tue_manipulation ${catkin_LIBRARIES})
 
+# Joint trajectory action
+add_executable(joint_trajectory_action src/joint_trajectory_action.cpp)
+target_link_libraries(joint_trajectory_action tue_manipulation)
+
+add_executable(grasp_precompute_action src/grasp_precompute_action.cpp)
+target_link_libraries(grasp_precompute_action tue_manipulation)
+
+# ------------------------------------------------------------------------------------------------
+#                                              TESTS
+# ------------------------------------------------------------------------------------------------
+
 add_executable(test_amigo_ik
     test/test_amigo_ik
 )
 target_link_libraries(test_amigo_ik tue_manipulation)
+
+
 
 
