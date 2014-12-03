@@ -1,42 +1,71 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(tue_manipulation)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+find_package(catkin REQUIRED COMPONENTS
+    kdl_parser
+    urdf
 
-rosbuild_find_ros_package(actionlib_msgs)
-include(${actionlib_msgs_PACKAGE_PATH}/cmake/actionbuild.cmake)
-genaction()
+    # For testing
+    roslib
+)
 
-rosbuild_init()
+# find_package(Boost REQUIRED COMPONENTS system program_options)
+# find_package(PCL REQUIRED)
+# find_package(OpenCV REQUIRED)
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+# ------------------------------------------------------------------------------------------------
+#                                     ROS MESSAGES AND SERVICES
+# ------------------------------------------------------------------------------------------------
 
-#uncomment if you have defined messages
-rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
+# Generate messages
+# add_message_files(
+#    FILES
+#    message1.msg
+#    ...
+# )
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+# Generate services
+# add_service_files(
+#    FILES
+#    service1.srv
+#    ...
+# )
 
-rosbuild_add_executable(joint_trajectory_action src/joint_trajectory_action.cpp)
-rosbuild_add_executable(reference_generator src/reference_generator.cpp)
-rosbuild_add_executable(dummy_joint_publisher src/dummy_joint_publisher.cpp)
-rosbuild_add_executable(grasp_precompute_action src/grasp_precompute_action.cpp)
-#rosbuild_add_executable(test_move_arm src/test_move_arm.cpp)
-rosbuild_add_executable(test_grasp_precompute src/test_grasp_precompute.cpp)
+# Generate added messages and services with any dependencies listed here
+# generate_messages(
+#    DEPENDENCIES
+#    geometry_msgs
+#    ...
+# )
+
+# ------------------------------------------------------------------------------------------------
+#                                          CATKIN EXPORT
+# ------------------------------------------------------------------------------------------------
+
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES bla
+#  CATKIN_DEPENDS other_catkin_pkg
+#  DEPENDS system_lib
+)
+
+# ------------------------------------------------------------------------------------------------
+#                                              BUILD
+# ------------------------------------------------------------------------------------------------
+
+include_directories(
+    include
+    ${catkin_INCLUDE_DIRS}
+)
+
+add_library(tue_manipulation
+    src/ik_solver.cpp    include/tue/manipulation/ik_solver.h
+)
+target_link_libraries(tue_manipulation ${catkin_LIBRARIES})
+
+add_executable(test_amigo_ik
+    test/test_amigo_ik
+)
+target_link_libraries(test_amigo_ik tue_manipulation)
+
 
