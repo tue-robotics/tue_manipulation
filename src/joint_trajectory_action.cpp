@@ -307,7 +307,7 @@ private:
             ref_pos_[joint_name] = ref_pos; // Required to push reference
             double cur_pos = cur_pos_[joint_name];
             abs_error = fabs(ref_pos - cur_pos);
-            ROS_DEBUG("%s: r: %f\t q: %f\t e: %f",joint_name.c_str(), ref_pos_[joint_name], cur_pos_[joint_name], abs_error);
+            //ROS_DEBUG("%s: r: %f\t q: %f\t e: %f",joint_name.c_str(), ref_pos_[joint_name], cur_pos_[joint_name], abs_error);
 
             // Check trajectory constraint
             if(abs_error > trajectory_constraints_[joint_name]) {
@@ -322,6 +322,7 @@ private:
             {
                 if(abs_error < intermediate_goal_constraints_[joint_name])
                 {
+                    //ROS_DEBUG("intermediate goal constraints for %s converged", joint_name.c_str());
                     converged_joints += 1;
                 }
             }
@@ -329,6 +330,7 @@ private:
             {
                 if(abs_error < final_goal_constraints_[joint_name])
                 {
+                    //ROS_DEBUG("final goal constraints for %s converged", joint_name.c_str());
                     converged_joints += 1;
                 }
             }
@@ -356,14 +358,16 @@ private:
         pub.publish(arm_msg);
 
         //if(converged_joints==(int)number_of_goal_joints_)
-        if (converged_joints==(int)joint_names_.size())
+        if (converged_joints==(int)number_of_goal_joints_)
         {
             now = ros::Time::now();
             current_point = current_point + 1;
+            ROS_INFO("every joint has converged, go to the next point");
         }
 
         if(current_point==(int)active_goal_.getGoal()->trajectory.points.size())
         {
+            ROS_INFO("active goal succeeded");
             active_goal_.setSucceeded();
             has_active_goal_ = false;
         }
