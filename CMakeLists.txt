@@ -5,30 +5,19 @@ find_package(catkin REQUIRED COMPONENTS
     kdl_parser
     urdf
     actionlib
+    actionlib_msgs
     tf
     tf_conversions
     control_msgs
     tue_msgs
-
-    # For testing
-    roslib
-
-    # Temp
-    geolib2
+    roslib # For testing
+    geolib2 # Temp
+    message_generation
 )
 
-# find_package(Boost REQUIRED COMPONENTS system program_options)
-# find_package(PCL REQUIRED)
-# find_package(OpenCV REQUIRED)
-
-# ------------------------------------------------------------------------------------------------
-#                                     ROS MESSAGES AND SERVICES
-# ------------------------------------------------------------------------------------------------
-
-# Generate messages
 add_message_files(
-   FILES
-   cart_pos.msg
+  FILES
+    cart_pos.msg
 )
 
 add_action_files(
@@ -37,40 +26,18 @@ add_action_files(
     GripperCommand.action
 )
 
-# Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
     actionlib_msgs
     tue_msgs
 )
 
-# Generate services
-# add_service_files(
-#    FILES
-#    service1.srv
-#    ...
-# )
-
-# generate_messages(
-#    DEPENDENCIES
-#    geometry_msgs
-#    ...
-# )
-
-# ------------------------------------------------------------------------------------------------
-#                                          CATKIN EXPORT
-# ------------------------------------------------------------------------------------------------
-
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES bla
- CATKIN_DEPENDS message_runtime
-#  DEPENDS system_lib
+#  LIBRARIES
+ CATKIN_DEPENDS message_runtime actionlib_msgs tue_msgs control_msgs
+#  DEPENDS
 )
-
-# ------------------------------------------------------------------------------------------------
-#                                              BUILD
-# ------------------------------------------------------------------------------------------------
 
 include_directories(
     include
@@ -109,7 +76,7 @@ add_dependencies(gripper_server ${PROJECT_NAME}_generate_messages_cpp)
 #                                              TESTS
 # ------------------------------------------------------------------------------------------------
 
-add_executable(test_robot_ik test/test_robot_ik)
+add_executable(test_robot_ik test/test_robot_ik.cpp)
 target_link_libraries(test_robot_ik tue_manipulation)
 
 add_executable(test_grasp_precompute test/test_grasp_precompute.cpp)
