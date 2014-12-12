@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
     tf_conversions
     control_msgs
     tue_msgs
+    diagnostic_msgs
     roslib # For testing
     geolib2 # Temp
     message_generation
