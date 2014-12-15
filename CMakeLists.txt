@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
     control_msgs
     tue_msgs
     diagnostic_msgs
+    visualization_msgs
     roslib # For testing
     geolib2 # Temp
     message_generation
@@ -36,7 +37,13 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES
- CATKIN_DEPENDS message_runtime actionlib_msgs tue_msgs control_msgs
+  CATKIN_DEPENDS 
+    message_runtime
+    actionlib_msgs
+    control_msgs
+    tue_msgs
+    diagnostic_msgs
+    visualization_msgs
 #  DEPENDS
 )
 
