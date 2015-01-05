@@ -76,7 +76,7 @@ public:
             trajectory_constraints_[joint_names_[i]] = t;
             joint_min_constraints_[joint_names_[i]] = mip;
             joint_max_constraints_[joint_names_[i]] = map;
-            ROS_INFO("Joint %s, min = %f, max = %f, int = %f, final = %f, traj = %f", joint_names_[i].c_str(), mip, map, ig, fg, t);
+            ROS_DEBUG("Joint %s, min = %f, max = %f, int = %f, final = %f, traj = %f", joint_names_[i].c_str(), mip, map, ig, fg, t);
         }
         nr_torso_joints_ = joint_names.size() - 7;// Assume 7 DoF arm... // ToDo: make nice
 
