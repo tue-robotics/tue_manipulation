@@ -80,6 +80,13 @@ add_executable(gripper_server src/gripper_server.cpp)
 target_link_libraries(gripper_server tue_manipulation)
 add_dependencies(gripper_server ${PROJECT_NAME}_generate_messages_cpp)
 
+# Torso server
+add_executable(torso_server src/torso_server.cpp)
+target_link_libraries(torso_server
+  ${catkin_LIBRARIES}
+)
+add_dependencies(torso_server ${catkin_EXPORTED_TARGETS})
+
 # ------------------------------------------------------------------------------------------------
 #                                              TESTS
 # ------------------------------------------------------------------------------------------------
@@ -95,3 +102,9 @@ target_link_libraries(test_amigo_dwa tue_manipulation)
 
 add_executable(test_gripper_server test/test_gripper_server.cpp)
 target_link_libraries(test_gripper_server tue_manipulation)
+
+add_executable(torso_server_test_client test/test_torso_server.cpp)
+target_link_libraries(torso_server_test_client
+  ${catkin_LIBRARIES}
+)
+add_dependencies(torso_server_test_client ${catkin_EXPORTED_TARGETS})
