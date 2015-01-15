@@ -55,6 +55,12 @@ void goalCb(const control_msgs::FollowJointTrajectoryGoalConstPtr& torso_goal) {
     setGoalTolerance(goal, goal_tolerance);
 
     while(n.ok() && as_->isActive()) {
+        
+        if (!meas_received) {
+            ROS_WARN("Torso server has not received any measurements yet, aborting");
+            as_->setAborted();
+            return;
+        }
 
         torso_ref.header.stamp = ros::Time::now();
 
