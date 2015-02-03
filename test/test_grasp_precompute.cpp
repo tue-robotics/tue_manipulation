@@ -42,7 +42,7 @@ int main(int argc, char** argv)
   goal.goal.header.frame_id = "/"+robot_name+"/base_link";
   goal.PERFORM_PRE_GRASP = true;
   goal.goal.x = 0.5;
-  goal.goal.y = 0.2;
+  goal.goal.y = 0.0;
   goal.goal.z = 0.9;
 
   goal.goal.roll  = 0;
@@ -52,9 +52,9 @@ int main(int argc, char** argv)
   client.sendGoal(goal);
   client.waitForResult();
   if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-      printf("Grasp precompute left successful\n");
+      printf("Grasp precompute successful\n");
   else
-	  printf("Grasp precompute left unsuccesfull\n");
+      printf("Grasp precompute unsuccesfull\n");
 
   return 0;
 }
