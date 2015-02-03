@@ -9,17 +9,31 @@ using namespace std;
 
 typedef actionlib::SimpleActionClient<tue_manipulation::GraspPrecomputeAction> Client;
 
+void spinThread()
+{
+  ros::spin();
+}
+
 int main(int argc, char** argv)
 {
-  if (argc < 2) {
-      std::cout << "Usage: 'rosrun tue_manipulation test_grasp_precompute [robot_name]', with robot name either amigo or sergio" << std::endl;
+  if (argc < 3) {
+      std::cout << "Usage: 'rosrun tue_manipulation test_grasp_precompute [robot_name] [left|right]', with robot name either amigo or sergio" << std::endl;
       return 1;
   }
+  std::string side(argv[2]);
   std::string robot_name(argv[1]);
-    
+
   ros::init(argc, argv, "test_grasp");
-  Client client("grasp_precompute_left", true); // true -> don't need ros::spin()
-  client.waitForServer();
+  Client client("grasp_precompute_" + side); // true -> don't need ros::spin()
+  boost::thread spin_thread(&spinThread);
+  printf("Looking for Actionlib server\n");
+  client.waitForServer(ros::Duration(2,0));
+  if (!client.isServerConnected()) {
+    printf(" --> Not found\n");
+    return 1;
+  }
+
+  printf(" --> Found\n");
   tue_manipulation::GraspPrecomputeGoal goal;
 
   ros::Time::waitForValid(ros::WallDuration(2));
@@ -38,9 +52,9 @@ int main(int argc, char** argv)
   client.sendGoal(goal);
   client.waitForResult();
   if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-      printf("Grasp precompute successful\n");
+      printf("Grasp precompute left successful\n");
   else
-	  printf("Grasp precompute unsuccesfull\n");
+	  printf("Grasp precompute left unsuccesfull\n");
 
   return 0;
 }
