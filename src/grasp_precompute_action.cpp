@@ -388,6 +388,7 @@ int main(int argc, char** argv)
         ROS_ERROR("Missing parameter 'root_link'.");
         return 1;
     }
+
     // ToDo: make nice
     n.param<std::string>("tf_prefix", EXT_ROOT_LINK, "");
     EXT_ROOT_LINK = "/"+EXT_ROOT_LINK+"/"+ROOT_LINK;
@@ -401,13 +402,13 @@ int main(int argc, char** argv)
     ROS_INFO("Waiting for joint trajectory action");
 
     // Wait for the joint trajectory action server
-    Client client("/amigo/" + side + "_arm/joint_trajectory_action", true);
+    Client client("joint_trajectory_action", true);
     client.waitForServer();
 
     ROS_INFO("Initialize grasp precompute server");
 
     // Initialize the grasp_precompute server
-    Server server(n, "/grasp_precompute_" + side, boost::bind(&execute, _1, &server, &client), false);
+    Server server(n, "grasp_precompute", boost::bind(&execute, _1, &server, &client), false);
     server.start();
 
     ROS_INFO("Initialize IK clients");
@@ -426,13 +427,13 @@ int main(int argc, char** argv)
     }
 
     // Start listening to the current joint measurements
-    ros::Subscriber armsub = n.subscribe("/joint_measurements", 1, armcontrollerCB);
+    ros::Subscriber armsub = n.subscribe("joint_measurements", 1, armcontrollerCB);
 
     // Start listening to the current spindle measurement
-    ros::Subscriber spindlesub = n.subscribe("/spindle_measurement", 1, spindlecontrollerCB);
+    ros::Subscriber spindlesub = n.subscribe("spindle_measurement", 1, spindlecontrollerCB);
 
     // IK marker publisher
-    IKpospub = new ros::Publisher(n.advertise<visualization_msgs::MarkerArray>("/IK_Position_Markers", 1));
+    IKpospub = new ros::Publisher(n.advertise<visualization_msgs::MarkerArray>("IK_Position_Markers", 1));
 
     ROS_INFO("Grasp precompute action initialized");
 

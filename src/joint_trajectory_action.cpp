@@ -81,14 +81,14 @@ public:
         nr_torso_joints_ = joint_names.size() - 7;// Assume 7 DoF arm... // ToDo: make nice
 
         // Here we start sending the references
-        pub = node_.advertise<sensor_msgs::JointState>("/references", 1);
-        torso_pub = node_.advertise<sensor_msgs::JointState>("/torso/references",1);
+        pub = node_.advertise<sensor_msgs::JointState>("references", 1);
+        torso_pub = node_.advertise<sensor_msgs::JointState>("torso/references",1);
         // Here we start listening for the measured positions
-        sub = node_.subscribe("/measurements", 1, &JointTrajectoryExecuter::armCB, this);
-        torso_sub = node_.subscribe("/torso/measurements", 1, &JointTrajectoryExecuter::armCB, this);
+        sub = node_.subscribe("measurements", 1, &JointTrajectoryExecuter::armCB, this);
+        torso_sub = node_.subscribe("torso/measurements", 1, &JointTrajectoryExecuter::armCB, this);
 
         // Diagnostics sub
-        diag_sub = node_.subscribe("/hardware_status", 1, &JointTrajectoryExecuter::diagnosticsCB, this);
+        diag_sub = node_.subscribe("hardware_status", 1, &JointTrajectoryExecuter::diagnosticsCB, this);
 
         // Start with hardware status OK
         torso_status = 2;
@@ -397,7 +397,7 @@ private:
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "joint_trajectory_action_node");
-    ros::NodeHandle node;//("~");
+    ros::NodeHandle node("~");
     JointTrajectoryExecuter jte(node);
 
     ros::spin();
