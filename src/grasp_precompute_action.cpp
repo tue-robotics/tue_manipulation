@@ -401,7 +401,7 @@ int main(int argc, char** argv)
     ROS_INFO("Waiting for joint trajectory action");
 
     // Wait for the joint trajectory action server
-    Client client("joint_trajectory_action_" + side, true);
+    Client client("/amigo/" + side + "_arm/joint_trajectory_action", true);
     client.waitForServer();
 
     ROS_INFO("Initialize grasp precompute server");
