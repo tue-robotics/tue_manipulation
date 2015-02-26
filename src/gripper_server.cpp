@@ -4,7 +4,7 @@
 #include <tue_manipulation/GripperCommandAction.h>
 //#include <tue_msgs/GripperMeasurement.h>
 
-std::string gripper_measurement_topic_;
+//std::string gripper_measurement_topic_;
 
 actionlib::SimpleActionServer<tue_manipulation::GripperCommandAction>* as_;
 
@@ -28,7 +28,7 @@ void executeCB(const tue_manipulation::GripperCommandGoalConstPtr& gripper_goal)
 
     //std::stringstream meas_topic;
     //meas_topic << "/arm_" << side_ << "_controller/gripper_measurement";
-    ros::Subscriber gripper_sub = n.subscribe(gripper_measurement_topic_, 1, &gripperMeasurementCb);
+    ros::Subscriber gripper_sub = n.subscribe("measurements", 1, &gripperMeasurementCb);
 
     gripper_command_ = gripper_goal->command;
     gripper_pub_.publish(gripper_command_);
@@ -81,19 +81,15 @@ void executeCB(const tue_manipulation::GripperCommandGoalConstPtr& gripper_goal)
 int main(int argc, char** argv) {
 
     ros::init(argc, argv, "gripper_server");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
 
     //std::stringstream as_name;
     //as_name << "/gripper_server_" << side_;
-    as_ = new actionlib::SimpleActionServer<tue_manipulation::GripperCommandAction>(nh, nh.getNamespace(), &executeCB, false);
+    as_ = new actionlib::SimpleActionServer<tue_manipulation::GripperCommandAction>(nh, "action", &executeCB, false);
 
-    nh.getParam("gripper_measurement_topic", gripper_measurement_topic_);
-
-    std::string gripper_ref_topic;
-    nh.getParam("gripper_reference_topic", gripper_ref_topic);
     //std::stringstream cmd_topic;
     //cmd_topic << "/arm_" << side_ << "_controller/gripper_command";
-    gripper_pub_ = nh.advertise<tue_msgs::GripperCommand>(gripper_ref_topic, 100);
+    gripper_pub_ = nh.advertise<tue_msgs::GripperCommand>("references", 100);
 
     as_->start();
 

@@ -363,37 +363,39 @@ int main(int argc, char** argv)
     ROS_INFO("Starting grasp precompute node");
 
     ros::init(argc, argv, "grasp_precompute_server");
-    ros::NodeHandle n("~");
+
+    ros::NodeHandle nh;
+    ros::NodeHandle nh_private("~");
 
     TF_LISTENER = new tf::TransformListener();
 
     // Get the parameters
     std::string side;
-    n.param<string>("side", side, ""); //determine for which side this node operates
+    nh_private.param<string>("side", side, ""); //determine for which side this node operates
     if (side.empty()){
         ROS_ERROR("Missing parameter 'side'.");
         return 1;
     }
 
-    n.param("max_yaw_delta", MAX_YAW_DELTA, 2.0); // maximum sampling offset from desired yaw [rad]
-    n.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); // step-size for yaw sampling [rad]
-    n.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
-    n.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
+    nh_private.param("max_yaw_delta", MAX_YAW_DELTA, 2.0); // maximum sampling offset from desired yaw [rad]
+    nh_private.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); // step-size for yaw sampling [rad]
+    nh_private.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // offset for pre-grasping in cartesian x-direction [m]
+    nh_private.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
 
     int ik_max_iterations;
-    n.param("ik_max_iterations", ik_max_iterations, 500);
+    nh_private.param("ik_max_iterations", ik_max_iterations, 500);
 
-    n.param<std::string>("root_link", ROOT_LINK, "");
+    nh_private.param<std::string>("root_link", ROOT_LINK, "");
     if (ROOT_LINK.empty()){
         ROS_ERROR("Missing parameter 'root_link'.");
         return 1;
     }
 
     // ToDo: make nice
-    n.param<std::string>("tf_prefix", EXT_ROOT_LINK, "");
+    nh_private.param<std::string>("tf_prefix", EXT_ROOT_LINK, "");
     EXT_ROOT_LINK = "/"+EXT_ROOT_LINK+"/"+ROOT_LINK;
 
-    n.param<std::string>("tip_link", TIP_LINK, "");
+    nh_private.param<std::string>("tip_link", TIP_LINK, "");
     if (TIP_LINK.empty()){
         ROS_ERROR("Missing parameter 'tip_link'.");
         return 1;
@@ -408,16 +410,17 @@ int main(int argc, char** argv)
     ROS_INFO("Initialize grasp precompute server");
 
     // Initialize the grasp_precompute server
-    Server server(n, "grasp_precompute", boost::bind(&execute, _1, &server, &client), false);
+    Server server(nh, "grasp_precompute", boost::bind(&execute, _1, &server, &client), false);
     server.start();
 
     ROS_INFO("Initialize IK clients");
 
     // Initialize the IK solver
     std::string urdf_description;
-    n.param<std::string>("robot_description", urdf_description, "");
+
+    nh.param<std::string>("robot_description", urdf_description, "");
     bool use_constrained_solver;
-    n.param("use_constrained_solver", use_constrained_solver, false); // Indicates whether to use the constrained IK solver developed for SERGIO
+    nh_private.param("use_constrained_solver", use_constrained_solver, false); // Indicates whether to use the constrained IK solver developed for SERGIO
 
     std::string error;
     if (!ik_solver.initFromURDF(urdf_description, ROOT_LINK, TIP_LINK, ik_max_iterations, error, use_constrained_solver))
@@ -427,13 +430,13 @@ int main(int argc, char** argv)
     }
 
     // Start listening to the current joint measurements
-    ros::Subscriber armsub = n.subscribe("joint_measurements", 1, armcontrollerCB);
+    ros::Subscriber armsub = nh.subscribe("joint_measurements", 1, armcontrollerCB);
 
     // Start listening to the current spindle measurement
-    ros::Subscriber spindlesub = n.subscribe("spindle_measurement", 1, spindlecontrollerCB);
+    ros::Subscriber spindlesub = nh.subscribe("spindle_measurement", 1, spindlecontrollerCB);
 
     // IK marker publisher
-    IKpospub = new ros::Publisher(n.advertise<visualization_msgs::MarkerArray>("IK_Position_Markers", 1));
+    IKpospub = new ros::Publisher(nh.advertise<visualization_msgs::MarkerArray>("ik_position_markers", 1));
 
     ROS_INFO("Grasp precompute action initialized");
 

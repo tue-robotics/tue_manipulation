@@ -397,7 +397,7 @@ private:
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "joint_trajectory_action_node");
-    ros::NodeHandle node("~");
+    ros::NodeHandle node;
     JointTrajectoryExecuter jte(node);
 
     ros::spin();
