@@ -20,6 +20,9 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 
+#include <moveit/move_group_interface/move_group.h>
+
+
 const double EPS = 1e-6;
 
 using namespace std;
@@ -34,6 +37,7 @@ tue::IKSolver ik_solver;
 
 typedef actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction> Server;
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> Client;
+typedef moveit::planning_interface::MoveGroup MoveGroup;
 
 ros::Publisher *IKpospub;
 
@@ -74,6 +78,27 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
     stamped_in.pose.position.y = goal_in->goal.y;
     stamped_in.pose.position.z = goal_in->goal.z;
     stamped_in.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(goal_in->goal.roll, goal_in->goal.pitch, goal_in->goal.yaw);
+
+    // Planning to a Pose goal
+    // ^^^^^^^^^^^^^^^^^^^^^^^
+    // We can plan a motion for this group to a desired pose for the
+    // end-effector.
+    MoveGroup group("right_arm");
+    /*geometry_msgs::Pose target_pose1;
+    target_pose1.orientation = tf::createQuaternionMsgFromRollPitchYaw(goal_in->goal.roll, goal_in->goal.pitch, goal_in->goal.yaw);
+    target_pose1.position.x = goal_in->goal.x;
+    target_pose1.position.y = goal_in->goal.y;
+    target_pose1.position.z = goal_in->goal.z;
+    group.setPoseTarget(target_pose1);
+
+
+    // Now, we call the planner to compute the plan
+    // and execute it.
+    moveit::planning_interface::MoveGroup::Plan my_plan;
+    bool success = group.plan(my_plan);
+    group.move();*/
+
+    return;
 
     // Check if a delta is requested
     if(delta_requested)

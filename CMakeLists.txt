@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
     roslib # For testing
     geolib2 # Temp
     message_generation
+    moveit_ros_planning_interface
 )
 
 add_message_files(
@@ -108,3 +109,7 @@ target_link_libraries(torso_server_test_client
   ${catkin_LIBRARIES}
 )
 add_dependencies(torso_server_test_client ${catkin_EXPORTED_TARGETS})
+
+add_executable(move_group_interface_tutorial src/move_group_interface_tutorial.cpp)
+target_link_libraries(move_group_interface_tutorial ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+install(TARGETS move_group_interface_tutorial DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

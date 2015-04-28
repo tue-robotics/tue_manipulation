@@ -24,9 +24,10 @@ int main(int argc, char** argv)
   std::string robot_name(argv[1]);
 
   ros::init(argc, argv, "test_grasp");
-  Client client("grasp_precompute_" + side); // true -> don't need ros::spin()
+  std::string actionlibname = robot_name + "/" + side + "_arm/grasp_precompute";
+  Client client( actionlibname ); // true -> don't need ros::spin()
   boost::thread spin_thread(&spinThread);
-  printf("Looking for Actionlib server\n");
+  printf("Looking for Actionlib server\n%s", actionlibname.c_str());
   client.waitForServer(ros::Duration(2,0));
   if (!client.isServerConnected()) {
     printf(" --> Not found\n");
