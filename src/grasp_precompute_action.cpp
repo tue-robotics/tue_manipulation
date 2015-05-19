@@ -22,7 +22,6 @@
 
 #include <moveit/move_group_interface/move_group.h>
 
-
 const double EPS = 1e-6;
 
 using namespace std;
@@ -38,6 +37,7 @@ tue::IKSolver ik_solver;
 typedef actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction> Server;
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> Client;
 typedef moveit::planning_interface::MoveGroup MoveGroup;
+typedef moveit::planning_interface::MoveGroup::Options Options;
 
 ros::Publisher *IKpospub;
 
@@ -83,20 +83,32 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
     // ^^^^^^^^^^^^^^^^^^^^^^^
     // We can plan a motion for this group to a desired pose for the
     // end-effector.
-    MoveGroup group("right_arm");
-    /*geometry_msgs::Pose target_pose1;
-    target_pose1.orientation = tf::createQuaternionMsgFromRollPitchYaw(goal_in->goal.roll, goal_in->goal.pitch, goal_in->goal.yaw);
-    target_pose1.position.x = goal_in->goal.x;
-    target_pose1.position.y = goal_in->goal.y;
-    target_pose1.position.z = goal_in->goal.z;
-    group.setPoseTarget(target_pose1);
+    //
+    std::cout << "MoveGroup init" << std::endl;
 
+    ros::NodeHandle gh;
+    MoveGroup group(Options("right_arm", "/amigo/robot_description", gh));
+//    geometry_msgs::Pose target_pose1;
+//    target_pose1.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);
+//    target_pose1.position.x = 0.4;
+//    target_pose1.position.y = -0.4;
+//    target_pose1.position.z = 1.0;
+//    group.setPoseTarget(target_pose1);
+    std::vector<double> values;
+    values.push_back(0);
+    values.push_back(0);
+    values.push_back(0);
+    values.push_back(0);
+    values.push_back(0);
+    values.push_back(0);
+    values.push_back(0);
+    group.setJointValueTarget(values);
 
     // Now, we call the planner to compute the plan
     // and execute it.
     moveit::planning_interface::MoveGroup::Plan my_plan;
     bool success = group.plan(my_plan);
-    group.move();*/
+    group.move();
 
     return;
 
@@ -437,8 +449,8 @@ int main(int argc, char** argv)
     ROS_INFO("Initialize IK clients");
 
     // Initialize the IK solver
-    std::string urdf_description;
 
+    std::string urdf_description;
     nh.param<std::string>("robot_description", urdf_description, "");
     bool use_constrained_solver;
     nh_private.param("use_constrained_solver", use_constrained_solver, false); // Indicates whether to use the constrained IK solver developed for SERGIO

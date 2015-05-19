@@ -59,6 +59,7 @@ int main(int argc, char **argv)
   target_pose1.position.z = 1.0;
 
   group.setPoseTarget(target_pose1);
+  std::cout << group.getPlanningFrame() << std::endl;
 
   group.move();
 
