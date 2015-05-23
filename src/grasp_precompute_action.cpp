@@ -28,7 +28,7 @@ using namespace std;
 
 double MAX_YAW_DELTA,YAW_SAMPLING_STEP,PRE_GRASP_DELTA;
 //string SIDE;
-std::string ROOT_LINK, EXT_ROOT_LINK, TIP_LINK;
+std::string ROOT_LINK, TIP_LINK;
 
 int NUM_GRASP_POINTS = 0, PRE_GRASP_INBETWEEN_SAMPLING_STEPS = 0;
 
@@ -38,6 +38,8 @@ typedef actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction> S
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> Client;
 typedef moveit::planning_interface::MoveGroup MoveGroup;
 typedef moveit::planning_interface::MoveGroup::Options Options;
+
+MoveGroup *group;
 
 ros::Publisher *IKpospub;
 
@@ -78,39 +80,6 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
     stamped_in.pose.position.y = goal_in->goal.y;
     stamped_in.pose.position.z = goal_in->goal.z;
     stamped_in.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(goal_in->goal.roll, goal_in->goal.pitch, goal_in->goal.yaw);
-
-    // Planning to a Pose goal
-    // ^^^^^^^^^^^^^^^^^^^^^^^
-    // We can plan a motion for this group to a desired pose for the
-    // end-effector.
-    //
-    std::cout << "MoveGroup init" << std::endl;
-
-    ros::NodeHandle gh;
-    MoveGroup group(Options("right_arm", "/amigo/robot_description", gh));
-//    geometry_msgs::Pose target_pose1;
-//    target_pose1.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);
-//    target_pose1.position.x = 0.4;
-//    target_pose1.position.y = -0.4;
-//    target_pose1.position.z = 1.0;
-//    group.setPoseTarget(target_pose1);
-    std::vector<double> values;
-    values.push_back(0);
-    values.push_back(0);
-    values.push_back(0);
-    values.push_back(0);
-    values.push_back(0);
-    values.push_back(0);
-    values.push_back(0);
-    group.setJointValueTarget(values);
-
-    // Now, we call the planner to compute the plan
-    // and execute it.
-    moveit::planning_interface::MoveGroup::Plan my_plan;
-    bool success = group.plan(my_plan);
-    group.move();
-
-    return;
 
     // Check if a delta is requested
     if(delta_requested)
@@ -153,24 +122,24 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
 
 
     // If input frame is not /base_link, convert to base_link so that sampling over the yaw indicates the z-axes pointing up (whereas it wouldn't with e.g. '/torso')
-    if(stamped_in.header.frame_id.compare(EXT_ROOT_LINK))
+    if(stamped_in.header.frame_id.compare(ROOT_LINK))
     {
         ROS_DEBUG("Frame id was not BASE_LINK");
         // Create tmp variable
         geometry_msgs::PoseStamped tmp;
 
         // Perform the transformation to /base_link
-        if(TF_LISTENER->waitForTransform(EXT_ROOT_LINK, stamped_in.header.frame_id, stamped_in.header.stamp, ros::Duration(1.0)))
+        if(TF_LISTENER->waitForTransform(ROOT_LINK, stamped_in.header.frame_id, stamped_in.header.stamp, ros::Duration(1.0)))
         {
             try
-            {TF_LISTENER->transformPose(EXT_ROOT_LINK, stamped_in, tmp);}
+            {TF_LISTENER->transformPose(ROOT_LINK, stamped_in, tmp);}
             catch (tf::TransformException ex){
                 as->setAborted();
                 ROS_ERROR("%s",ex.what());
                 return;}
         }else{
             as->setAborted();
-            ROS_ERROR("grasp_precompute_action: TF_LISTENER could not find transform from %s to %s:",EXT_ROOT_LINK.c_str(), stamped_in.header.frame_id.c_str());
+            ROS_ERROR("grasp_precompute_action: TF_LISTENER could not find transform from %s to %s:",ROOT_LINK.c_str(), stamped_in.header.frame_id.c_str());
             return;
 
         }
@@ -279,6 +248,28 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
         tf::Transform yaw_offset(tf::createQuaternionFromYaw(YAW_SAMPLING_DIRECTION * YAW_DELTA),tf::Point(0,0,0));
         new_grasp_pose = grasp_pose * yaw_offset;
 
+        std::vector<geometry_msgs::Pose> waypoints(NUM_GRASP_POINTS);
+        for (int i = NUM_GRASP_POINTS - 1; i >= 0; --i) {
+
+            //cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
+            tf::Transform pre_grasp_offset(tf::Quaternion(0,0,0,1),tf::Point(-PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0),0,0));
+            new_pre_grasp_pose = new_grasp_pose * pre_grasp_offset;
+
+            tf::poseTFToMsg(new_pre_grasp_pose, waypoints[i]);
+
+        }
+
+        moveit_msgs::RobotTrajectory trajectory;
+        //ROS_INFO("Computing Cartesian path");
+        //int result = group->computeCartesianPath(waypoints, 0.05, 0.3, trajectory, false);
+        //ROS_INFO("Cartesian path result = %i",result);
+        std::vector<double> joint_goal(8, 0);
+        joint_goal[0] = 0.3;
+        group->setJointValueTarget(joint_goal);
+        moveit::planning_interface::MoveGroup::Plan plan;
+        int result = group->plan(plan);
+        ROS_INFO("Result = %i", result);
+/*
         // Check if all grasp points are feasible
         GRASP_FEASIBLE = true;
         int k = 0;
@@ -310,7 +301,7 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
                 break;
             }
         }
-
+*/
         //ROS_INFO("Yaw delta %f ",YAW_SAMPLING_DIRECTION * YAW_DELTA);
         // If the grasp is not feasible, change the yaw and the sampling direction
         if (!GRASP_FEASIBLE)
@@ -462,6 +453,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    // Start MoveIt group
+    group = new MoveGroup(Options(side+"_arm", "/amigo/robot_description", nh));
+
     // Start listening to the current joint measurements
     ros::Subscriber armsub = nh.subscribe("joint_measurements", 1, armcontrollerCB);
 
@@ -470,17 +464,14 @@ int main(int argc, char** argv)
 
     // IK marker publisher
     IKpospub = new ros::Publisher(nh.advertise<visualization_msgs::MarkerArray>("ik_position_markers", 1));
-    
-    // ToDo: make nice
-    nh_private.param<std::string>("tf_prefix", EXT_ROOT_LINK, "");
-    TIP_LINK = "/"+EXT_ROOT_LINK+"/"+TIP_LINK;
-    EXT_ROOT_LINK = "/"+EXT_ROOT_LINK+"/"+ROOT_LINK;
 
     ROS_INFO("Grasp precompute action initialized");
 
     ros::spin();
 
     delete TF_LISTENER;
+    delete group;
+    delete IKpospub;
 
     return 0;
 }
