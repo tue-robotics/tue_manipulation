@@ -245,9 +245,11 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
     while(ros::ok() && !GRASP_FEASIBLE && !SAMPLING_BOUNDARIES_REACHED )
     {
         // Define new_grasp_pose
+        ROS_INFO("Computing new grasp pose...");
         tf::Transform yaw_offset(tf::createQuaternionFromYaw(YAW_SAMPLING_DIRECTION * YAW_DELTA),tf::Point(0,0,0));
         new_grasp_pose = grasp_pose * yaw_offset;
 
+        ROS_INFO("Computing intermediate points...");
         std::vector<geometry_msgs::Pose> waypoints(NUM_GRASP_POINTS);
         for (int i = NUM_GRASP_POINTS - 1; i >= 0; --i) {
 
@@ -258,15 +260,18 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
             tf::poseTFToMsg(new_pre_grasp_pose, waypoints[i]);
 
         }
-
+        ROS_INFO("Starting MoveIt stuff...");
         moveit_msgs::RobotTrajectory trajectory;
         //ROS_INFO("Computing Cartesian path");
         //int result = group->computeCartesianPath(waypoints, 0.05, 0.3, trajectory, false);
         //ROS_INFO("Cartesian path result = %i",result);
-        std::vector<double> joint_goal(8, 0);
+        std::vector<double> joint_goal(8, 0.0);
         joint_goal[0] = 0.3;
+        ROS_INFO("Setting joint value");
         group->setJointValueTarget(joint_goal);
+        ROS_INFO("Instantiating plan...");
         moveit::planning_interface::MoveGroup::Plan plan;
+        ROS_INFO("Planning...");
         int result = group->plan(plan);
         ROS_INFO("Result = %i", result);
 /*
