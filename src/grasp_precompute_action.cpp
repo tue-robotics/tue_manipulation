@@ -39,7 +39,7 @@ typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction>
 typedef moveit::planning_interface::MoveGroup MoveGroup;
 typedef moveit::planning_interface::MoveGroup::Options Options;
 
-MoveGroup *group;
+//MoveGroup *group;
 
 ros::Publisher *IKpospub;
 
@@ -261,19 +261,41 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
 
         }
         ROS_INFO("Starting MoveIt stuff...");
-        moveit_msgs::RobotTrajectory trajectory;
+        ros::NodeHandle nh;
+        moveit::planning_interface::MoveGroup group(Options("left_arm", "/amigo/robot_description", nh));
+        //group = new MoveGroup(Options(side+"_arm", "/amigo/robot_description", nh));
+        
+        //moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+
+
+		geometry_msgs::Pose target_pose1;
+		target_pose1.orientation.w = 1.0;
+		target_pose1.position.x = 0.5;
+		target_pose1.position.y = 0.2;
+		target_pose1.position.z = 0.8;
+		group.setPoseTarget(target_pose1);
+		
+		moveit::planning_interface::MoveGroup::Plan my_plan;
+		bool success = group.plan(my_plan);
+        group.move();
+
+		ROS_INFO("Visualizing plan 1 (pose goal) %s",success?"":"FAILED");
+		/* Sleep to give Rviz time to visualize the plan. */
+		sleep(5.0);
+        break;
+        //moveit_msgs::RobotTrajectory trajectory;
         //ROS_INFO("Computing Cartesian path");
         //int result = group->computeCartesianPath(waypoints, 0.05, 0.3, trajectory, false);
         //ROS_INFO("Cartesian path result = %i",result);
-        std::vector<double> joint_goal(8, 0.0);
-        joint_goal[0] = 0.3;
-        ROS_INFO("Setting joint value");
-        group->setJointValueTarget(joint_goal);
-        ROS_INFO("Instantiating plan...");
-        moveit::planning_interface::MoveGroup::Plan plan;
-        ROS_INFO("Planning...");
-        int result = group->plan(plan);
-        ROS_INFO("Result = %i", result);
+        //std::vector<double> joint_goal(8, 0.0);
+        //joint_goal[0] = 0.3;
+        //ROS_INFO("Setting joint value");
+        //group->setJointValueTarget(joint_goal);
+        //ROS_INFO("Instantiating plan...");
+        //moveit::planning_interface::MoveGroup::Plan plan;
+        //ROS_INFO("Planning...");
+        //int result = group->plan(plan);
+        //ROS_INFO("Result = %i", result);
 /*
         // Check if all grasp points are feasible
         GRASP_FEASIBLE = true;
@@ -459,7 +481,8 @@ int main(int argc, char** argv)
     }
 
     // Start MoveIt group
-    group = new MoveGroup(Options(side+"_arm", "/amigo/robot_description", nh));
+    //group = new MoveGroup(Options(side+"_arm", "/amigo/robot_description", nh));
+    //group = new MoveGroup(Options("body", "/amigo/robot_description", nh));
 
     // Start listening to the current joint measurements
     ros::Subscriber armsub = nh.subscribe("joint_measurements", 1, armcontrollerCB);
@@ -475,7 +498,7 @@ int main(int argc, char** argv)
     ros::spin();
 
     delete TF_LISTENER;
-    delete group;
+    //delete group;
     delete IKpospub;
 
     return 0;
