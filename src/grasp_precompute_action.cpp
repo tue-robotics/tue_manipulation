@@ -239,6 +239,7 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
     while(ros::ok() && !GRASP_FEASIBLE && !SAMPLING_BOUNDARIES_REACHED )
     {
         // Define new_grasp_pose
+        ROS_INFO("Computing new grasp pose...");
         tf::Transform yaw_offset(tf::createQuaternionFromYaw(YAW_SAMPLING_DIRECTION * YAW_DELTA),tf::Point(0,0,0));
         new_grasp_pose = grasp_pose * yaw_offset;
 
@@ -400,7 +401,7 @@ int main(int argc, char** argv)
     ROS_INFO("Waiting for joint trajectory action");
 
     // Wait for the joint trajectory action server
-    Client client("joint_trajectory_action", true);
+    Client client(side + "_arm/joint_trajectory_action", true);
     client.waitForServer();
 
     ROS_INFO("Initialize grasp precompute server");
