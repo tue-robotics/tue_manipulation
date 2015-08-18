@@ -436,9 +436,9 @@ int main(int argc, char** argv)
     IKpospub = new ros::Publisher(nh.advertise<visualization_msgs::MarkerArray>("ik_position_markers", 1));
     
     // ToDo: make nice
-    nh_private.param<std::string>("tf_prefix", EXT_ROOT_LINK, "");
-    TIP_LINK = "/"+EXT_ROOT_LINK+"/"+TIP_LINK;
-    EXT_ROOT_LINK = "/"+EXT_ROOT_LINK+"/"+ROOT_LINK;
+    nh_private.param<std::string>(EXT_ROOT_LINK, "");
+    TIP_LINK = EXT_ROOT_LINK+"/"+TIP_LINK;
+    EXT_ROOT_LINK = EXT_ROOT_LINK+"/"+ROOT_LINK;
 
     ROS_INFO("Grasp precompute action initialized");
 
