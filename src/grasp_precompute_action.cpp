@@ -26,7 +26,7 @@ using namespace std;
 
 double MAX_YAW_DELTA,YAW_SAMPLING_STEP,PRE_GRASP_DELTA;
 //string SIDE;
-std::string ROOT_LINK, EXT_ROOT_LINK, TIP_LINK;
+std::string ROOT_LINK, TIP_LINK;
 
 int NUM_GRASP_POINTS = 0, PRE_GRASP_INBETWEEN_SAMPLING_STEPS = 0;
 
@@ -116,24 +116,24 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
 
 
     // If input frame is not /base_link, convert to base_link so that sampling over the yaw indicates the z-axes pointing up (whereas it wouldn't with e.g. '/torso')
-    if(stamped_in.header.frame_id.compare(EXT_ROOT_LINK))
+    if(stamped_in.header.frame_id.compare(ROOT_LINK))
     {
         ROS_DEBUG("Frame id was not BASE_LINK");
         // Create tmp variable
         geometry_msgs::PoseStamped tmp;
 
         // Perform the transformation to /base_link
-        if(TF_LISTENER->waitForTransform(EXT_ROOT_LINK, stamped_in.header.frame_id, stamped_in.header.stamp, ros::Duration(1.0)))
+        if(TF_LISTENER->waitForTransform(ROOT_LINK, stamped_in.header.frame_id, stamped_in.header.stamp, ros::Duration(1.0)))
         {
             try
-            {TF_LISTENER->transformPose(EXT_ROOT_LINK, stamped_in, tmp);}
+            {TF_LISTENER->transformPose(ROOT_LINK, stamped_in, tmp);}
             catch (tf::TransformException ex){
                 as->setAborted();
                 ROS_ERROR("%s",ex.what());
                 return;}
         }else{
             as->setAborted();
-            ROS_ERROR("grasp_precompute_action: TF_LISTENER could not find transform from %s to %s:",EXT_ROOT_LINK.c_str(), stamped_in.header.frame_id.c_str());
+            ROS_ERROR("grasp_precompute_action: TF_LISTENER could not find transform from %s to %s:",ROOT_LINK.c_str(), stamped_in.header.frame_id.c_str());
             return;
 
         }
@@ -436,9 +436,10 @@ int main(int argc, char** argv)
     IKpospub = new ros::Publisher(nh.advertise<visualization_msgs::MarkerArray>("ik_position_markers", 1));
     
     // ToDo: make nice
-    nh_private.param<std::string>(EXT_ROOT_LINK, "");
-    TIP_LINK = EXT_ROOT_LINK+"/"+TIP_LINK;
-    EXT_ROOT_LINK = EXT_ROOT_LINK+"/"+ROOT_LINK;
+//    nh_private.param<std::string>("tf_prefix",EXT_ROOT_LINK, "");
+//    TIP_LINK = EXT_ROOT_LINK+"/"+TIP_LINK;
+//    EXT_ROOT_LINK = EXT_ROOT_LINK+"/"+ROOT_LINK;
+//    EXT_ROOT_LINK = ROOT_LINK;
 
     ROS_INFO("Grasp precompute action initialized");
 
