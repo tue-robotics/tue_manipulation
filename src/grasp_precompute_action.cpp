@@ -261,6 +261,8 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
 
         }
 
+        // ToDo: reverse vector for clarity???
+
         /// Compute a plan to the first waypoint
         moveit::planning_interface::MoveGroup::Plan my_plan;
         group->setPoseTarget(waypoints[NUM_GRASP_POINTS-1]);
@@ -274,9 +276,36 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
             unsigned int size = my_plan.trajectory_.joint_trajectory.points.size();
             start_state.joint_state.position = my_plan.trajectory_.joint_trajectory.points[size-1].positions;
             group->setStartState(start_state);
-            group->setPoseTarget(waypoints[0]);
+
             moveit::planning_interface::MoveGroup::Plan my_second_plan;
-            GRASP_FEASIBLE = group->plan(my_second_plan);
+
+            /*
+            Currently, we have two approaches to make sure we follow the approach vector.
+            * The 'Plan' approach, which simply calls group->plan, hence using an RRT. This seems to be fast
+              but there is no guarantee for a straight path in Cartesian space
+            * Explicitly computing a Cartesian path. Seems less robust (gives no results more often) but
+              will always result in a straight path
+            */
+
+            // 'Plan' approach
+//            group->setPoseTarget(waypoints[0]);
+//            GRASP_FEASIBLE = group->plan(my_second_plan);
+
+            // Alternative: 'computeCartesianPath' approach
+            std::vector<geometry_msgs::Pose> wps(2);
+            wps[0] = waypoints[NUM_GRASP_POINTS-1];
+            wps[1] = waypoints[0];
+            moveit_msgs::RobotTrajectory cartesian_moveit_trajectory;
+            double res = group->computeCartesianPath(wps, 0.01, 10.0, cartesian_moveit_trajectory, false);
+            // Check if more than 90% of the trajectory has been computed
+            if (res > 0.9)
+            {
+                GRASP_FEASIBLE = true;
+            } else{
+                GRASP_FEASIBLE = false;
+            }
+            my_second_plan.trajectory_ = cartesian_moveit_trajectory;
+
             // If still feasible, append trajectory
             if (GRASP_FEASIBLE)
             {
@@ -286,20 +315,6 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
                     my_plan.trajectory_.joint_trajectory.points.push_back(my_second_plan.trajectory_.joint_trajectory.points[i]);
                 }
             }
-
-//            std::vector<geometry_msgs::Pose> wps(2);
-//            wps[0] = waypoints[0];
-//            wps[1] = waypoints[NUM_GRASP_POINTS-1];
-//            moveit_msgs::RobotTrajectory cartesian_moveit_trajectory;
-//            double res = group->computeCartesianPath(wps, 0.1, 1.0, cartesian_moveit_trajectory, false);
-//            // Check if more than 90% of the trajectory has been computed
-//            if (res > 0.9)
-//            {
-//                GRASP_FEASIBLE = true;
-//            } else{
-//                GRASP_FEASIBLE = false;
-//            }
-//            my_plan.trajectory_ = cartesian_moveit_trajectory;
         }
 
         /// If we have a plan: execute it
@@ -307,6 +322,8 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
         {
             GRASP_FEASIBLE = group->execute(my_plan);
         }
+
+        SAMPLING_BOUNDARIES_REACHED = true;
 
 //        GRASP_FEASIBLE = group->move();
 
