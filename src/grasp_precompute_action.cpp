@@ -261,58 +261,55 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
 
         }
 
-//        group->setPoseTarget(*waypoints.end());
-        group->setPoseTarget(waypoints[0]);
-		
-		moveit::planning_interface::MoveGroup::Plan my_plan;
-        GRASP_FEASIBLE = group->move();
+        /// Compute a plan to the first waypoint
+        moveit::planning_interface::MoveGroup::Plan my_plan;
+        group->setPoseTarget(waypoints[NUM_GRASP_POINTS-1]);
+        GRASP_FEASIBLE = group->plan(my_plan);
 
-        //moveit_msgs::RobotTrajectory trajectory;
-        //ROS_INFO("Computing Cartesian path");
-        //int result = group->computeCartesianPath(waypoints, 0.05, 0.3, trajectory, false);
-        //ROS_INFO("Cartesian path result = %i",result);
-        //std::vector<double> joint_goal(8, 0.0);
-        //joint_goal[0] = 0.3;
-        //ROS_INFO("Setting joint value");
-        //group->setJointValueTarget(joint_goal);
-        //ROS_INFO("Instantiating plan...");
-        //moveit::planning_interface::MoveGroup::Plan plan;
-        //ROS_INFO("Planning...");
-        //int result = group->plan(plan);
-        //ROS_INFO("Result = %i", result);
-/*
-        // Check if all grasp points are feasible
-        GRASP_FEASIBLE = true;
-        int k = 0;
-        for(int i = NUM_GRASP_POINTS - 1; i >= 0; --i)
+        /// If we have a pre-grasp vector, compute the rest of the path
+        if (NUM_GRASP_POINTS > 1 && GRASP_FEASIBLE)
         {
-            //cout << i << " offset = " << -PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0) << endl;
-            tf::Transform pre_grasp_offset(tf::Quaternion(0,0,0,1),tf::Point(-PRE_GRASP_DELTA*i/(PRE_GRASP_INBETWEEN_SAMPLING_STEPS+1.0),0,0));
-            new_pre_grasp_pose = new_grasp_pose * pre_grasp_offset;
-
-            KDL::Frame new_pre_grasp_pose_kdl;
-            tf::poseTFToKDL(new_pre_grasp_pose, new_pre_grasp_pose_kdl);
-
-            KDL::JntArray joint_solution;
-            if (ik_solver.cartesianToJoints(new_pre_grasp_pose_kdl, joint_solution, joint_seeds))
+            moveit_msgs::RobotState start_state;
+            start_state.joint_state.name = my_plan.trajectory_.joint_trajectory.joint_names;
+            unsigned int size = my_plan.trajectory_.joint_trajectory.points.size();
+            start_state.joint_state.position = my_plan.trajectory_.joint_trajectory.points[size-1].positions;
+            group->setStartState(start_state);
+            group->setPoseTarget(waypoints[0]);
+            moveit::planning_interface::MoveGroup::Plan my_second_plan;
+            GRASP_FEASIBLE = group->plan(my_second_plan);
+            // If still feasible, append trajectory
+            if (GRASP_FEASIBLE)
             {
-                pre_grasp_solution[k] = joint_solution;
-                ++k;
-
-                // Set the seed state for the next point to the solution of the previous point
-                joint_seeds = joint_solution;
-
-                // Fill the IK markers
-                IKPosMarkerArray.markers[i].id = i;
-                tf::poseTFToMsg(grasp_pose * yaw_offset * pre_grasp_offset, IKPosMarkerArray.markers[i].pose);
+                for (unsigned int i = 0; i < my_second_plan.trajectory_.joint_trajectory.points.size(); i++)
+                {
+                    my_second_plan.trajectory_.joint_trajectory.points[i].time_from_start += my_plan.trajectory_.joint_trajectory.points[size-1].time_from_start;
+                    my_plan.trajectory_.joint_trajectory.points.push_back(my_second_plan.trajectory_.joint_trajectory.points[i]);
+                }
             }
-            else
-            {
-                GRASP_FEASIBLE = false;
-                break;
-            }
+
+//            std::vector<geometry_msgs::Pose> wps(2);
+//            wps[0] = waypoints[0];
+//            wps[1] = waypoints[NUM_GRASP_POINTS-1];
+//            moveit_msgs::RobotTrajectory cartesian_moveit_trajectory;
+//            double res = group->computeCartesianPath(wps, 0.1, 1.0, cartesian_moveit_trajectory, false);
+//            // Check if more than 90% of the trajectory has been computed
+//            if (res > 0.9)
+//            {
+//                GRASP_FEASIBLE = true;
+//            } else{
+//                GRASP_FEASIBLE = false;
+//            }
+//            my_plan.trajectory_ = cartesian_moveit_trajectory;
         }
-*/
+
+        /// If we have a plan: execute it
+        if (GRASP_FEASIBLE > 0)
+        {
+            GRASP_FEASIBLE = group->execute(my_plan);
+        }
+
+//        GRASP_FEASIBLE = group->move();
+
         //ROS_INFO("Yaw delta %f ",YAW_SAMPLING_DIRECTION * YAW_DELTA);
         // If the grasp is not feasible, change the yaw and the sampling direction
         if (!GRASP_FEASIBLE)
