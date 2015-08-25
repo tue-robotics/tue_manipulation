@@ -451,8 +451,8 @@ int main(int argc, char** argv)
     ROS_INFO("Initialize IK clients");
 
     // Initialize the IK solver
-
     std::string urdf_description;
+
     nh.param<std::string>("robot_description", urdf_description, "");
     bool use_constrained_solver;
     nh_private.param("use_constrained_solver", use_constrained_solver, false); // Indicates whether to use the constrained IK solver developed for SERGIO
