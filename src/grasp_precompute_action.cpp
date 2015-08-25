@@ -1,6 +1,8 @@
 // Author: Rob Janssen & the two stooges
 // Modifications: Janno Lunenburg
 
+#include "tue/manipulation/grasp_precompute.h"
+
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
@@ -421,6 +423,8 @@ int main(int argc, char** argv)
     ros::NodeHandle nh_private("~");
 
     TF_LISTENER = new tf::TransformListener();
+
+    //GraspPrecompute gp;
 
     // Get the parameters
     std::string side;
