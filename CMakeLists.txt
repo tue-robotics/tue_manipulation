@@ -99,6 +99,9 @@ target_link_libraries(test_robot_ik tue_manipulation)
 add_executable(test_grasp_precompute test/test_grasp_precompute.cpp)
 target_link_libraries(test_grasp_precompute tue_manipulation)
 
+add_executable(test_moveit test/test_moveit.cpp)
+target_link_libraries(test_moveit tue_manipulation)
+
 add_executable(test_amigo_dwa test/test_amigo_dwa.cpp)
 target_link_libraries(test_amigo_dwa tue_manipulation)
 
