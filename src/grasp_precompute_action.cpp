@@ -419,12 +419,16 @@ int main(int argc, char** argv)
 
     ros::init(argc, argv, "grasp_precompute_server");
 
+    /*
+    GraspPrecompute gp;
+    ros::spin();
+    return 0;
+    */
+
     ros::NodeHandle nh;
     ros::NodeHandle nh_private("~");
 
     TF_LISTENER = new tf::TransformListener();
-
-    //GraspPrecompute gp;
 
     // Get the parameters
     std::string side;

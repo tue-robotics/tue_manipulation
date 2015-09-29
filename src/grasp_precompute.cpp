@@ -35,11 +35,13 @@ GraspPrecompute::GraspPrecompute()
         return;
     }
 
-    nh_private.param("pre_grasp_delta", pre_grasp_delta_, 0.05); // offset for pre-grasping in cartesian x-direction [m]
+    nh_private.param("pre_grasp_delta", pre_grasp_delta_, 0.05);
+    nh_private.param("max_yaw_delta", max_yaw_, 2.0);
+    nh_private.param("yaw_sampling_step", yaw_sampling_step_, 0.2);
 
     /// Start action server
     as_ = new actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction>(nh, "grasp_precompute", boost::bind(&GraspPrecompute::execute, this, _1), false);
-    //as_.start(); ToDo: enable this when the work is done ;)
+    as_->start();
 
     /// MoveIt
     moveit::planning_interface::MoveGroup::Options options(side+"_arm", "/amigo/robot_description", nh);
@@ -58,6 +60,7 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
     /// Initialize variables
     unsigned int num_grasp_points = 1;
     unsigned int pre_grasp_inbetween_sampling_steps = 20; // Hardcoded, we might not need this... //PRE_GRASP_INBETWEEN_SAMPLING_STEPS
+    moveit::planning_interface::MoveGroup::Plan my_plan;
 
     /// Check for absolute or delta (and ambiqious goals)
     bool absolute_requested=false, delta_requested=false;
@@ -142,6 +145,7 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
 
     ROS_INFO("Starting sampling...");
 
+    /// Try to determine a trajectory
     while(ros::ok() && !grasp_feasible && !sampling_boundaries_reached )
     {
         // Define new_grasp_pose
@@ -164,9 +168,10 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
         // ToDo: reverse vector for clarity???
 
         /// Compute a plan to the first waypoint
-        moveit::planning_interface::MoveGroup::Plan my_plan;
         moveit_group_->setPoseTarget(waypoints[num_grasp_points-1]);
+        ROS_INFO("x: %f, y: %f, z: %f", waypoints[num_grasp_points-1].position.x, waypoints[num_grasp_points-1].position.y, waypoints[num_grasp_points-1].position.z);
         grasp_feasible = moveit_group_->plan(my_plan);
+        ROS_INFO("Grasp feasible: %i", grasp_feasible);
 
         /// If we have a pre-grasp vector, compute the rest of the path
         if (num_grasp_points > 1 && grasp_feasible)
@@ -217,6 +222,36 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
                 }
             }
         }
+
+        /// If grasp not feasible, resample yaw
+        if (grasp_feasible != 1)
+        {
+            ROS_DEBUG("Not all grasp points feasible: resampling yaw");
+            yaw_delta = yaw_delta + yaw_sampling_step_;
+            yaw_sampling_direction = -1 * yaw_sampling_direction;
+
+            if(yaw_delta > max_yaw_)
+            {
+                ROS_WARN("Sampling boundaries reached. No feasible sample found\n");
+                sampling_boundaries_reached = true;
+                as_->setAborted(); // ToDo: set failed
+                return;
+
+            }
+        }
     }
+
+    /// Planning succeeded, so execute it!
+    grasp_feasible = moveit_group_->execute(my_plan);
+
+    if (grasp_feasible)
+    {
+        ROS_INFO("Arm motion succeeded");
+        as_->setSucceeded();
+    } else {
+        ROS_INFO("Arm motion failed");
+        as_->setAborted(); // ToDo: set failed
+    }
+
 
 }
