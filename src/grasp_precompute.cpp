@@ -46,6 +46,9 @@ GraspPrecompute::GraspPrecompute()
     /// MoveIt
     moveit::planning_interface::MoveGroup::Options options(side+"_arm", "/amigo/robot_description", nh);
     moveit_group_ = new moveit::planning_interface::MoveGroup(options);
+    moveit_group_->setPoseReferenceFrame(root_link_);
+    moveit_group_->setEndEffectorLink(tip_link_);
+
 }
 
 GraspPrecompute::~GraspPrecompute()
@@ -167,22 +170,12 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
 
         // ToDo: reverse vector for clarity???
 
-        /// Compute a plan to the first waypoint
-//        robot_state::RobotStatePtr rs = moveit_group_->getCurrentState();
-//        ROS_INFO("Joint state: %f", rs->getJointPositions("torso_joint"));
-//        ROS_INFO("Robot state has %i joints", rs->joint_state.name.size() );
-//        for (unsigned int i = 0; i < rs->joint_state.name.size(); i++)
-//        {
-//			ROS_INFO("Joint %s: %f", rs->joint_state.name[i].c_str(), rs->joint_state.position[i]);
-//		}
-        
-        moveit_group_->setPoseTarget(waypoints[num_grasp_points-1], tip_link_);
-        moveit_group_->setPoseReferenceFrame(root_link_);
+        /// Compute a plan to the first waypoint        
+        moveit_group_->setPoseTarget(waypoints[num_grasp_points-1]);
         moveit_group_->setGoalTolerance(0.01);
-        //moveit_group_->setPlannerId("RRTConnectkConfigDefault");
-        ROS_INFO("x: %f, y: %f, z: %f", waypoints[num_grasp_points-1].position.x, waypoints[num_grasp_points-1].position.y, waypoints[num_grasp_points-1].position.z);
+//        ROS_INFO("x: %f, y: %f, z: %f", waypoints[num_grasp_points-1].position.x, waypoints[num_grasp_points-1].position.y, waypoints[num_grasp_points-1].position.z);
         grasp_feasible = moveit_group_->plan(my_plan);
-        ROS_INFO("Grasp feasible: %i", grasp_feasible);
+//        ROS_INFO("Grasp feasible: %i", grasp_feasible);
 
         /// If we have a pre-grasp vector, compute the rest of the path
         if (num_grasp_points > 1 && grasp_feasible)
