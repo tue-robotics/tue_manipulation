@@ -44,11 +44,6 @@ private:
 
     /** Maximum offset from desired yaw [rad] */
     double max_yaw_;
-    /*
-    nh_private.param("yaw_sampling_step", YAW_SAMPLING_STEP, 0.2); //
-    nh_private.param("pre_grasp_delta", PRE_GRASP_DELTA, 0.05); // Offset for pre-grasping in cartesian x-direction [m]
-    nh_private.param("pre_grasp_inbetween_sampling_steps", PRE_GRASP_INBETWEEN_SAMPLING_STEPS, 0); // offset for pre-grasping in cartesian x-direction [m]
-    */
 
     /** MoveIt group */
     moveit::planning_interface::MoveGroup* moveit_group_;
