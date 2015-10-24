@@ -24,11 +24,17 @@ public:
 
 private:
 
-    /** Action server */
+    /** Cartesian goal Action server */
     actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction>* as_;
 
-    /** Goal callback function */
+    /** Cartesian goal callback function */
     void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal);
+
+    /** Joint goal action server */
+    actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>* jas_;
+
+    /** Joint goal callback function */
+    void joint_execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal);
 
     /** TF listener */
     tf::TransformListener* listener_;

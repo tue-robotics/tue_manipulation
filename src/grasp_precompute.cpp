@@ -39,21 +39,26 @@ GraspPrecompute::GraspPrecompute()
     nh_private.param("max_yaw_delta", max_yaw_, 2.0);
     nh_private.param("yaw_sampling_step", yaw_sampling_step_, 0.2);
 
-    /// Start action server
-    as_ = new actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction>(nh, "grasp_precompute", boost::bind(&GraspPrecompute::execute, this, _1), false);
-    as_->start();
-
     /// MoveIt
     moveit::planning_interface::MoveGroup::Options options(side+"_arm", "/amigo/robot_description", nh);
     moveit_group_ = new moveit::planning_interface::MoveGroup(options);
     moveit_group_->setPoseReferenceFrame(root_link_);
     moveit_group_->setEndEffectorLink(tip_link_);
 
+    /// Start Cartesian action server
+    as_ = new actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction>(nh, "grasp_precompute", boost::bind(&GraspPrecompute::execute, this, _1), false);
+    as_->start();
+
+    /// Start joint action server
+    jas_ = new actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>(nh, "joint_trajectory", boost::bind(&GraspPrecompute::joint_execute, this, _1), false);
+    jas_->start();
+
 }
 
 GraspPrecompute::~GraspPrecompute()
 {
     delete as_;
+    delete jas_;
     delete listener_;
     delete moveit_group_;
 }
@@ -246,6 +251,8 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
         }
     }
 
+    // ToDo: make nice
+
     /// Planning succeeded, so execute it!
     grasp_feasible = moveit_group_->execute(my_plan);
 
@@ -258,5 +265,51 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
         as_->setAborted(); // ToDo: set failed
     }
 
+}
+
+
+void GraspPrecompute::joint_execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal)
+{
+
+    /// Check goal
+    // ToDo
+
+    /// Initialize variables
+    moveit::planning_interface::MoveGroup::Plan my_plan;
+
+    /// Initialize MoveIt
+    moveit_group_->setStartStateToCurrentState();
+    // goal->trajectory.joint_names
+    // goal->trajectory.points.positions
+
+    /// Plan the first point
+    std::map<std::string, double> trajectory_point;
+    for (unsigned int i = 0; i < goal->trajectory.joint_names.size(); ++i)
+    {
+        trajectory_point[ goal->trajectory.joint_names[i] ] = goal->trajectory.points[0].positions[i];
+    }
+    moveit_group_->setJointValueTarget(trajectory_point);
+    bool feasible = moveit_group_->plan(my_plan);
+
+    /// Plan the rest of the points
+    // ToDo
+
+    if (!feasible)
+    {
+        ROS_WARN("Joint goal not feasible, aborting");
+        jas_->setAborted();
+        return;
+    }
+
+    /// Execute
+    bool succeeded = moveit_group_->execute(my_plan);
+    if (feasible)
+    {
+        ROS_INFO("Arm motion succeeded");
+        jas_->setSucceeded();
+    } else {
+        ROS_INFO("Arm motion failed");
+        jas_->setAborted(); // ToDo: set failed
+    }
 
 }
