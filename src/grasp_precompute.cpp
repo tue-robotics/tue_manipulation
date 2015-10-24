@@ -1,6 +1,9 @@
 #include "tue/manipulation/grasp_precompute.h"
 
 #include <ros/ros.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/trajectory_processing/iterative_time_parameterization.h>
 
 const double EPS = 1e-6;
 
@@ -219,12 +222,33 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
             } else{
                 grasp_feasible = false;
             }
-            my_second_plan.trajectory_ = cartesian_moveit_trajectory;
+
+            /// Interpolate to get velocities
+            // First to create a RobotTrajectory object
+            robot_trajectory::RobotTrajectory rt(moveit_group_->getCurrentState()->getRobotModel(), moveit_group_->getName());
+
+            // Second get a RobotTrajectory from trajectory
+            robot_state::RobotState rs(moveit_group_->getCurrentState()->getRobotModel());
+            for (unsigned int i = 0; i < cartesian_moveit_trajectory.joint_trajectory.joint_names.size(); i++){
+                rs.setJointPositions(cartesian_moveit_trajectory.joint_trajectory.joint_names[i], &cartesian_moveit_trajectory.joint_trajectory.points[0].positions[i]);
+            }
+            rt.setRobotTrajectoryMsg(rs, cartesian_moveit_trajectory);
+
+            // Third create a IterativeParabolicTimeParameterization object
+            trajectory_processing::IterativeParabolicTimeParameterization iptp;
+
+            // Fourth compute computeTimeStamps
+            if (!iptp.computeTimeStamps(rt)){
+                ROS_WARN("Failed to calculate velocities for cartesian path.");
+                grasp_feasible = false;
+            }
 
             // If still feasible and the entire trajectory is to be executed (FIRST_JOINT_POS_ONLY is false), append trajectory
             // ToDo: make nice!
             if (grasp_feasible && !goal->FIRST_JOINT_POS_ONLY)
             {
+                rt.getRobotTrajectoryMsg(cartesian_moveit_trajectory);
+                my_second_plan.trajectory_ = cartesian_moveit_trajectory;
                 for (unsigned int i = 0; i < my_second_plan.trajectory_.joint_trajectory.points.size(); i++)
                 {
                     my_second_plan.trajectory_.joint_trajectory.points[i].time_from_start += my_plan.trajectory_.joint_trajectory.points[size-1].time_from_start;
