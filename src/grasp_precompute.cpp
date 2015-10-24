@@ -171,6 +171,7 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
         // ToDo: reverse vector for clarity???
 
         /// Compute a plan to the first waypoint        
+        moveit_group_->setStartStateToCurrentState();
         moveit_group_->setPoseTarget(waypoints[num_grasp_points-1]);
         moveit_group_->setGoalTolerance(0.01);
 //        ROS_INFO("x: %f, y: %f, z: %f", waypoints[num_grasp_points-1].position.x, waypoints[num_grasp_points-1].position.y, waypoints[num_grasp_points-1].position.z);
