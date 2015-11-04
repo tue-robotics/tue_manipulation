@@ -6,12 +6,27 @@
 #include <kdl/chain.hpp>
 #include <kdl/jntarray.hpp>
 
+#include <geolib/datatypes.h>
+
 #include <boost/shared_ptr.hpp>
 
 namespace tue
 {
 namespace manipulation
 {
+
+// ----------------------------------------------------------------------------------------------------
+
+class Constraint
+{
+
+public:
+
+    // Returns cost to fullfil constrained. 0 means that constraint is fullfilled.
+    virtual double test(const geo::Pose3D& pose) const = 0;
+};
+
+// ----------------------------------------------------------------------------------------------------
 
 class DWA
 {
@@ -25,11 +40,19 @@ public:
     bool initFromURDF(const std::string& urdf, const std::string root_name,
                       const std::string& tip_name, std::string& error);
 
-    double calculateVelocity(const KDL::JntArray& q_current, unsigned int q);
+    void setConstraint(Constraint* c)
+    {
+        delete constraint_;
+        constraint_ = c;
+    }
+
+    void calculateVelocity(const KDL::JntArray& q_current, double dt, std::vector<double>& q_wanted) const;
 
     bool getJointIndex(const std::string& name, unsigned int& i_joint) const;
 
-    const std::string& getJointName(unsigned int i_joint) { return joint_names_[i_joint]; }
+    const std::string& getJointName(unsigned int i_joint) const { return joint_names_[i_joint]; }
+
+    const std::vector<std::string>& getJointNames() const { return joint_names_; }
 
 private:
 
@@ -43,6 +66,8 @@ private:
     std::map<std::string, unsigned int> joint_name_to_index_;
 
     std::vector<unsigned int> joint_index_to_segment_index_;
+
+    Constraint* constraint_;
 
 };
 

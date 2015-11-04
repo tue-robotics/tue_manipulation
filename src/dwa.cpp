@@ -25,7 +25,7 @@ geo::Pose3D toGeo(const KDL::Frame& f)
 
 // ----------------------------------------------------------------------------------------------------
 
-DWA::DWA()
+DWA::DWA() : constraint_(NULL)
 {
 }
 
@@ -33,12 +33,13 @@ DWA::DWA()
 
 DWA::~DWA()
 {
+    delete constraint_;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 bool DWA::initFromURDF(const std::string& urdf, const std::string root_name,
-                            const std::string& tip_name, std::string& error)
+                       const std::string& tip_name, std::string& error)
 {
     urdf::Model robot_model;
     KDL::Tree tree;
@@ -85,6 +86,8 @@ bool DWA::initFromURDF(const std::string& urdf, const std::string root_name,
     unsigned int j = 0;
     for(unsigned int i = 0; i < chain_.getNrOfSegments(); ++i)
     {
+//        std::cout << chain_.getSegment(i).getName() << std::endl;
+
         const KDL::Joint& kdl_joint = chain_.getSegment(i).getJoint();
         if (kdl_joint.getType() != KDL::Joint::None)
         {
@@ -127,75 +130,74 @@ bool DWA::getJointIndex(const std::string& name, unsigned int& i_joint) const
 
 // ----------------------------------------------------------------------------------------------------
 
-double testObjective(const geo::Pose3D& pose, const geo::Pose3D& goal)
+void DWA::calculateVelocity(const KDL::JntArray& q_current, double dt, std::vector<double>& q_wanted) const
 {
-    double dist_sq = (goal.t - pose.t).length2();
-
-    double rot1 = std::abs((pose.R * geo::Vector3(0.1, 0, 0)).z);
-    double rot2 = std::abs((pose.R * geo::Vector3(0, 0.1, 0)).z);
-
-    return -dist_sq - rot1 - rot2;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-double DWA::calculateVelocity(const KDL::JntArray& q_current, unsigned int i_joint)
-{
-    unsigned int i_seg = joint_index_to_segment_index_[i_joint];
-
-    KDL::Frame f_before = KDL::Frame::Identity();
-    KDL::Frame f_after = KDL::Frame::Identity();
-
-    unsigned int j = 0;
-    const KDL::Segment* q_seg = 0;    
-    for(unsigned int i = 0; i < chain_.getNrOfSegments(); ++i)
+    if (!constraint_)
     {
-        double pos;
-        const KDL::Segment& seg = chain_.getSegment(i);
-        if (seg.getJoint().getType() != KDL::Joint::None)
-        {
-            pos = q_current(j);
-            ++j;
-        }
-        else
-        {
-            pos = 0;
-        }
-
-        KDL::Frame f = seg.pose(pos);
-
-        if (i < i_seg)
-            f_before = f_before * f;
-        else if (i > i_seg)
-            f_after = f_after * f;
-        else
-            q_seg = &seg;
+        for(unsigned int i = 0; i < q_current.rows(); ++i)
+            q_wanted[i] = q_current(i);
+        return;
     }
 
-    double best_fitness = -1e10;
-    double best_vel = 0;
-
-    double pos = q_current(i_joint);
-    for(double vel = -0.4; vel < 0.41; vel += 0.05)
+    for(unsigned int i_joint = 0; i_joint < q_current.rows(); ++i_joint)
     {
-        double p = pos + vel;
 
-//        std::cout << q_min_(q) << ", " << q_max_(q) << std::endl;
+        unsigned int i_seg = joint_index_to_segment_index_[i_joint];
 
-        if (p > q_min_(i_joint) && p < q_max_(i_joint))
+        KDL::Frame f_before = KDL::Frame::Identity();
+        KDL::Frame f_after = KDL::Frame::Identity();
+
+        unsigned int j = 0;
+        const KDL::Segment* q_seg = 0;
+        for(unsigned int i = 0; i < chain_.getNrOfSegments(); ++i)
         {
-            KDL::Frame f = f_before * q_seg->pose(p) * f_after;
-
-            double fitness = testObjective(toGeo(f), geo::Pose3D(0.5, -0.3, 0.5));
-            if (fitness > best_fitness)
+            double pos;
+            const KDL::Segment& seg = chain_.getSegment(i);
+            if (seg.getJoint().getType() != KDL::Joint::None)
             {
-                best_fitness = fitness;
-                best_vel = vel;
+                pos = q_current(j);
+                ++j;
+            }
+            else
+            {
+                pos = 0;
+            }
+
+            KDL::Frame f = seg.pose(pos);
+
+            if (i < i_seg)
+                f_before = f_before * f;
+            else if (i > i_seg)
+                f_after = f_after * f;
+            else
+                q_seg = &seg;
+        }
+
+        double best_dist = 1e10;
+        double best_vel = 0;
+
+        double pos = q_current(i_joint);
+        for(double vel = -0.4; vel < 0.41; vel += 0.01)
+        {
+            double p = pos + vel;
+
+            //        std::cout << q_min_(q) << ", " << q_max_(q) << std::endl;
+
+            if (p > q_min_(i_joint) && p < q_max_(i_joint))
+            {
+                KDL::Frame f = f_before * q_seg->pose(p) * f_after;
+
+                double dist = constraint_->test(toGeo(f));
+                if (dist < best_dist)
+                {
+                    best_dist = dist;
+                    best_vel = vel;
+                }
             }
         }
-    }
 
-    return best_vel;
+        q_wanted[i_joint] = q_current(i_joint) + (best_vel * dt);
+    }
 }
 
 
