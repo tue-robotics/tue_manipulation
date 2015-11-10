@@ -37,8 +37,8 @@ generate_messages(
 )
 
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES
+  INCLUDE_DIRS include
+  LIBRARIES tue_manipulation
   CATKIN_DEPENDS  
     actionlib_msgs
     control_msgs
@@ -67,6 +67,8 @@ target_link_libraries(constrained_ik_solver ${catkin_LIBRARIES})
 add_library(tue_manipulation
     src/ik_solver.cpp    include/tue/manipulation/ik_solver.h
     src/dwa.cpp          include/tue/manipulation/dwa.h
+    src/reference_generator.cpp      include/tue/manipulation/reference_generator.h
+    src/reference_interpolator.cpp   include/tue/manipulation/reference_interpolator.h
 )
 target_link_libraries(tue_manipulation constrained_ik_solver ${catkin_LIBRARIES})
 
