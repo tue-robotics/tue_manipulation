@@ -31,6 +31,16 @@ public:
         max_positions_[idx] = max_pos;
     }
 
+    void setMaxVelocity(unsigned int idx, double max_vel)
+    {
+        max_velocities_[idx] = max_vel;
+    }
+
+    void setMaxAcceleration(unsigned int idx, double max_acc)
+    {
+        max_accelerations_[idx] = max_acc;
+    }
+
     bool setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::stringstream& ss);
 
     bool calculatePositionReferences(const std::vector<double>& positions, double dt,
