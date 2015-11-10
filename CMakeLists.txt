@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
     geolib2 # Temp
     message_generation
     moveit_ros_planning_interface
+    sensor_msgs
+    std_msgs
 )
 
 add_message_files(
@@ -38,12 +40,14 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES
-  CATKIN_DEPENDS 
-    message_runtime
+  CATKIN_DEPENDS  
     actionlib_msgs
     control_msgs
-    tue_msgs
     diagnostic_msgs
+    message_runtime
+    sensor_msgs
+    std_msgs
+    tue_msgs
     visualization_msgs
 #  DEPENDS
 )
