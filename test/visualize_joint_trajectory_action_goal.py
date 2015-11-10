@@ -3,6 +3,7 @@
 import rospy
 from control_msgs.msg import FollowJointTrajectoryActionGoal
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 rospy.init_node('visualize_joint_trajectory_action_goal')
 
@@ -18,6 +19,7 @@ def callback(goal):
 			joints[goal.goal.trajectory.joint_names[index]]["accelerations"].append(joint_point)
 
 	i = 1
+	pp = PdfPages('/tmp/plots.pdf')
 	for name, points in joints.iteritems():
 
 		plt.figure(i)
@@ -38,7 +40,10 @@ def callback(goal):
 
 		i+=1
 
+		plt.savefig(pp, format='pdf')
+
 	plt.draw()
+	pp.close()
 
 plt.ion()
 
