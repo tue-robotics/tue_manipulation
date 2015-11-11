@@ -23,6 +23,7 @@ std::ostream& operator<<(std::ostream& out, const std::vector<double>& v)
 
 // ----------------------------------------------------------------------------------------------------
 
+// Interpolate using Hermite curve
 void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
                       const trajectory_msgs::JointTrajectoryPoint& p0,
                       const trajectory_msgs::JointTrajectoryPoint& p1,
@@ -36,16 +37,30 @@ void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
     p_out.velocities.resize(njoints);
     p_out.accelerations.resize(njoints);
 
+    // Transform time to [0, 1]
+    double f = t / T;
+
+    // Pre-calculate some things
+    double f2 = f * f;
+    double f3 = f * f2;
+
     // Interpolate for every joint
     for(unsigned int k = 0; k < njoints; ++k)
     {
-        double a = p0.positions[k];
-        double b = p0.velocities[k];
-        double c = (-3*p0.positions[k] + 3*p1.positions[k] - 2*T*p0.velocities[k] - T*p1.velocities[k]) / T*T;
-        double d = (2*p0.positions[k] - 2*p1.positions[k] + T*p0.velocities[k] + T*p1.velocities[k]) / T*T*T;
-        p_out.positions[k] = a + b*t + c*t*t + d*t*t*t;
-        p_out.velocities[k] = b + 2*c*t + 3*d*t*t;
-        p_out.accelerations[k] = 2*c + 6*d*t;
+        p_out.positions[k] = (2 * f3 - 3 * f2 + 1) * p0.positions[k]
+                + (f3 - 2 * f2 + f) * (p0.velocities[k] * T)
+                + (-2 * f3 + 3 * f2) * p1.positions[k]
+                + (f3 - f2) * (p1.velocities[k] * T);
+
+        p_out.velocities[k] = (6 * f2 - 6 * f) * p0.positions[k] / T
+                + (3 * f2 - 4 * f + 1) * p0.velocities[k]
+                + (-6 * f2 + 6 * f) * p1.positions[k] / T
+                + (3 * f2 - 2 * f) * p1.velocities[k];
+
+        p_out.accelerations[k] = ((12 * f - 6) * p0.positions[k]
+                + (6 * f - 4) * (p0.velocities[k] * T)
+                + (-12 * f + 6) * p1.positions[k]
+                + (6 * f - 2) * (p1.velocities[k] * T) / T); // Not sure this is right!
     }
 
     p_out.time_from_start = ros::Duration(t_abs);
@@ -144,6 +159,8 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     sub_goal_idx_ = 0;
     time_since_start_ = 0;
 
+//    graph_viewer_.clear();
+
     if (goal.trajectory.points.empty())
     {
         is_idle_ = true;
@@ -241,6 +258,9 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
                 is_idle_ = true;
                 return true;
             }
+
+//            graph_viewer_.addPoint(0, 1, time_since_start_, sub_goal.positions[0], sub_goal.velocities[0]);
+
         }
         else
         {
@@ -273,10 +293,12 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
             interpolators_[joint_idx].reset(p_interpolated.positions[i],
                                             p_interpolated.velocities[i]);
         }
+
+//        graph_viewer_.addPoint(0, 0, time_since_start_, p_interpolated.positions[0], p_interpolated.velocities[0]);
     }
     else
     {
-//        std::cout << "NORMAL! " << time_since_start_ << std::endl;
+//        graph_viewer_.clear();
 
         for(unsigned int i = 0; i < num_goal_joints_; ++i)
         {
@@ -290,6 +312,8 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
             references[joint_idx] = ref.pos;
         }
     }
+
+//    graph_viewer_.view();
 
     return true;
 }
