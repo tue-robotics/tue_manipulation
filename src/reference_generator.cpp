@@ -18,9 +18,9 @@ void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
     double t = t_abs - p0.time_from_start.toSec();
     unsigned int njoints = p0.positions.size();
 
-    std::vector<double> q(njoints, 0.0);
-    std::vector<double> qdot(njoints, 0.0);
-    std::vector<double> qddot(njoints, 0.0);
+    p_out.positions.resize(njoints);
+    p_out.velocities.resize(njoints);
+    p_out.accelerations.resize(njoints);
 
     // Interpolate for every joint
     for(unsigned int k = 0; k < njoints; ++k)
@@ -29,14 +29,11 @@ void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
         double b = p0.velocities[k];
         double c = (-3*p0.positions[k] + 3*p1.positions[k] - 2*T*p0.velocities[k] - T*p1.velocities[k]) / T*T;
         double d = (2*p0.positions[k] - 2*p1.positions[k] + T*p0.velocities[k] + T*p1.velocities[k]) / T*T*T;
-        q[k] = a + b*t + c*t*t + d*t*t*t;
-        qdot[k] = b + 2*c*t + 3*d*t*t;
-        qddot[k] = 2*c + 6*d*t;
+        p_out.positions[k] = a + b*t + c*t*t + d*t*t*t;
+        p_out.velocities[k] = b + 2*c*t + 3*d*t*t;
+        p_out.accelerations[k] = 2*c + 6*d*t;
     }
 
-    p_out.positions = q;
-    p_out.velocities = qdot;
-    p_out.accelerations = qddot;
     p_out.time_from_start = ros::Duration(t_abs);
 }
 
