@@ -85,11 +85,18 @@ private:
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Goal trajectory / set points
 
+    double time_since_start_;
+
     unsigned int sub_goal_idx_;
 
-    std::vector<double> sub_goal_;
+    // Maps joint indices in the goal to indices in the internal representation
+    std::vector<unsigned int> joint_index_mapping_;
 
     control_msgs::FollowJointTrajectoryGoal goal_;
+
+    std::vector<bool> is_smooth_point_;
+
+    unsigned int num_goal_joints_;
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -99,7 +106,7 @@ private:
 
     std::vector<ReferenceInterpolator> interpolators_;
 
-    static double NO_SETPOINT;
+    static double NO_VALUE;
 
 };
 
