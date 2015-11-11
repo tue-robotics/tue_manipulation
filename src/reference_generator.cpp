@@ -9,6 +9,20 @@ double ReferenceGenerator::NO_VALUE = -1000; // TODO: make this nicer
 
 // ----------------------------------------------------------------------------------------------------
 
+std::ostream& operator<<(std::ostream& out, const std::vector<double>& v)
+{
+    if (v.empty())
+        return out;
+
+    out << v[0];
+    for(unsigned int i = 1; i < v.size(); ++i)
+        out << " " << v[i];
+
+    return out;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
                       const trajectory_msgs::JointTrajectoryPoint& p0,
                       const trajectory_msgs::JointTrajectoryPoint& p1,
@@ -243,15 +257,17 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
 
     if (is_smooth_point_[sub_goal_idx_] && is_smooth_point_[sub_goal_idx_ - 1])
     {
+//        std::cout << "CUBIC!" << std::endl;
+
         // Use cubic interpolation
 
-        const trajectory_msgs::JointTrajectoryPoint& prev_sub_goal = goal_.trajectory.points[sub_goal_idx_];
+        const trajectory_msgs::JointTrajectoryPoint& prev_sub_goal = goal_.trajectory.points[sub_goal_idx_ - 1];
+
+        trajectory_msgs::JointTrajectoryPoint p_interpolated;
+        interpolateCubic(p_interpolated, prev_sub_goal, sub_goal, time_since_start_);
 
         for(unsigned int i = 0; i < num_goal_joints_; ++i)
         {
-            trajectory_msgs::JointTrajectoryPoint p_interpolated;
-            interpolateCubic(p_interpolated, prev_sub_goal, sub_goal, time_since_start_);
-
             unsigned int joint_idx = joint_index_mapping_[i];
             references[joint_idx] = p_interpolated.positions[i];
             interpolators_[joint_idx].reset(p_interpolated.positions[i],
@@ -260,6 +276,8 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
     }
     else
     {
+//        std::cout << "NORMAL! " << time_since_start_ << std::endl;
+
         for(unsigned int i = 0; i < num_goal_joints_; ++i)
         {
             double p_wanted = sub_goal.positions[i];
