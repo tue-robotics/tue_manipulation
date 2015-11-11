@@ -162,6 +162,8 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
 bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& positions, double dt,
                                                      std::vector<double>& references)
 {   
+    time_since_start_ += dt;
+
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Initialize interpolators, if needed
 
@@ -189,13 +191,13 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
 
     while(true)
     {
-        const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
-
         bool sub_goal_reached = false;
 
-        if (is_smooth_point_[sub_goal_idx_])
+        const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
+
+        if (is_smooth_point_[sub_goal_idx_] && is_smooth_point_[sub_goal_idx_ - 1])
         {
-            if (time_since_start_ > sub_goal.time_from_start.toSec())
+            if (time_since_start_ >= sub_goal.time_from_start.toSec())
                 sub_goal_reached = true;
         }
         else
@@ -208,17 +210,15 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
                 if (std::abs(sub_goal.positions[i] - positions[joint_idx]) > 0.01)
                 {
                     sub_goal_reached = false;
-                    time_since_start_ = sub_goal.time_from_start.toSec();
                     break;
                 }
             }
+
+            if (sub_goal_reached)
+                time_since_start_ = sub_goal.time_from_start.toSec();
         }
 
-        if (!sub_goal_reached)
-        {
-            break;
-        }
-        else
+        if (sub_goal_reached)
         {
             // If it has been reached, go to the next one
             ++sub_goal_idx_;
@@ -231,37 +231,37 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
                 return true;
             }
         }
+        else
+        {
+            break;
+        }
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Determine references using interpolation
 
-    const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
-
     references = positions;
 
-    bool use_cubic_interpolation = false;
-    if (sub_goal_idx_ > 0 && sub_goal.velocities.size() == num_goal_joints_ && sub_goal.time_from_start.toSec() > 0)
+    const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
+
+    if (is_smooth_point_[sub_goal_idx_] && is_smooth_point_[sub_goal_idx_ - 1])
     {
+        // Use cubic interpolation
+
         const trajectory_msgs::JointTrajectoryPoint& prev_sub_goal = goal_.trajectory.points[sub_goal_idx_];
 
-        if (prev_sub_goal.velocities.size() == num_goal_joints_ && prev_sub_goal.time_from_start.toSec() > 0)
+        for(unsigned int i = 0; i < num_goal_joints_; ++i)
         {
-            use_cubic_interpolation = true;
-            for(unsigned int i = 0; i < num_goal_joints_; ++i)
-            {
-                trajectory_msgs::JointTrajectoryPoint p_interpolated;
-                interpolateCubic(p_interpolated, prev_sub_goal, sub_goal, time_since_start_);
+            trajectory_msgs::JointTrajectoryPoint p_interpolated;
+            interpolateCubic(p_interpolated, prev_sub_goal, sub_goal, time_since_start_);
 
-                unsigned int joint_idx = joint_index_mapping_[i];
-                references[joint_idx] = p_interpolated.positions[i];
-                interpolators_[joint_idx].reset(p_interpolated.positions[i],
-                                                p_interpolated.velocities[i]);
-            }
+            unsigned int joint_idx = joint_index_mapping_[i];
+            references[joint_idx] = p_interpolated.positions[i];
+            interpolators_[joint_idx].reset(p_interpolated.positions[i],
+                                            p_interpolated.velocities[i]);
         }
     }
-
-    if (!use_cubic_interpolation)
+    else
     {
         for(unsigned int i = 0; i < num_goal_joints_; ++i)
         {
@@ -284,4 +284,3 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
 } // end namespace tue
 
 } // end namespace manipulation
-
