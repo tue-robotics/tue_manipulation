@@ -8,11 +8,12 @@ namespace manipulation
 
 // ----------------------------------------------------------------------------------------------------
 
-struct PosVelAcc
+struct ReferencePoint
 {
-    PosVelAcc() {}
+    ReferencePoint() {}
 
-    PosVelAcc(double pos_, double vel_, double acc_) : pos(pos_), vel(vel_), acc(acc_) {}
+    ReferencePoint(double pos_, double vel_, double acc_)
+        : pos(pos_), vel(vel_), acc(acc_) {}
 
     double pos;
     double vel;
@@ -30,18 +31,18 @@ public:
 
     ~ReferenceInterpolator();
 
-    void setRefGen(double x_reset);
+    void reset(double pos, double vel);
 
-    PosVelAcc generateReference(double x_desired, double max_vel, double max_acc, double dt, bool stop, double EPS);
+    ReferencePoint generateReference(double x_desired, double max_vel, double max_acc, double dt, bool stop, double EPS);
 
 private:
 
-    int dir;
-    bool reset;
-    double x;
-    double vel;
-    double vel_last;
-    bool ready;
+    int dir_;
+    bool reset_;
+    double x_;
+    double vel_;
+    double vel_last_;
+    bool ready_;
 
 };
 

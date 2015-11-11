@@ -40,18 +40,18 @@ ReferenceInterpolator::~ReferenceInterpolator()
 
 // ----------------------------------------------------------------------------------------------------
 
-void ReferenceInterpolator::setRefGen(double x_reset)
+void ReferenceInterpolator::reset(double pos, double vel)
 {
-    reset = true;
-    dir = 1;
-    vel = 0.0;
-    x = x_reset;
-    ready = false;
+    reset_ = true;
+    dir_ = 1;
+    vel_ = vel;
+    x_ = pos;
+    ready_ = false;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-PosVelAcc ReferenceInterpolator::generateReference(double x_desired, double max_vel, double max_acc,
+ReferencePoint ReferenceInterpolator::generateReference(double x_desired, double max_vel, double max_acc,
                                                    double dt, bool stopping, double eps_tune)
 {
     eps_tune = std::max<double>(std::min<double>(eps_tune,2.0),1.0);
@@ -66,15 +66,15 @@ PosVelAcc ReferenceInterpolator::generateReference(double x_desired, double max_
 
     ///double v;
     double a = 0.0;
-    double vel_mag = fabs(vel);
+    double vel_mag = fabs(vel_);
 
     //compute deceleration distance
     double delta_t1=vel_mag/max_acc; //deceleration segment time
     double dec_dist = 0.5*max_acc * (delta_t1) * (delta_t1); //deceleration distance
 
     //determine magnitude and sign of error vector
-    double delta_x = fabs(x_desired - x);
-    int sign_x = signum(vel);
+    double delta_x = fabs(x_desired - x_);
+    int sign_x = signum(vel_);
 
     //decide whether to move or stand still
     if (vel_mag!=0.0 || stopping){
@@ -87,14 +87,15 @@ PosVelAcc ReferenceInterpolator::generateReference(double x_desired, double max_
     }
     else {
         still = true;
-        x = x_desired;
+        x_ = x_desired;
         ///ROS_WARN("case 3");
     }
 
 
-    if (reset){
-        dir = signum(x_desired - x);
-        reset = false;
+    if (reset_)
+    {
+        dir_ = signum(x_desired - x_);
+        reset_ = false;
     }
 
     ///ROS_INFO("dec_dist=%f, delta_x=%f,dir=%d, sign=%d",fabs(dec_dist),fabs(delta_x),dir,sign_x);
@@ -113,7 +114,7 @@ PosVelAcc ReferenceInterpolator::generateReference(double x_desired, double max_
             dec = true;
             ///ROS_INFO("go to dec");
         }
-        else if (sign_x * (x_desired - x) < 0 && vel_mag != 0.0){
+        else if (sign_x * (x_desired - x_) < 0 && vel_mag != 0.0){
             dec = true;
             ///ROS_INFO("setpoint behind");
         }
@@ -131,37 +132,37 @@ PosVelAcc ReferenceInterpolator::generateReference(double x_desired, double max_
         if (acc){
             vel_mag += max_acc * dt;
             vel_mag = std::min<double>(vel_mag, max_vel);
-            x+= dir * vel_mag * dt;
-            a = dir * max_acc;
+            x_+= dir_ * vel_mag * dt;
+            a = dir_ * max_acc;
         }
         if (con){
-            x+= dir * vel_mag * dt;
+            x_+= dir_ * vel_mag * dt;
             a = 0;
         }
         if (dec){
             vel_mag -= max_acc * dt;
             vel_mag = std::max<double>(vel_mag, 0.0);
-            x+= dir * vel_mag * dt;
-            a = - dir * max_acc;
+            x_+= dir_ * vel_mag * dt;
+            a = - dir_ * max_acc;
             if (vel_mag < (0.5 * max_acc * dt)){
                 vel_mag = 0.0;
-                reset = true;
+                reset_ = true;
                 ///ROS_WARN("reset");
             }
 
         }
 
-        ready = false;
+        ready_ = false;
 
     }
 
     //stand still: reset values
     else if (still){
-        vel = 0;
+        vel_ = 0;
         a = 0;
         sign_x = 0;
-        reset = true;
-        ready = true;
+        reset_ = true;
+        ready_ = true;
         /// ROS_INFO("still");
 
     }
@@ -170,13 +171,13 @@ PosVelAcc ReferenceInterpolator::generateReference(double x_desired, double max_
     }
     //populate return values
     ///v = dir * vel_mag;
-    vel = dir * vel_mag;
+    vel_ = dir_ * vel_mag;
     ///a = (vel - vel_last)/dt;
 
-    vel_last = vel;
+    vel_last_ = vel_;
 
     //return values
-    return PosVelAcc(x, vel, a);
+    return ReferencePoint(x_, vel_, a);
 }
 
 // ----------------------------------------------------------------------------------------------------
