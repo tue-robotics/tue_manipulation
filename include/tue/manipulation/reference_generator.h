@@ -84,20 +84,31 @@ private:
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Current state
+
+    std::vector<double> positions_;
+    std::vector<double> velocities_;
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Goal trajectory / set points
 
-    double time_since_start_;
+    double time_until_next_sub_goal_;
 
-    unsigned int sub_goal_idx_;
+    int sub_goal_idx_;
 
     // Maps joint indices in the goal to indices in the internal representation
     std::vector<unsigned int> joint_index_mapping_;
 
     control_msgs::FollowJointTrajectoryGoal goal_;
 
-    std::vector<bool> is_smooth_point_;
-
     unsigned int num_goal_joints_;
+
+    void calculateTimeAndVelocities();
+
+
+    double t_segment_;
+    std::vector<double> last_pos_;
+    std::vector<double> last_vel_;
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
