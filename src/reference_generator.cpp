@@ -53,7 +53,7 @@ void interpolateCubic(double x0, double v0, double x1, double v1, double t, doub
             + (-6 * f2 + 6 * f) * x1 / T
             + (3 * f2 - 2 * f) * v1;
 
-    std::cout << "(" << x0 << ", " << v0<< ") " << "(" << x << ", " << v << ") " << "(" << x1 << ", " << v1 << ") " << std::endl;
+//    std::cout << "(" << x0 << ", " << v0<< ") " << "(" << x << ", " << v << ") " << "(" << x1 << ", " << v1 << ") " << std::endl;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -243,8 +243,6 @@ void ReferenceGenerator::calculateTimeAndVelocities()
         sub_goal.time_from_start = ros::Duration(0);
     }
 
-    std::cout << "Velocities: " << sub_goal.velocities << std::endl;
-
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Determine time until sub goal, if not given
 
@@ -300,7 +298,7 @@ void ReferenceGenerator::calculateTimeAndVelocities()
     last_pos_ = positions_;
     last_vel_ = velocities_;
 
-    std::cout << time_until_next_sub_goal_ << std::endl;
+    std::cout << "Velocities: " << sub_goal.velocities << ", duration: " << time_until_next_sub_goal_ << std::endl;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -414,12 +412,10 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
         {
             unsigned int joint_idx = joint_index_mapping_[i];
 
-            std::cout << i << ": ";
-
             interpolateCubic(last_pos_[joint_idx], last_vel_[joint_idx], sub_goal.positions[i], sub_goal.velocities[i],
                              t_segment_ - time_until_next_sub_goal_, t_segment_, positions_[joint_idx], velocities_[joint_idx]);
 
-            references[i] = positions_[joint_idx];
+            references[joint_idx] = positions_[joint_idx];
         }
     }
 
