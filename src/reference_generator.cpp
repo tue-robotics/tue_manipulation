@@ -193,7 +193,7 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     goal_ = goal;
     sub_goal_idx_ = -1;
 
-//    graph_viewer_.clear();
+    graph_viewer_.clear();
 
     if (goal.trajectory.points.empty())
     {
@@ -351,7 +351,7 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
 
     const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
 
-    if (false)
+    if (true)
     {
 
         for(unsigned int i = 0; i < num_goal_joints_; ++i)
@@ -362,44 +362,28 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
             double x_goal = sub_goal.positions[i];
 
             double& v = velocities_[joint_idx];
-            double v_abs = std::abs(v);
             double v_goal = sub_goal.velocities[i];
 
-            double v_diff_abs = std::abs(v_goal - v);
+            double t_brake = std::abs(v_goal - v) / max_accelerations_[joint_idx];
 
-            double t_brake = v_diff_abs / max_accelerations_[joint_idx];
-
-            if (i == 0)
-                std::cout << "t_brake = " << t_brake << " " << time_until_next_sub_goal_ << std::endl;
-
-            int v_sign = signum(x_goal - x);
+            double v_step = dt * max_accelerations_[joint_idx];
 
             if (time_until_next_sub_goal_ <= t_brake)
             {
-                v -= dt * max_accelerations_[joint_idx] * v_sign;
+                v += v_step * signum(v_goal - v);
             }
             else
             {
-                double s;
-                if (v_abs < std::abs(v_goal))
-                    s = v_abs * time_until_next_sub_goal_ + (v_diff_abs  * t_brake) / 2;
-                else
-                    s = v_abs * time_until_next_sub_goal_ - (v_diff_abs  * t_brake) / 2;
+                double s1 = (time_until_next_sub_goal_ - t_brake) * (v - v_step) + t_brake * ((v - v_step) + v_goal) / 2;
+                double s2 = (time_until_next_sub_goal_ - t_brake) * (v + v_step) + t_brake * ((v + v_step) + v_goal) / 2;
 
-                if (i == 0)
-                    std::cout << i << ": x = " << x << ", x_goal = " << x_goal << ", v = " << v << ", v_goal = " << v_goal << ", t_left = " << time_until_next_sub_goal_
-                              << ", s = " << s << "v_sign = " << v_sign << "x_diff = " << std::abs(x_goal - x) << std::endl;
+                double x_diff = x_goal - x;
 
-
-
-                if (s < std::abs(x_goal - x))
-                    v += dt * max_accelerations_[joint_idx] * v_sign;
-                else
-                    v -= dt * max_accelerations_[joint_idx] * v_sign;
+                if (s2 < x_diff)
+                    v += v_step;
+                else if (s1 > x_diff)
+                    v -= v_step;
             }
-
-            if (i == 0)
-                std::cout << "    v_new = " << v << std::endl;
 
             x += dt * v;
 
@@ -418,6 +402,8 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
             references[joint_idx] = positions_[joint_idx];
         }
     }
+
+    graph_viewer_.addPoint(0, 0, ros::Time::now().toSec(), positions_[2]);
 
 
 //    if (is_smooth_sub_goal_)
@@ -458,7 +444,7 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
 //        }
 //    }
 
-//    graph_viewer_.view();
+    graph_viewer_.view();
 
     return true;
 }

@@ -4,7 +4,7 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 
 #include "tue/manipulation/reference_interpolator.h"
-//#include "tue/manipulation/graph_viewer.h"
+#include "tue/manipulation/graph_viewer.h"
 
 namespace tue
 {
@@ -122,7 +122,7 @@ private:
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-//    GraphViewer graph_viewer_;
+    GraphViewer graph_viewer_;
 
 };
 
