@@ -233,7 +233,14 @@ void ReferenceGenerator::calculateTimeAndVelocities()
 
                 if ((x0 < x1) == (x1 < x2))
                 {
-                    sub_goal.velocities[i] = std::min(max_velocities_[joint_idx], sqrt(2 * max_accelerations_[joint_idx] * std::abs(x2 - x1)));
+                    // Calculate the maximum velocity we can reach from x0 to x1
+                    double v_max_01 = sqrt(2 * max_accelerations_[joint_idx] * std::abs(x1 - x0) + velocities_[i] * velocities_[i]);
+
+                    // Calculate the maximum velocity we are allowed to have such that we can still reach x2 with 0 velocity
+                    double v_max_12 = sqrt(2 * max_accelerations_[joint_idx] * std::abs(x2 - x1));
+
+                    sub_goal.velocities[i] = std::min(max_velocities_[joint_idx], std::min(v_max_01, v_max_12));
+
                     if (x2 < x1)
                         sub_goal.velocities[i] = -sub_goal.velocities[i];
                 }
@@ -403,7 +410,16 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
         }
     }
 
-    graph_viewer_.addPoint(0, 0, ros::Time::now().toSec(), positions_[2]);
+
+    {
+        unsigned int i = 4;
+        unsigned int joint_idx = joint_index_mapping_[i];
+        std::cout << positions_[joint_idx] << " (" << velocities_[joint_idx] << ") -> " << sub_goal.positions[i] << " (" << sub_goal.velocities[i] << ")" << std::endl;
+
+        graph_viewer_.addPoint(0, 0, ros::Time::now().toSec(), positions_[joint_idx]);
+        graph_viewer_.addPoint(0, 1, ros::Time::now().toSec(), sub_goal.positions[i]);
+
+    }
 
 
 //    if (is_smooth_sub_goal_)

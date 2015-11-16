@@ -207,8 +207,8 @@ void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal_in, Serve
         if (i < num_jta_points)
         {
             jtagoal.trajectory.points[i].positions.resize(ik_solver.numJoints());
-            jtagoal.trajectory.points[i].velocities.resize(ik_solver.numJoints());
-            jtagoal.trajectory.points[i].accelerations.resize(ik_solver.numJoints());
+//            jtagoal.trajectory.points[i].velocities.resize(ik_solver.numJoints());
+//            jtagoal.trajectory.points[i].accelerations.resize(ik_solver.numJoints());
         }
 
         IKPosMarkerArray.markers[i].type = 2; // 2=SPHERE
