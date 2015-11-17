@@ -133,6 +133,8 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
     ReferenceInterpolator& r = interpolators_[idx];
     r.reset(pos, vel);
     is_idle_ = true;
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------------------------------
