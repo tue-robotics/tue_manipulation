@@ -96,6 +96,8 @@ void ReferenceGenerator::initJoint(const std::string& name, double max_vel, doub
         max_accelerations_.push_back(max_acc);
         min_positions_.push_back(min_pos);
         max_positions_.push_back(max_pos);
+        interpolators_.push_back(ReferenceInterpolator());
+
     }
 }
 
@@ -126,12 +128,16 @@ void ReferenceGenerator::setJointNames(const std::vector<std::string>& joint_nam
 
 bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos, double vel)
 {
+    std::cout << "Lets set " << joint_name << " to " << pos << " and " << vel << std::endl;
     int idx = this->joint_index(joint_name);
+    std::cout << "idx = " << idx << std::endl;
     if (idx < 0)
         return false;
 
     ReferenceInterpolator& r = interpolators_[idx];
+    std::cout << "rrrrrrr" << std::endl;
     r.reset(pos, vel);
+    std::cout << "eset!" << std::endl;
     is_idle_ = true;
 }
 
@@ -139,6 +145,7 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
 
 bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::stringstream& ss)
 {
+    std::cout << "Welcome to the wonderful world of interpolation!" << std::endl;
     num_goal_joints_ = goal.trajectory.joint_names.size();
 
     joint_index_mapping_.resize(num_goal_joints_);
@@ -164,6 +171,8 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
 
     if (!goal_ok)
         return false;
+
+    std::cout << "Congratulation, you passed our initial screening" << std::endl;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
     // Set goal
