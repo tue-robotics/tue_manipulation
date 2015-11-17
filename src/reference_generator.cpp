@@ -139,6 +139,8 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
     r.reset(pos, vel);
     std::cout << "eset!" << std::endl;
     is_idle_ = true;
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------------------------------
