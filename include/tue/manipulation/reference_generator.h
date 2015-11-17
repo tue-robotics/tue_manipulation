@@ -42,6 +42,8 @@ public:
         max_accelerations_[idx] = max_acc;
     }
 
+    bool setJointState(const std::string& joint_name, double pos, double vel);
+
     bool setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::stringstream& ss);
 
     bool calculatePositionReferences(const std::vector<double>& positions, double dt,

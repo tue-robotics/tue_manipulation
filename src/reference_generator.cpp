@@ -124,6 +124,19 @@ void ReferenceGenerator::setJointNames(const std::vector<std::string>& joint_nam
 
 // ----------------------------------------------------------------------------------------------------
 
+bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos, double vel)
+{
+    int idx = this->joint_index(joint_name);
+    if (idx < 0)
+        return false;
+
+    ReferenceInterpolator& r = interpolators_[idx];
+    r.reset(pos, vel);
+    is_idle_ = true;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::stringstream& ss)
 {
     num_goal_joints_ = goal.trajectory.joint_names.size();
