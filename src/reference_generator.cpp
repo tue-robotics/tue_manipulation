@@ -219,33 +219,31 @@ void ReferenceGenerator::calculateTimeAndVelocities()
     {
         sub_goal.velocities.resize(num_goal_joints_, 0);
 
-        if (sub_goal_idx_ + 1 < goal_.trajectory.points.size())
-        {
-            time_until_next_sub_goal_ = 0;
+//        if (sub_goal_idx_ + 1 < goal_.trajectory.points.size())
+//        {
+//            for(unsigned int i = 0; i < num_goal_joints_; ++i)
+//            {
+//                unsigned int joint_idx = joint_index_mapping_[i];
 
-            for(unsigned int i = 0; i < num_goal_joints_; ++i)
-            {
-                unsigned int joint_idx = joint_index_mapping_[i];
+//                double x0 = positions_[joint_idx];
+//                double x1 = sub_goal.positions[i];
+//                double x2 = goal_.trajectory.points[sub_goal_idx_ + 1].positions[i];
 
-                double x0 = positions_[joint_idx];
-                double x1 = sub_goal.positions[i];
-                double x2 = goal_.trajectory.points[sub_goal_idx_ + 1].positions[i];
+//                if ((x0 < x1) == (x1 < x2))
+//                {
+//                    // Calculate the maximum velocity we can reach from x0 to x1
+//                    double v_max_01 = sqrt(2 * max_accelerations_[joint_idx] * std::abs(x1 - x0) + velocities_[i] * velocities_[i]);
 
-                if ((x0 < x1) == (x1 < x2))
-                {
-                    // Calculate the maximum velocity we can reach from x0 to x1
-                    double v_max_01 = sqrt(2 * max_accelerations_[joint_idx] * std::abs(x1 - x0) + velocities_[i] * velocities_[i]);
+//                    // Calculate the maximum velocity we are allowed to have such that we can still reach x2 with 0 velocity
+//                    double v_max_12 = sqrt(2 * max_accelerations_[joint_idx] * std::abs(x2 - x1));
 
-                    // Calculate the maximum velocity we are allowed to have such that we can still reach x2 with 0 velocity
-                    double v_max_12 = sqrt(2 * max_accelerations_[joint_idx] * std::abs(x2 - x1));
+//                    sub_goal.velocities[i] = std::min(max_velocities_[joint_idx], std::min(v_max_01, v_max_12));
 
-                    sub_goal.velocities[i] = std::min(max_velocities_[joint_idx], std::min(v_max_01, v_max_12));
-
-                    if (x2 < x1)
-                        sub_goal.velocities[i] = -sub_goal.velocities[i];
-                }
-            }
-        }
+//                    if (x2 < x1)
+//                        sub_goal.velocities[i] = -sub_goal.velocities[i];
+//                }
+//            }
+//        }
 
         sub_goal.time_from_start = ros::Duration(0);
     }
@@ -305,7 +303,7 @@ void ReferenceGenerator::calculateTimeAndVelocities()
     last_pos_ = positions_;
     last_vel_ = velocities_;
 
-    std::cout << "Velocities: " << sub_goal.velocities << ", duration: " << time_until_next_sub_goal_ << std::endl;
+//    std::cout << "Velocities: " << sub_goal.velocities << ", duration: " << time_until_next_sub_goal_ << std::endl;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -346,6 +344,8 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
             return true;
         }
 
+        std::cout << "---- " << sub_goal_idx_ << " ----------------------------------------------" << std::endl;
+
         calculateTimeAndVelocities();
     }
 
@@ -371,26 +371,66 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
             double& v = velocities_[joint_idx];
             double v_goal = sub_goal.velocities[i];
 
-            double t_brake = std::abs(v_goal - v) / max_accelerations_[joint_idx];
-
             double v_step = dt * max_accelerations_[joint_idx];
 
-            if (time_until_next_sub_goal_ <= t_brake)
-            {
-                v += v_step * signum(v_goal - v);
-            }
+            // - - - - -
+
+//            double t_brake = std::abs(v_goal - v) / max_accelerations_[joint_idx];
+
+//            if (time_until_next_sub_goal_ <= t_brake)
+//            {
+//                v += v_step * signum(v_goal - v);
+//            }
+//            else
+//            {
+//                double s1 = (time_until_next_sub_goal_ - t_brake) * (v - v_step) + t_brake * ((v - v_step) + v_goal) / 2;
+//                double s2 = (time_until_next_sub_goal_ - t_brake) * (v + v_step) + t_brake * ((v + v_step) + v_goal) / 2;
+
+//                double x_diff = x_goal - x;
+
+//                if (s2 < x_diff)
+//                    v += v_step;
+//                else if (s1 > x_diff)
+//                    v -= v_step;
+//            }
+
+            // - - - - -
+
+            int x_sign = signum(x_goal - x);
+//            double x_diff_abs = (x_goal - x) * x_sign;
+            double x_diff = x_goal - x;
+
+            double v_max1, v_max2;
+
+            // - - - - - - - - - - - - - -
+
+            double v_hyp1 = v + v_step;
+            double s1 = v_hyp1 * time_until_next_sub_goal_;
+            if (s1 > x_diff)
+                v_max1 = v_hyp1 - sqrt(2 * max_accelerations_[joint_idx] * (s1 - x_diff));
             else
-            {
-                double s1 = (time_until_next_sub_goal_ - t_brake) * (v - v_step) + t_brake * ((v - v_step) + v_goal) / 2;
-                double s2 = (time_until_next_sub_goal_ - t_brake) * (v + v_step) + t_brake * ((v + v_step) + v_goal) / 2;
+                v_max1 = v_hyp1 + sqrt(2 * max_accelerations_[joint_idx] * (x_diff - s1));
 
-                double x_diff = x_goal - x;
+            // - - - - - - - - - - - - - -
 
-                if (s2 < x_diff)
-                    v += v_step;
-                else if (s1 > x_diff)
-                    v -= v_step;
-            }
+            double v_hyp2 = v - v_step;
+            double s2 = v_hyp2 * time_until_next_sub_goal_;
+            if (s2 > x_diff)
+                v_max2 = v_hyp2 - sqrt(2 * max_accelerations_[joint_idx] * (s2 - x_diff));
+            else
+                v_max2 = v_hyp2 + sqrt(2 * max_accelerations_[joint_idx] * (x_diff - s2));
+
+            // - - - - - - - - - - - - - -
+
+            if (std::abs(v_max1 - v_goal) < std::abs(v_max2 - v_goal))
+                v = v_hyp1;
+            else
+                v = v_hyp2;
+
+            if (i == 4)
+                std::cout << time_until_next_sub_goal_ << ": v_goal = " << v_goal << ", v_max1 = " << v_max1 << ", v_max2 = " << v_max2 << ", v = " << v << std::endl;
+
+            // - - - - -
 
             x += dt * v;
 
@@ -414,10 +454,13 @@ bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& 
     {
         unsigned int i = 4;
         unsigned int joint_idx = joint_index_mapping_[i];
-        std::cout << positions_[joint_idx] << " (" << velocities_[joint_idx] << ") -> " << sub_goal.positions[i] << " (" << sub_goal.velocities[i] << ")" << std::endl;
+//        std::cout << positions_[joint_idx] << " (" << velocities_[joint_idx] << ") -> " << sub_goal.positions[i] << " (" << sub_goal.velocities[i] << ")" << std::endl;
 
         graph_viewer_.addPoint(0, 0, ros::Time::now().toSec(), positions_[joint_idx]);
         graph_viewer_.addPoint(0, 1, ros::Time::now().toSec(), sub_goal.positions[i]);
+
+//        graph_viewer_.addPoint(0, 0, ros::Time::now().toSec(), velocities_[joint_idx]);
+//        graph_viewer_.addPoint(0, 1, ros::Time::now().toSec(), sub_goal.velocities[i]);
 
     }
 
