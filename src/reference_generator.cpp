@@ -5,8 +5,6 @@ namespace tue
 namespace manipulation
 {
 
-double ReferenceGenerator::NO_VALUE = -1000; // TODO: make this nicer
-
 // ----------------------------------------------------------------------------------------------------
 
 std::ostream& operator<<(std::ostream& out, const std::vector<double>& v)
@@ -58,9 +56,9 @@ void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
                 + (3 * f2 - 2 * f) * p1.velocities[k];
 
         p_out.accelerations[k] = ((12 * f - 6) * p0.positions[k]
-                + (6 * f - 4) * (p0.velocities[k] * T)
-                + (-12 * f + 6) * p1.positions[k]
-                + (6 * f - 2) * (p1.velocities[k] * T) / T); // Not sure this is right!
+                                  + (6 * f - 4) * (p0.velocities[k] * T)
+                                  + (-12 * f + 6) * p1.positions[k]
+                                  + (6 * f - 2) * (p1.velocities[k] * T) / T); // Not sure this is right!
     }
 
     p_out.time_from_start = ros::Duration(t_abs);
@@ -68,7 +66,7 @@ void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
 
 // ----------------------------------------------------------------------------------------------------
 
-ReferenceGenerator::ReferenceGenerator() : is_idle_(true)
+ReferenceGenerator::ReferenceGenerator()
 {
 }
 
@@ -84,19 +82,15 @@ void ReferenceGenerator::initJoint(const std::string& name, double max_vel, doub
                                    double min_pos, double max_pos)
 {
     int idx = this->joint_index(name);
-    if (idx >= 0)
-    {
-        initJoint(idx, max_vel, max_acc, min_pos, max_pos);
-    }
-    else
+    if (idx < 0)
     {
         joint_name_to_index_[name] = joint_names_.size();
         joint_names_.push_back(name);
-        max_velocities_.push_back(max_vel);
-        max_accelerations_.push_back(max_acc);
-        min_positions_.push_back(min_pos);
-        max_positions_.push_back(max_pos);
+        idx = joint_info_.size();
+        joint_info_.push_back(JointInfo());
     }
+
+    initJoint(idx, max_vel, max_acc, min_pos, max_pos);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -104,10 +98,12 @@ void ReferenceGenerator::initJoint(const std::string& name, double max_vel, doub
 void ReferenceGenerator::initJoint(unsigned int idx, double max_vel, double max_acc,
                                    double min_pos, double max_pos)
 {
-    max_velocities_[idx] = max_vel;
-    max_accelerations_[idx] = max_acc;
-    min_positions_[idx] = min_pos;
-    max_positions_[idx] = max_pos;
+    JointInfo& j = joint_info_[idx];
+    j.max_vel = max_vel;
+    j.max_acc = max_acc;
+    j.min_pos = min_pos;
+    j.max_pos = max_pos;
+    j.is_idle = true;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -120,6 +116,8 @@ void ReferenceGenerator::setJointNames(const std::vector<std::string>& joint_nam
     joint_name_to_index_.clear();
     for(unsigned int i = 0; i < joint_names_.size(); ++i)
         joint_name_to_index_[joint_names_[i]] = i;
+
+    joint_info_.resize(joint_names_.size(), JointInfo());
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -130,9 +128,10 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
     if (idx < 0)
         return false;
 
-    ReferenceInterpolator& r = interpolators_[idx];
-    r.reset(pos, vel);
-    is_idle_ = true;
+    JointInfo& j = joint_info_[idx];
+    j.interpolator.reset(pos, vel);
+    j.is_idle = true;
+    j.is_initialized = true;
 
     return true;
 }
@@ -141,15 +140,16 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
 
 bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::stringstream& ss)
 {
-    num_goal_joints_ = goal.trajectory.joint_names.size();
-
-    joint_index_mapping_.resize(num_goal_joints_);
+    JointGoal new_goal;
+    new_goal.goal_msg = goal;
+    new_goal.num_goal_joints = goal.trajectory.joint_names.size();
+    new_goal.joint_index_mapping.resize(new_goal.num_goal_joints);
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Check feasibility of joint goals
 
     bool goal_ok = true;
-    for (unsigned int i = 0; i < num_goal_joints_; ++i)
+    for (unsigned int i = 0; i < new_goal.num_goal_joints; ++i)
     {
         const std::string& joint_name = goal.trajectory.joint_names[i];
 
@@ -161,174 +161,173 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
             goal_ok = false;
         }
 
-        joint_index_mapping_[i] = idx;
+        if (!joint_info_[idx].is_idle)
+        {
+            ss << "Joint '" << joint_name << "' is busy.\n";
+            goal_ok = false;
+        }
+
+        if (!joint_info_[idx].is_initialized)
+        {
+            ss << "Joint '" << joint_name << "' is not initialized.\n";
+            goal_ok = false;
+        }
+
+        new_goal.joint_index_mapping[i] = idx;
     }
 
     if (!goal_ok)
         return false;
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
-    // Set goal
+    //    graph_viewer_.clear();
 
-    goal_ = goal;
-    sub_goal_idx_ = 0;
-    time_since_start_ = 0;
-
-//    graph_viewer_.clear();
-
-    if (goal.trajectory.points.empty())
+    if (new_goal.goal_msg.trajectory.points.empty())
     {
-        is_idle_ = true;
+        for(unsigned int i = 0; i < new_goal.num_goal_joints; ++i)
+            joint_info_[new_goal.joint_index_mapping[i]].is_idle = true;
         return true;
     }
 
-    is_idle_ = false;
+    new_goal.sub_goal_idx = 0;
+    new_goal.time_since_start = 0;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
     // Determine which points are smooth
 
-    is_smooth_point_.reserve(goal.trajectory.points.size());
-    is_smooth_point_[0] = false;
-    for(unsigned int i = 1; i < goal.trajectory.points.size(); ++i)
+    new_goal.is_smooth_point.reserve(goal.trajectory.points.size());
+    new_goal.is_smooth_point[0] = false;
+    for(unsigned int i = 1; i < new_goal.goal_msg.trajectory.points.size(); ++i)
     {
-        const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[i];
+        const trajectory_msgs::JointTrajectoryPoint& sub_goal = new_goal.goal_msg.trajectory.points[i];
 
-        is_smooth_point_[i] = (sub_goal.velocities.size() == num_goal_joints_
-                               && sub_goal.time_from_start.toSec() > 0);
+        new_goal.is_smooth_point[i] = (sub_goal.velocities.size() == new_goal.num_goal_joints
+                                       && sub_goal.time_from_start.toSec() > 0);
     }
+
+    goals_.push_back(new_goal);
 
     return true;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& positions, double dt,
-                                                     std::vector<double>& references)
-{   
-    time_since_start_ += dt;
+bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<double>& references)
+{
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    for(unsigned int i = 0; i < joint_info_.size(); ++i)
+    {
+        JointInfo& j = joint_info_[i];
+        if (j.is_idle)
+            references[i] = j.interpolator.position();
+    }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // Initialize interpolators, if needed
 
-    if (interpolators_.empty())
+    for(std::vector<JointGoal>::iterator it = goals_.begin(); it != goals_.end(); ++it)
     {
-        interpolators_.resize(positions.size());
-        for(unsigned int i = 0; i < interpolators_.size(); ++i)
+        JointGoal& goal = *it;
+
+        goal.time_since_start += dt;
+
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
+        // Go to next unreached sub goal
+
+        while(true)
         {
-            ReferenceInterpolator& r = interpolators_[i];
-            r.reset(positions[i], 0);
-        }
-        return false;
-    }
+            bool sub_goal_reached = false;
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
+            const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
 
-    if (is_idle_ || sub_goal_idx_ >= goal_.trajectory.points.size())
-    {
-        references = positions;
-        return true;
-    }
-
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
-    // Go to next unreached sub goal
-
-    while(true)
-    {
-        bool sub_goal_reached = false;
-
-        const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
-
-        if (is_smooth_point_[sub_goal_idx_] && is_smooth_point_[sub_goal_idx_ - 1])
-        {
-            if (time_since_start_ >= sub_goal.time_from_start.toSec())
-                sub_goal_reached = true;
-        }
-        else
-        {
-            sub_goal_reached = true;
-            for(unsigned int i = 0; i < num_goal_joints_; ++i)
+            if (goal.is_smooth_point[goal.sub_goal_idx] && goal.is_smooth_point[goal.sub_goal_idx - 1])
             {
-                unsigned int joint_idx = joint_index_mapping_[i];
-
-                if (std::abs(sub_goal.positions[i] - positions[joint_idx]) > 0.01)
+                if (goal.time_since_start >= sub_goal.time_from_start.toSec())
+                    sub_goal_reached = true;
+            }
+            else
+            {
+                sub_goal_reached = true;
+                for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
                 {
-                    sub_goal_reached = false;
-                    break;
+                    unsigned int joint_idx = goal.joint_index_mapping[i];
+
+                    if (std::abs(sub_goal.positions[i] - joint_info_[joint_idx].interpolator.position()) > 0.01)
+                    {
+                        sub_goal_reached = false;
+                        break;
+                    }
                 }
+
+                if (sub_goal_reached)
+                    goal.time_since_start = sub_goal.time_from_start.toSec();
             }
 
             if (sub_goal_reached)
-                time_since_start_ = sub_goal.time_from_start.toSec();
+            {
+                // If it has been reached, go to the next one
+                ++goal.sub_goal_idx;
+
+                if (goal.sub_goal_idx >= goal.goal_msg.trajectory.points.size())
+                {
+                    for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+                        joint_info_[goal.joint_index_mapping[i]].is_idle = true;
+
+                    return true;
+                }
+
+//                graph_viewer_.addPoint(0, 1, time_since_start_, sub_goal.positions[0], sub_goal.velocities[0]);
+
+            }
+            else
+            {
+                break;
+            }
         }
 
-        if (sub_goal_reached)
-        {
-            // If it has been reached, go to the next one
-            ++sub_goal_idx_;
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Determine references using interpolation
 
-            if (sub_goal_idx_ >= goal_.trajectory.points.size())
+        const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
+
+        if (goal.is_smooth_point[goal.sub_goal_idx] && goal.is_smooth_point[goal.sub_goal_idx - 1])
+        {
+            //        std::cout << "CUBIC!" << std::endl;
+
+            // Use cubic interpolation
+
+            const trajectory_msgs::JointTrajectoryPoint& prev_sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1];
+
+            trajectory_msgs::JointTrajectoryPoint p_interpolated;
+            interpolateCubic(p_interpolated, prev_sub_goal, sub_goal, goal.time_since_start);
+
+            for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
             {
-                // Reached final goal
-                references = positions;
-                is_idle_ = true;
-                return true;
+                unsigned int joint_idx = goal.joint_index_mapping[i];
+                references[joint_idx] = p_interpolated.positions[i];
+                joint_info_[joint_idx].interpolator.reset(p_interpolated.positions[i], p_interpolated.velocities[i]);
             }
 
-//            graph_viewer_.addPoint(0, 1, time_since_start_, sub_goal.positions[0], sub_goal.velocities[0]);
-
+            //        graph_viewer_.addPoint(0, 0, time_since_start_, p_interpolated.positions[0], p_interpolated.velocities[0]);
         }
         else
         {
-            break;
+            //        graph_viewer_.clear();
+
+            for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+            {
+                double p_wanted = sub_goal.positions[i];
+
+                unsigned int joint_idx = goal.joint_index_mapping[i];
+
+                JointInfo& j = joint_info_[joint_idx];
+
+                ReferencePoint ref = j.interpolator.generateReference(p_wanted, j.max_vel, j.max_pos, dt, false, 0.01);
+                references[joint_idx] = ref.pos;
+            }
         }
     }
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // Determine references using interpolation
-
-    references = positions;
-
-    const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
-
-    if (is_smooth_point_[sub_goal_idx_] && is_smooth_point_[sub_goal_idx_ - 1])
-    {
-//        std::cout << "CUBIC!" << std::endl;
-
-        // Use cubic interpolation
-
-        const trajectory_msgs::JointTrajectoryPoint& prev_sub_goal = goal_.trajectory.points[sub_goal_idx_ - 1];
-
-        trajectory_msgs::JointTrajectoryPoint p_interpolated;
-        interpolateCubic(p_interpolated, prev_sub_goal, sub_goal, time_since_start_);
-
-        for(unsigned int i = 0; i < num_goal_joints_; ++i)
-        {
-            unsigned int joint_idx = joint_index_mapping_[i];
-            references[joint_idx] = p_interpolated.positions[i];
-            interpolators_[joint_idx].reset(p_interpolated.positions[i],
-                                            p_interpolated.velocities[i]);
-        }
-
-//        graph_viewer_.addPoint(0, 0, time_since_start_, p_interpolated.positions[0], p_interpolated.velocities[0]);
-    }
-    else
-    {
-//        graph_viewer_.clear();
-
-        for(unsigned int i = 0; i < num_goal_joints_; ++i)
-        {
-            double p_wanted = sub_goal.positions[i];
-
-            unsigned int joint_idx = joint_index_mapping_[i];
-
-            ReferenceInterpolator& r = interpolators_[joint_idx];
-            ReferencePoint ref = r.generateReference(p_wanted, max_velocities_[joint_idx],
-                                                     max_accelerations_[joint_idx], dt, false, 0.01);
-            references[joint_idx] = ref.pos;
-        }
-    }
-
-//    graph_viewer_.view();
+    //    graph_viewer_.view();
 
     return true;
 }

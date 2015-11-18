@@ -35,6 +35,8 @@ public:
 
     ReferencePoint generateReference(double x_desired, double max_vel, double max_acc, double dt, bool stop, double EPS);
 
+    double position() const { return x_; }
+
 private:
 
     int dir_;
