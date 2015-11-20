@@ -14,7 +14,7 @@ public:
 
     void addPoint(int graph_id, int label, double x, double y, double y_dot = 1e9);
 
-    void view();
+    void view(bool wait = false);
 
     void clear();
 

@@ -5,8 +5,6 @@ namespace tue
 namespace manipulation
 {
 
-double ReferenceGenerator::NO_VALUE = -1000; // TODO: make this nicer
-
 // ----------------------------------------------------------------------------------------------------
 
 int signum(double a)
@@ -53,57 +51,11 @@ void interpolateCubic(double x0, double v0, double x1, double v1, double t, doub
             + (-6 * f2 + 6 * f) * x1 / T
             + (3 * f2 - 2 * f) * v1;
 
-//    std::cout << "(" << x0 << ", " << v0<< ") " << "(" << x << ", " << v << ") " << "(" << x1 << ", " << v1 << ") " << std::endl;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-// Interpolate using Hermite curve
-void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
-                      const trajectory_msgs::JointTrajectoryPoint& p0,
-                      const trajectory_msgs::JointTrajectoryPoint& p1,
-                      double t_abs)
-{
-    double T = (p1.time_from_start - p0.time_from_start).toSec();
-    double t = t_abs - p0.time_from_start.toSec();
-    unsigned int njoints = p0.positions.size();
-
-    p_out.positions.resize(njoints);
-    p_out.velocities.resize(njoints);
-    p_out.accelerations.resize(njoints);
-
-    // Transform time to [0, 1]
-    double f = t / T;
-
-    // Pre-calculate some things
-    double f2 = f * f;
-    double f3 = f * f2;
-
-    // Interpolate for every joint
-    for(unsigned int k = 0; k < njoints; ++k)
-    {
-        p_out.positions[k] = (2 * f3 - 3 * f2 + 1) * p0.positions[k]
-                + (f3 - 2 * f2 + f) * (p0.velocities[k] * T)
-                + (-2 * f3 + 3 * f2) * p1.positions[k]
-                + (f3 - f2) * (p1.velocities[k] * T);
-
-        p_out.velocities[k] = (6 * f2 - 6 * f) * p0.positions[k] / T
-                + (3 * f2 - 4 * f + 1) * p0.velocities[k]
-                + (-6 * f2 + 6 * f) * p1.positions[k] / T
-                + (3 * f2 - 2 * f) * p1.velocities[k];
-
-        p_out.accelerations[k] = ((12 * f - 6) * p0.positions[k]
-                + (6 * f - 4) * (p0.velocities[k] * T)
-                + (-12 * f + 6) * p1.positions[k]
-                + (6 * f - 2) * (p1.velocities[k] * T) / T); // Not sure this is right!
-    }
-
-    p_out.time_from_start = ros::Duration(t_abs);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-ReferenceGenerator::ReferenceGenerator() : is_idle_(true)
+ReferenceGenerator::ReferenceGenerator()
 {
 }
 
@@ -119,19 +71,15 @@ void ReferenceGenerator::initJoint(const std::string& name, double max_vel, doub
                                    double min_pos, double max_pos)
 {
     int idx = this->joint_index(name);
-    if (idx >= 0)
-    {
-        initJoint(idx, max_vel, max_acc, min_pos, max_pos);
-    }
-    else
+    if (idx < 0)
     {
         joint_name_to_index_[name] = joint_names_.size();
         joint_names_.push_back(name);
-        max_velocities_.push_back(max_vel);
-        max_accelerations_.push_back(max_acc);
-        min_positions_.push_back(min_pos);
-        max_positions_.push_back(max_pos);
+        idx = joint_info_.size();
+        joint_info_.push_back(JointInfo());
     }
+
+    initJoint(idx, max_vel, max_acc, min_pos, max_pos);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -139,10 +87,29 @@ void ReferenceGenerator::initJoint(const std::string& name, double max_vel, doub
 void ReferenceGenerator::initJoint(unsigned int idx, double max_vel, double max_acc,
                                    double min_pos, double max_pos)
 {
-    max_velocities_[idx] = max_vel;
-    max_accelerations_[idx] = max_acc;
-    min_positions_[idx] = min_pos;
-    max_positions_[idx] = max_pos;
+    JointInfo& j = joint_info_[idx];
+    j.max_vel = max_vel;
+    j.max_acc = max_acc;
+    j.min_pos = min_pos;
+    j.max_pos = max_pos;
+    j.is_idle = true;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos, double vel)
+{
+    int idx = this->joint_index(joint_name);
+    if (idx < 0)
+        return false;
+
+    JointInfo& j = joint_info_[idx];
+    j.pos = pos;
+    j.vel = vel;
+    j.is_idle = true;
+    j.is_initialized = true;
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -155,23 +122,25 @@ void ReferenceGenerator::setJointNames(const std::vector<std::string>& joint_nam
     joint_name_to_index_.clear();
     for(unsigned int i = 0; i < joint_names_.size(); ++i)
         joint_name_to_index_[joint_names_[i]] = i;
+
+    joint_info_.resize(joint_names_.size(), JointInfo());
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::stringstream& ss)
+bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& msg, std::stringstream& ss)
 {
-    num_goal_joints_ = goal.trajectory.joint_names.size();
-
-    joint_index_mapping_.resize(num_goal_joints_);
+//    JointGoal goal;
+    goal.msg = msg;
+    goal.joint_index_mapping.resize(msg.trajectory.joint_names.size());
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Check feasibility of joint goals
 
     bool goal_ok = true;
-    for (unsigned int i = 0; i < num_goal_joints_; ++i)
+    for (unsigned int i = 0; i < goal.num_goal_joints(); ++i)
     {
-        const std::string& joint_name = goal.trajectory.joint_names[i];
+        const std::string& joint_name = msg.trajectory.joint_names[i];
 
         int idx = joint_index(joint_name);
 
@@ -181,7 +150,19 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
             goal_ok = false;
         }
 
-        joint_index_mapping_[i] = idx;
+        if (!joint_info_[idx].is_idle)
+        {
+            ss << "Joint '" << joint_name << "' is busy.\n";
+            goal_ok = false;
+        }
+
+        if (!joint_info_[idx].is_initialized)
+        {
+            ss << "Joint '" << joint_name << "' is not initialized.\n";
+            goal_ok = false;
+        }
+
+        goal.joint_index_mapping[i] = idx;
     }
 
     if (!goal_ok)
@@ -190,60 +171,146 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
     // Set goal
 
-    goal_ = goal;
-    sub_goal_idx_ = -1;
-
-    graph_viewer_.clear();
-
-    if (goal.trajectory.points.empty())
+    if (goal.msg.trajectory.points.empty())
     {
-        is_idle_ = true;
+        for(unsigned int i = 0; i < goal.num_goal_joints(); ++i)
+            joint_info_[goal.joint_index_mapping[i]].is_idle = true;
         return true;
     }
 
-    is_idle_ = false;
+    goal.sub_goal_idx = -1;
+    goal.t = 0;
+    goal.t_end = 0;
+
+    for(unsigned int i = 0; i < goal.num_goal_joints(); ++i)
+        joint_info_[goal.joint_index_mapping[i]].is_idle = false;
 
     return true;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void ReferenceGenerator::calculateTimeAndVelocities()
+void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment& seg)
 {
-    trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
+    double v0 = seg.v0;
+    double v1 = seg.v1;
+
+    std::cout << "Generate: x0 = " << x0 << ", x1 = " << x1 << ", v0 = " << v0 << ", v1 = " << v1 << std::endl;
+
+    bool swapped = false;
+    if (v0 > v1)
+    {
+        double temp = v0;
+        v0 = v1;
+        v1 = temp;
+        swapped = true;
+    }
+
+    std::cout << "          v0 = " << v0 << ", v1 = " << v1 << std::endl;
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    double k = (v1 - v0) / j.max_acc;
+    double l = seg.t_c - k;
+
+    double X = x1 - x0;
+    double U = l * v1 + k * (v0 + v1) / 2;
+    double L = l * v0 + k * (v0 + v1) / 2;
+
+
+    std::cout << "l = " << l << ", X = " << X << ", L = " << L << ", U = " << U << std::endl;
+
+    if (X > U)
+    {
+        double Y = X - U;
+        seg.vc = v1 + 0.5 * j.max_acc * (l - sqrt(std::max<double>(0, l * l - (4 * Y / j.max_acc))));
+    }
+    else
+    {
+        if (X > L)
+        {
+            seg.vc = v0 + (X - L) / l;
+        }
+        else
+        {
+            double Y = L - X;
+            seg.vc = v0 - 0.5 * j.max_acc * (l - sqrt(std::max<double>(0, l * l - (4 * Y / j.max_acc))));
+        }
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    seg.t_a = std::abs(seg.vc - v0) / j.max_acc;
+    seg.t_b = seg.t_c - (std::abs(v1 - seg.vc) / j.max_acc);    
+
+    if (swapped)
+    {
+        double temp = seg.t_a;
+        seg.t_a = seg.t_c - seg.t_b;
+        seg.t_b = seg.t_c - temp;
+    }
+
+    std::cout << "(0, " << seg.v0 << ")    (" << seg.t_a << ", " << seg.vc << ")    (" << seg.t_b << ", " << seg.vc << ")    (" << seg.t_c << ", " << seg.v1 << ")" << std::endl;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void ReferenceGenerator::prepareSubGoalTrajectory(JointGoal& goal)
+{
+    trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.msg.trajectory.points[goal.sub_goal_idx];
+
+    unsigned int num_goal_joints = goal.num_goal_joints();
+
+    if (goal.segments.empty())
+        goal.segments.resize(goal.num_goal_joints());
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Set initial velocities
+
+    for(unsigned int i = 0; i < num_goal_joints; ++i)
+        goal.segments[i].v0 = joint_info_[goal.joint_index_mapping[i]].vel;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Determine sub goal velocities, if not given
 
-    if (sub_goal.velocities.size() != num_goal_joints_)
+    if (sub_goal.velocities.size() == num_goal_joints)
     {
-        sub_goal.velocities.resize(num_goal_joints_, 0);
+        for(unsigned int i = 0; i < num_goal_joints; ++i)
+            goal.segments[i].v1 = sub_goal.velocities[i];
+    }
+    else
+    {
+        if (goal.sub_goal_idx + 1 < goal.msg.trajectory.points.size())
+        {
+            for(unsigned int i = 0; i < num_goal_joints; ++i)
+            {
+                const JointInfo& j = joint_info_[goal.joint_index_mapping[i]];
 
-//        if (sub_goal_idx_ + 1 < goal_.trajectory.points.size())
-//        {
-//            for(unsigned int i = 0; i < num_goal_joints_; ++i)
-//            {
-//                unsigned int joint_idx = joint_index_mapping_[i];
+                double x0 = j.pos;
+                double x1 = sub_goal.positions[i];
+                double x2 = goal.msg.trajectory.points[goal.sub_goal_idx + 1].positions[i];
 
-//                double x0 = positions_[joint_idx];
-//                double x1 = sub_goal.positions[i];
-//                double x2 = goal_.trajectory.points[sub_goal_idx_ + 1].positions[i];
+                if ((x0 < x1) == (x1 < x2))
+                {
+                    // Calculate the maximum velocity we can reach from x0 to x1
+                    double v_max_01 = sqrt(2 * j.max_acc * std::abs(x1 - x0) + j.vel * j.vel);
 
-//                if ((x0 < x1) == (x1 < x2))
-//                {
-//                    // Calculate the maximum velocity we can reach from x0 to x1
-//                    double v_max_01 = sqrt(2 * max_accelerations_[joint_idx] * std::abs(x1 - x0) + velocities_[i] * velocities_[i]);
+                    // Calculate the maximum velocity we are allowed to have such that we can still reach x2 with 0 velocity
+                    double v_max_12 = sqrt(2 * j.max_acc * std::abs(x2 - x1));
 
-//                    // Calculate the maximum velocity we are allowed to have such that we can still reach x2 with 0 velocity
-//                    double v_max_12 = sqrt(2 * max_accelerations_[joint_idx] * std::abs(x2 - x1));
+                    goal.segments[i].v1 = std::min(j.max_vel, std::min(v_max_01, v_max_12));
 
-//                    sub_goal.velocities[i] = std::min(max_velocities_[joint_idx], std::min(v_max_01, v_max_12));
-
-//                    if (x2 < x1)
-//                        sub_goal.velocities[i] = -sub_goal.velocities[i];
-//                }
-//            }
-//        }
+                    if (x2 < x1)
+                        goal.segments[i].v1 = -goal.segments[i].v1;
+                }
+            }
+        }
+        else
+        {
+            // All velocities to 0
+            for(unsigned int i = 0; i < num_goal_joints; ++i)
+                goal.segments[i].v1 = 0;
+        }
 
         sub_goal.time_from_start = ros::Duration(0);
     }
@@ -251,259 +318,128 @@ void ReferenceGenerator::calculateTimeAndVelocities()
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Determine time until sub goal, if not given
 
-    if (sub_goal.time_from_start > ros::Duration(0) && sub_goal_idx_ > 0)
+    if (sub_goal.time_from_start > ros::Duration(0) && goal.sub_goal_idx > 0)
     {
-        time_until_next_sub_goal_ = (sub_goal.time_from_start - goal_.trajectory.points[sub_goal_idx_ - 1].time_from_start).toSec();
+        goal.t_end = (sub_goal.time_from_start - goal.msg.trajectory.points[goal.sub_goal_idx - 1].time_from_start).toSec();
+        for(unsigned int i = 0; i < num_goal_joints; ++i)
+            goal.segments[i].t_c = goal.t_end;
     }
     else
     {
-        time_until_next_sub_goal_ = 0;
+        goal.t_end = 0;
 
-        for(unsigned int i = 0; i < num_goal_joints_; ++i)
+        for(unsigned int i = 0; i < num_goal_joints; ++i)
         {
-            unsigned int joint_idx = joint_index_mapping_[i];
+            const JointInfo& j = joint_info_[goal.joint_index_mapping[i]];
 
-            double v_max = max_velocities_[joint_idx];
-            double a_max = max_accelerations_[joint_idx];
+            double v0 = goal.segments[i].v0;
+            double v1 = goal.segments[i].v1;
 
-            double v0 = std::abs(velocities_[joint_idx]);
-            double v1 = std::abs(sub_goal.velocities[i]);
+            double x_diff = std::abs(sub_goal.positions[i] - j.pos);
 
-            double x_diff = std::abs(sub_goal.positions[i] - positions_[joint_idx]);
-
-            double v_middle = sqrt(max_accelerations_[joint_idx] * x_diff + (v0 * v0 + v1 * v1) / 2);
+            double v_middle = sqrt(j.max_acc * x_diff + (v0 * v0 + v1 * v1) / 2);
 
             double t_diff;
-            if (v_middle > max_velocities_[joint_idx])
+            if (v_middle > j.max_vel)
             {
-                double x_acc = (v_max * v_max - (v0 * v0)) / (2 * a_max);
-                double x_dec = (v_max * v_max - (v1 * v1)) / (2 * a_max);
+                double x_acc = (j.max_vel * j.max_vel - (v0 * v0)) / (2 * j.max_acc);
+                double x_dec = (j.max_vel * j.max_vel - (v1 * v1)) / (2 * j.max_acc);
 
                 double x_rest = x_diff - x_acc - x_dec;
 
-                double t_acc = std::abs(v_max - v0) / a_max;
-                double t_dec = std::abs(v_max - v1) / a_max;
-                double t_rest = x_rest / v_max;
+                double t_acc = std::abs(j.max_vel - v0) / j.max_acc;
+                double t_dec = std::abs(j.max_vel - v1) / j.max_acc;
+                double t_rest = x_rest / j.max_vel;
 
                 t_diff = t_acc + t_rest + t_dec;
             }
             else
             {
-                double t_acc = std::abs(v_middle - v0) / max_accelerations_[joint_idx];
-                double t_dec = std::abs(v_middle - v1) / max_accelerations_[joint_idx];
+                double t_acc = std::abs(v_middle - v0) / j.max_acc;
+                double t_dec = std::abs(v_middle - v1) / j.max_acc;
 
                 t_diff = t_acc + t_dec;
             }
 
-            time_until_next_sub_goal_ = std::max(t_diff, time_until_next_sub_goal_);
+            goal.t_end = std::max(t_diff, goal.t_end);
         }
+
+        for(unsigned int i = 0; i < num_goal_joints; ++i)
+            goal.segments[i].t_c = goal.t_end;
     }
 
-    t_segment_ = time_until_next_sub_goal_;
-    last_pos_ = positions_;
-    last_vel_ = velocities_;
+    for(unsigned int i = 0; i < num_goal_joints; ++i)
+    {
+        const JointInfo& j = joint_info_[goal.joint_index_mapping[i]];
+        std::cout << "  " << i << ": " << "x: " << j.pos << " -> " << sub_goal.positions[i] << " | "
+                                       << "v: " << j.vel << " -> " << goal.segments[i].v1 << " | "
+                                       << "t: " << goal.t << " / " << goal.t_end << std::endl;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Generate segments based on given velocities and times
+
+    for(unsigned int i = 0; i < num_goal_joints; ++i)
+    {
+        const JointInfo& j = joint_info_[goal.joint_index_mapping[i]];
+
+        double x0 = j.pos;
+        double x1 = sub_goal.positions[i];
+
+        generateSegment(x0, x1, j, goal.segments[i]);
+    }
 
 //    std::cout << "Velocities: " << sub_goal.velocities << ", duration: " << time_until_next_sub_goal_ << std::endl;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-bool ReferenceGenerator::calculatePositionReferences(const std::vector<double>& positions, double dt,
-                                                     std::vector<double>& references)
+bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<double>& references)
 {   
-//    std::cout << is_idle_ << " " << time_until_next_sub_goal_ << " (" << sub_goal_idx_ << "): " << positions << std::endl;
-
-    time_until_next_sub_goal_ -= dt;
-
-    if (positions_.empty())
-    {
-        positions_ = positions;
-        velocities_.resize(positions.size(), 0); // Assume we are initially in 0 velocity position
-    }
-
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
-
-    if (is_idle_ || sub_goal_idx_ >= (int)goal_.trajectory.points.size())
-    {
-        references = positions;
-        return true;
-    }
-
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
     // Go to next unreached sub goal
 
-    if (sub_goal_idx_ < 0 || time_until_next_sub_goal_ <= 0)
-    {
-        ++sub_goal_idx_;
+//    std::cout << goal.t << " / " << goal.t_end << std::endl;
 
-        if (sub_goal_idx_ >= goal_.trajectory.points.size())
+    if (goal.sub_goal_idx < 0 || goal.t > goal.t_end)
+    {
+        ++goal.sub_goal_idx;
+
+        if (goal.sub_goal_idx >= goal.msg.trajectory.points.size())
         {
             // Reached final goal
-            references = positions;
-            is_idle_ = true;
+
+            for(unsigned int i = 0; i < goal.num_goal_joints(); ++i)
+                joint_info_[goal.joint_index_mapping[i]].is_idle = true;
+
             return true;
         }
 
-        std::cout << "---- " << sub_goal_idx_ << " ----------------------------------------------" << std::endl;
+        std::cout << "---- " << goal.sub_goal_idx << " ----------------------------------------------" << std::endl;
 
-        calculateTimeAndVelocities();
+        goal.t -= goal.t_end;
+        prepareSubGoalTrajectory(goal);
     }
-
-    // TODO: extra check to see if the goal position corresonds to the actual position
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Determine references using interpolation
 
-    references = positions;
-
-    const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal_.trajectory.points[sub_goal_idx_];
-
-    if (true)
+    for(unsigned int i = 0; i < goal.num_goal_joints(); ++i)
     {
+        unsigned int joint_idx = goal.joint_index_mapping[i];
 
-        for(unsigned int i = 0; i < num_goal_joints_; ++i)
-        {
-            unsigned int joint_idx = joint_index_mapping_[i];
+        JointInfo& j = joint_info_[joint_idx];
+        j.vel = goal.segments[i].calculateVelocity(goal.t);
+        j.pos += dt * j.vel;
+        references[joint_idx] = j.pos;
 
-            double& x = positions_[joint_idx];
-            double x_goal = sub_goal.positions[i];
-
-            double& v = velocities_[joint_idx];
-            double v_goal = sub_goal.velocities[i];
-
-            double v_step = dt * max_accelerations_[joint_idx];
-
-            // - - - - -
-
-//            double t_brake = std::abs(v_goal - v) / max_accelerations_[joint_idx];
-
-//            if (time_until_next_sub_goal_ <= t_brake)
-//            {
-//                v += v_step * signum(v_goal - v);
-//            }
-//            else
-//            {
-//                double s1 = (time_until_next_sub_goal_ - t_brake) * (v - v_step) + t_brake * ((v - v_step) + v_goal) / 2;
-//                double s2 = (time_until_next_sub_goal_ - t_brake) * (v + v_step) + t_brake * ((v + v_step) + v_goal) / 2;
-
-//                double x_diff = x_goal - x;
-
-//                if (s2 < x_diff)
-//                    v += v_step;
-//                else if (s1 > x_diff)
-//                    v -= v_step;
-//            }
-
-            // - - - - -
-
-            int x_sign = signum(x_goal - x);
-//            double x_diff_abs = (x_goal - x) * x_sign;
-            double x_diff = x_goal - x;
-
-            double v_max1, v_max2;
-
-            // - - - - - - - - - - - - - -
-
-            double v_hyp1 = v + v_step;
-            double s1 = v_hyp1 * time_until_next_sub_goal_;
-            if (s1 > x_diff)
-                v_max1 = v_hyp1 - sqrt(2 * max_accelerations_[joint_idx] * (s1 - x_diff));
-            else
-                v_max1 = v_hyp1 + sqrt(2 * max_accelerations_[joint_idx] * (x_diff - s1));
-
-            // - - - - - - - - - - - - - -
-
-            double v_hyp2 = v - v_step;
-            double s2 = v_hyp2 * time_until_next_sub_goal_;
-            if (s2 > x_diff)
-                v_max2 = v_hyp2 - sqrt(2 * max_accelerations_[joint_idx] * (s2 - x_diff));
-            else
-                v_max2 = v_hyp2 + sqrt(2 * max_accelerations_[joint_idx] * (x_diff - s2));
-
-            // - - - - - - - - - - - - - -
-
-            if (std::abs(v_max1 - v_goal) < std::abs(v_max2 - v_goal))
-                v = v_hyp1;
-            else
-                v = v_hyp2;
-
-            if (i == 4)
-                std::cout << time_until_next_sub_goal_ << ": v_goal = " << v_goal << ", v_max1 = " << v_max1 << ", v_max2 = " << v_max2 << ", v = " << v << std::endl;
-
-            // - - - - -
-
-            x += dt * v;
-
-            references[joint_idx] = x;
-        }
-    }
-    else
-    {
-        for(unsigned int i = 0; i < num_goal_joints_; ++i)
-        {
-            unsigned int joint_idx = joint_index_mapping_[i];
-
-            interpolateCubic(last_pos_[joint_idx], last_vel_[joint_idx], sub_goal.positions[i], sub_goal.velocities[i],
-                             t_segment_ - time_until_next_sub_goal_, t_segment_, positions_[joint_idx], velocities_[joint_idx]);
-
-            references[joint_idx] = positions_[joint_idx];
-        }
+//        const TrajectorySegment& seg = goal.segments[i];
+//        std::cout << "(0, " << seg.v0 << ")    (" << seg.t_a << ", " << seg.vc << ")    (" << seg.t_b << ", " << seg.vc << ")    (" << seg.t_c << ", " << seg.v1 << ")" << std::endl;
+//        std::cout << goal.t << ": " << j.pos << "    " << j.vel << std::endl;
     }
 
+    goal.t += dt;
 
-    {
-        unsigned int i = 4;
-        unsigned int joint_idx = joint_index_mapping_[i];
-//        std::cout << positions_[joint_idx] << " (" << velocities_[joint_idx] << ") -> " << sub_goal.positions[i] << " (" << sub_goal.velocities[i] << ")" << std::endl;
-
-        graph_viewer_.addPoint(0, 0, ros::Time::now().toSec(), positions_[joint_idx]);
-        graph_viewer_.addPoint(0, 1, ros::Time::now().toSec(), sub_goal.positions[i]);
-
-//        graph_viewer_.addPoint(0, 0, ros::Time::now().toSec(), velocities_[joint_idx]);
-//        graph_viewer_.addPoint(0, 1, ros::Time::now().toSec(), sub_goal.velocities[i]);
-
-    }
-
-
-//    if (is_smooth_sub_goal_)
-//    {
-////        std::cout << "CUBIC!" << std::endl;
-
-//        // Use cubic interpolation
-
-//        const trajectory_msgs::JointTrajectoryPoint& prev_sub_goal = goal_.trajectory.points[sub_goal_idx_ - 1];
-
-//        trajectory_msgs::JointTrajectoryPoint p_interpolated;
-//        interpolateCubic(p_interpolated, prev_sub_goal, sub_goal, time_since_start_);
-
-//        for(unsigned int i = 0; i < num_goal_joints_; ++i)
-//        {
-//            unsigned int joint_idx = joint_index_mapping_[i];
-//            references[joint_idx] = p_interpolated.positions[i];
-//            interpolators_[joint_idx].reset(p_interpolated.positions[i],
-//                                            p_interpolated.velocities[i]);
-//        }
-
-////        graph_viewer_.addPoint(0, 0, time_since_start_, p_interpolated.positions[0], p_interpolated.velocities[0]);
-//    }
-//    else
-//    {
-////        graph_viewer_.clear();
-
-//        for(unsigned int i = 0; i < num_goal_joints_; ++i)
-//        {
-//            double p_wanted = sub_goal.positions[i];
-
-//            unsigned int joint_idx = joint_index_mapping_[i];
-
-//            ReferenceInterpolator& r = interpolators_[joint_idx];
-//            ReferencePoint ref = r.generateReference(p_wanted, max_velocities_[joint_idx],
-//                                                     max_accelerations_[joint_idx], dt, false, 0.01);
-//            references[joint_idx] = ref.pos;
-//        }
-//    }
-
-    graph_viewer_.view();
 
     return true;
 }

@@ -11,6 +11,77 @@ namespace tue
 namespace manipulation
 {
 
+
+
+// ----------------------------------------------------------------------------------------------------
+
+struct TrajectorySegment
+{
+    double v0;
+    double v1;
+    double t_a;
+    double t_b;
+    double t_c;
+    double vc;
+
+    double calculateVelocity(double t)
+    {
+        if (t < t_a)
+        {
+            double f = (t / t_a);
+            return (1 - f) * v0 + f * vc;
+        }
+        else if (t < t_b)
+        {
+            return vc;
+        }
+        else
+        {
+            double f = (t - t_b) / (t_c - t_b);
+            return (1 - f) * vc + f * v1;
+        }
+    }
+};
+
+// ----------------------------------------------------------------------------------------------------
+
+struct JointGoal
+{
+    double t;
+    double t_end;
+
+    int sub_goal_idx;
+
+    // Maps joint indices in the goal to indices in the internal representation
+    std::vector<unsigned int> joint_index_mapping;
+
+    control_msgs::FollowJointTrajectoryGoal msg;
+
+    unsigned int num_goal_joints() const { return msg.trajectory.joint_names.size(); }
+
+    // trajectory segments per joint
+    std::vector<TrajectorySegment> segments;
+};
+
+// ----------------------------------------------------------------------------------------------------
+
+struct JointInfo
+{
+    JointInfo() : pos(0), vel(0), max_vel(0), max_acc(0), min_pos(0), max_pos(0), is_idle(true), is_initialized(false) {}
+
+    double pos;
+    double vel;
+
+    double max_vel;
+    double max_acc;
+    double min_pos;
+    double max_pos;
+    bool is_idle;
+    bool is_initialized;
+};
+
+// ----------------------------------------------------------------------------------------------------
+
 class ReferenceGenerator
 {
 
@@ -26,26 +97,27 @@ public:
 
     void initJoint(unsigned int idx, double max_vel, double max_acc, double min_pos, double max_pos);
 
+    bool setJointState(const std::string& joint_name, double pos, double vel);
+
     void setPositionLimits(unsigned int idx, double min_pos, double max_pos)
     {
-        min_positions_[idx] = min_pos;
-        max_positions_[idx] = max_pos;
+        joint_info_[idx].min_pos = min_pos;
+        joint_info_[idx].max_pos = max_pos;
     }
 
     void setMaxVelocity(unsigned int idx, double max_vel)
     {
-        max_velocities_[idx] = max_vel;
+        joint_info_[idx].max_vel = max_vel;
     }
 
     void setMaxAcceleration(unsigned int idx, double max_acc)
     {
-        max_accelerations_[idx] = max_acc;
+        joint_info_[idx].max_acc = max_acc;
     }
 
     bool setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::stringstream& ss);
 
-    bool calculatePositionReferences(const std::vector<double>& positions, double dt,
-                                     std::vector<double>& references);
+    bool calculatePositionReferences(double dt, std::vector<double>& references);
 
     // Returns joint index for a given joint name. If joint does not exist, returns -1
     int joint_index(const std::string& name) const
@@ -63,7 +135,17 @@ public:
 
     const std::vector<std::string>& joint_names() const { return joint_names_; }
 
-    bool is_idle() const { return is_idle_; }
+    bool is_idle() const
+    {
+        for(std::vector<JointInfo>::const_iterator it = joint_info_.begin(); it != joint_info_.end(); ++it)
+            if (!it->is_idle)
+                return false;
+
+        return true;
+    }
+
+    double position(unsigned int idx) const { return joint_info_[idx].pos; }
+    double velocity(unsigned int idx) const { return joint_info_[idx].vel; }
 
 private:
 
@@ -74,51 +156,16 @@ private:
 
     std::map<std::string, unsigned int> joint_name_to_index_;
 
-    std::vector<double> max_velocities_;
-
-    std::vector<double> max_accelerations_;
-
-    std::vector<double> min_positions_;
-
-    std::vector<double> max_positions_;
+    std::vector<JointInfo> joint_info_;
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // Current state
+    // Goal
 
-    std::vector<double> positions_;
-    std::vector<double> velocities_;
+    JointGoal goal;
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // Goal trajectory / set points
+    void prepareSubGoalTrajectory(JointGoal& goal);
 
-    double time_until_next_sub_goal_;
-
-    int sub_goal_idx_;
-
-    // Maps joint indices in the goal to indices in the internal representation
-    std::vector<unsigned int> joint_index_mapping_;
-
-    control_msgs::FollowJointTrajectoryGoal goal_;
-
-    unsigned int num_goal_joints_;
-
-    void calculateTimeAndVelocities();
-
-
-    double t_segment_;
-    std::vector<double> last_pos_;
-    std::vector<double> last_vel_;
-
-
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // Joint state and interpolation
-
-    bool is_idle_;
-
-    std::vector<ReferenceInterpolator> interpolators_;
-
-    static double NO_VALUE;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

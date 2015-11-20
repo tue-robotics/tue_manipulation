@@ -115,3 +115,6 @@ target_link_libraries(torso_server_test_client
   ${catkin_LIBRARIES}
 )
 add_dependencies(torso_server_test_client ${catkin_EXPORTED_TARGETS})
+
+add_executable(test_refgen test/test_refgen.cpp)
+target_link_libraries(test_refgen tue_manipulation)
