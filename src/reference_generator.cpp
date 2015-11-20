@@ -303,6 +303,10 @@ void ReferenceGenerator::prepareSubGoalTrajectory(JointGoal& goal)
                     if (x2 < x1)
                         goal.segments[i].v1 = -goal.segments[i].v1;
                 }
+                else
+                {
+                    goal.segments[i].v1 = 0;
+                }
             }
         }
         else
