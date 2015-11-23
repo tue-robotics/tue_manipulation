@@ -31,7 +31,7 @@ struct TrajectorySegment
             double f = (t / t_a);
             return (1 - f) * v0 + f * vc;
         }
-        else if (t < t_b)
+        else if (t <= t_b)
         {
             return vc;
         }
@@ -169,6 +169,7 @@ private:
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+    double total_time_;
     GraphViewer graph_viewer_;
 
 };

@@ -17,6 +17,15 @@ int signum(double a)
 
 // ----------------------------------------------------------------------------------------------------
 
+void swap(double& a, double& b)
+{
+    double temp = a;
+    a = b;
+    b = temp;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 std::ostream& operator<<(std::ostream& out, const std::vector<double>& v)
 {
     if (v.empty())
@@ -185,6 +194,9 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     for(unsigned int i = 0; i < goal.num_goal_joints(); ++i)
         joint_info_[goal.joint_index_mapping[i]].is_idle = false;
 
+    total_time_ = 0;
+    graph_viewer_.clear();
+
     return true;
 }
 
@@ -195,14 +207,18 @@ void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment
     double v0 = seg.v0;
     double v1 = seg.v1;
 
-    bool swapped = false;
-    if (v0 > v1)
+    bool mirrored = false;
+    if (x1 < x0)
     {
-        double temp = v0;
-        v0 = v1;
-        v1 = temp;
-        swapped = true;
+        swap(x0, x1);
+        swap(v0, v1);
+        v0 = -v0;
+        v1 = -v1;
+        mirrored = true;
     }
+
+    if (v0 > v1)
+        swap(v0, v1);
 
     // - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -217,6 +233,10 @@ void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment
     {
         double Y = X - U;
         seg.vc = v1 + 0.5 * j.max_acc * (l - sqrt(std::max<double>(0, l * l - (4 * Y / j.max_acc))));
+
+        if (l * l - (4 * Y / j.max_acc) < 0)
+            std::cout << "ERROR 1" << std::endl;
+
         // TODO: deal with case that l * l - (4 * Y / j.max_acc) < 0
     }
     else
@@ -228,24 +248,41 @@ void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment
         else
         {
             double Y = L - X;
-            seg.vc = v0 - 0.5 * j.max_acc * (l - sqrt(std::max<double>(0, l * l - (4 * Y / j.max_acc))));
 
-            // TODO: deal with case that vc is lower than 0
-            // TODO: deal with case that l * l - (4 * Y / j.max_acc) < 0
+            double r = l * l - (4 * Y / j.max_acc);
+            if (r < 0)
+            {
+                seg.vc = 0;
+                double ta = std::abs(v0) / j.max_acc;
+
+                if (ta > seg.t_c)
+                    std::cout << "ERROR!!!!!" << std::endl;
+
+                double S = ta * v0 / 2;
+                double T = X - S;
+
+                // T = (v1 / j.max_acc) * v1 * 0.5
+                //   = v1 * v1 / (j.max_acc * 2)
+                // v1 = sqrt(T * j.max_acc * 2)
+
+                seg.v1 = std::min((seg.t_c - ta) * j.max_acc, sqrt(T * j.max_acc * 2));
+            }
+            else
+            {
+                seg.vc = v0 - 0.5 * j.max_acc * (l - sqrt(r));
+                // TODO: deal with case that vc is lower than 0
+
+            }
         }
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    seg.t_a = std::abs(seg.vc - v0) / j.max_acc;
-    seg.t_b = seg.t_c - (std::abs(v1 - seg.vc) / j.max_acc);    
+    if (mirrored)
+        seg.vc = -seg.vc;
 
-    if (swapped)
-    {
-        double temp = seg.t_a;
-        seg.t_a = seg.t_c - seg.t_b;
-        seg.t_b = seg.t_c - temp;
-    }
+    seg.t_a = std::abs(seg.vc - seg.v0) / j.max_acc;
+    seg.t_b = seg.t_c - (std::abs(seg.v1 - seg.vc) / j.max_acc);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -368,6 +405,8 @@ void ReferenceGenerator::prepareSubGoalTrajectory(JointGoal& goal)
                 t_diff = t_acc + t_dec;
             }
 
+            t_diff = std::max(t_diff, std::abs(v0) / j.max_acc);
+
             goal.t_end = std::max(t_diff, goal.t_end);
         }
 
@@ -403,6 +442,12 @@ void ReferenceGenerator::prepareSubGoalTrajectory(JointGoal& goal)
 
 bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<double>& references)
 {   
+    if (references.size() != joint_info_.size())
+        references.resize(joint_info_.size(), 0);
+
+    for(unsigned int i = 0; i < joint_info_.size(); ++i)
+        references[i] = joint_info_[i].pos;
+
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
     // Go to next unreached sub goal
 
@@ -471,10 +516,21 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
         j.pos += dt * j.vel;
         references[joint_idx] = j.pos;
 
+        if (i == 1)
+        {
+            graph_viewer_.addPoint(0, 0, total_time_, j.pos);
+            graph_viewer_.addPoint(0, 1, total_time_, goal.msg.trajectory.points[goal.sub_goal_idx].positions[i]);
+            std::cout << goal.t << ": " << j.pos << "    " << j.vel << std::endl;
+        }
+
 //        const TrajectorySegment& seg = goal.segments[i];
 //        std::cout << "(0, " << seg.v0 << ")    (" << seg.t_a << ", " << seg.vc << ")    (" << seg.t_b << ", " << seg.vc << ")    (" << seg.t_c << ", " << seg.v1 << ")" << std::endl;
 //        std::cout << goal.t << ": " << j.pos << "    " << j.vel << std::endl;
     }
+
+    total_time_ += dt;
+
+    graph_viewer_.view();
 
     return true;
 }
