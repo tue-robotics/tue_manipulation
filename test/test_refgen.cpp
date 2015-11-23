@@ -36,7 +36,7 @@ int main(int argc, char **argv)
             {
                 std::stringstream ss;
                 ss << "joint-" << (i-1);
-                refgen.initJoint(ss.str(), 1, 1, -1, 1);
+                refgen.initJoint(ss.str(), 1, 0.1, -1, 1);
                 refgen.setJointState(ss.str(), pos, 0);
             }
             else
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 
     GraphViewer g;
 
-    while(!refgen.is_idle() && time < 30)
+    while(!refgen.is_idle())
     {
         refgen.calculatePositionReferences(0.01, references);
         time += dt;

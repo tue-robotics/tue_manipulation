@@ -195,8 +195,6 @@ void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment
     double v0 = seg.v0;
     double v1 = seg.v1;
 
-    std::cout << "Generate: x0 = " << x0 << ", x1 = " << x1 << ", v0 = " << v0 << ", v1 = " << v1 << std::endl;
-
     bool swapped = false;
     if (v0 > v1)
     {
@@ -205,8 +203,6 @@ void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment
         v1 = temp;
         swapped = true;
     }
-
-    std::cout << "          v0 = " << v0 << ", v1 = " << v1 << std::endl;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -217,13 +213,11 @@ void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment
     double U = l * v1 + k * (v0 + v1) / 2;
     double L = l * v0 + k * (v0 + v1) / 2;
 
-
-    std::cout << "l = " << l << ", X = " << X << ", L = " << L << ", U = " << U << std::endl;
-
     if (X > U)
     {
         double Y = X - U;
         seg.vc = v1 + 0.5 * j.max_acc * (l - sqrt(std::max<double>(0, l * l - (4 * Y / j.max_acc))));
+        // TODO: deal with case that l * l - (4 * Y / j.max_acc) < 0
     }
     else
     {
@@ -235,6 +229,9 @@ void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment
         {
             double Y = L - X;
             seg.vc = v0 - 0.5 * j.max_acc * (l - sqrt(std::max<double>(0, l * l - (4 * Y / j.max_acc))));
+
+            // TODO: deal with case that vc is lower than 0
+            // TODO: deal with case that l * l - (4 * Y / j.max_acc) < 0
         }
     }
 
@@ -249,8 +246,6 @@ void generateSegment(double x0, double x1, const JointInfo& j, TrajectorySegment
         seg.t_a = seg.t_c - seg.t_b;
         seg.t_b = seg.t_c - temp;
     }
-
-    std::cout << "(0, " << seg.v0 << ")    (" << seg.t_a << ", " << seg.vc << ")    (" << seg.t_b << ", " << seg.vc << ")    (" << seg.t_c << ", " << seg.v1 << ")" << std::endl;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -336,11 +331,19 @@ void ReferenceGenerator::prepareSubGoalTrajectory(JointGoal& goal)
         {
             const JointInfo& j = joint_info_[goal.joint_index_mapping[i]];
 
+            double x0 = j.pos;
+            double x1 = sub_goal.positions[i];
+
             double v0 = goal.segments[i].v0;
             double v1 = goal.segments[i].v1;
 
-            double x_diff = std::abs(sub_goal.positions[i] - j.pos);
+            if (x1 < x0)
+            {
+                v0 = -v0;
+                v1 = -v1;
+            }
 
+            double x_diff = std::abs(x1 - x0);
             double v_middle = sqrt(j.max_acc * x_diff + (v0 * v0 + v1 * v1) / 2);
 
             double t_diff;
@@ -372,13 +375,13 @@ void ReferenceGenerator::prepareSubGoalTrajectory(JointGoal& goal)
             goal.segments[i].t_c = goal.t_end;
     }
 
-    for(unsigned int i = 0; i < num_goal_joints; ++i)
-    {
-        const JointInfo& j = joint_info_[goal.joint_index_mapping[i]];
-        std::cout << "  " << i << ": " << "x: " << j.pos << " -> " << sub_goal.positions[i] << " | "
-                                       << "v: " << j.vel << " -> " << goal.segments[i].v1 << " | "
-                                       << "t: " << goal.t << " / " << goal.t_end << std::endl;
-    }
+//    for(unsigned int i = 0; i < num_goal_joints; ++i)
+//    {
+//        const JointInfo& j = joint_info_[goal.joint_index_mapping[i]];
+//        std::cout << "  " << i << ": " << "x: " << j.pos << " -> " << sub_goal.positions[i] << " | "
+//                                       << "v: " << j.vel << " -> " << goal.segments[i].v1 << " | "
+//                                       << "t: " << goal.t << " / " << goal.t_end << std::endl;
+//    }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Generate segments based on given velocities and times
@@ -405,8 +408,38 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
 
 //    std::cout << goal.t << " / " << goal.t_end << std::endl;
 
+    std::stringstream error;
+
     if (goal.sub_goal_idx < 0 || goal.t > goal.t_end)
     {
+        if (goal.sub_goal_idx >= 0)
+        {
+
+            for(unsigned int i = 0; i < goal.num_goal_joints(); ++i)
+            {
+                const JointInfo& j = joint_info_[goal.joint_index_mapping[i]];
+
+                double x_goal = goal.msg.trajectory.points[goal.sub_goal_idx].positions[i];
+                double x_current = j.pos;
+
+                if (std::abs(x_current - x_goal) > 0.01)
+                    error << "Error for joint " << i << ": pos current = " << x_current << ", pos goal = " << x_goal << std::endl;
+
+                double v_goal = goal.segments[i].v1;
+                double v_current = j.vel;
+
+                if (std::abs(v_current - v_goal) > 0.01)
+                    error << "Error for joint " << i << ": vel current = " << v_current << ", vel goal = " << v_goal << std::endl;
+            }
+
+            if (!error.str().empty())
+            {
+                std::cout << std::endl;
+                std::cout << "---- " << goal.sub_goal_idx << " -----------------------------------------------" << std::endl;
+                std::cout << error.str() << std::endl;
+            }
+        }
+
         ++goal.sub_goal_idx;
 
         if (goal.sub_goal_idx >= goal.msg.trajectory.points.size())
@@ -419,11 +452,12 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
             return true;
         }
 
-        std::cout << "---- " << goal.sub_goal_idx << " ----------------------------------------------" << std::endl;
-
-        goal.t -= goal.t_end;
+        goal.t = 0;
         prepareSubGoalTrajectory(goal);
     }
+
+    goal.t += dt;
+
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Determine references using interpolation
@@ -441,9 +475,6 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
 //        std::cout << "(0, " << seg.v0 << ")    (" << seg.t_a << ", " << seg.vc << ")    (" << seg.t_b << ", " << seg.vc << ")    (" << seg.t_c << ", " << seg.v1 << ")" << std::endl;
 //        std::cout << goal.t << ": " << j.pos << "    " << j.vel << std::endl;
     }
-
-    goal.t += dt;
-
 
     return true;
 }
