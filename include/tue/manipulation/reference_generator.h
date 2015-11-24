@@ -35,6 +35,15 @@ struct JointGoal
 
 // ----------------------------------------------------------------------------------------------------
 
+struct JointGoalInfo
+{
+    std::string id;
+    std::stringstream s_error;
+    std::string error() const { return s_error.str(); }
+};
+
+// ----------------------------------------------------------------------------------------------------
+
 struct JointInfo
 {
     JointInfo() : max_vel(0), max_acc(0), min_pos(0), max_pos(0), is_idle(true), is_set(false) {}
@@ -89,9 +98,22 @@ public:
 
     bool setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::string& id, std::stringstream& ss);
 
-    bool setGoal(const std::string& joint_name, double position);
+    bool setGoal(const std::string& joint_name, double position)
+    {
+        JointGoalInfo info;
+        return setGoal(joint_name, position, info);
+    }
 
-    bool setGoal(const std::vector<std::string>& joint_names, const std::vector<double>& positions);
+    bool setGoal(const std::string& joint_name, double position, JointGoalInfo& info);
+
+    bool setGoal(const std::vector<std::string>& joint_names, const std::vector<double>& positions)
+    {
+        JointGoalInfo info;
+        return setGoal(joint_names, positions, info);
+    }
+
+    bool setGoal(const std::vector<std::string>& joint_names, const std::vector<double>& positions,
+                 JointGoalInfo& info);
 
     void cancelGoal(const std::string& id);
 

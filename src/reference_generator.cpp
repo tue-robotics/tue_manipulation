@@ -273,7 +273,7 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
 
 // ----------------------------------------------------------------------------------------------------
 
-bool ReferenceGenerator::setGoal(const std::string& joint_name, double position)
+bool ReferenceGenerator::setGoal(const std::string& joint_name, double position, JointGoalInfo& info)
 {
     control_msgs::FollowJointTrajectoryGoal goal_msg;
     goal_msg.trajectory.joint_names.push_back(joint_name);
@@ -282,14 +282,13 @@ bool ReferenceGenerator::setGoal(const std::string& joint_name, double position)
     p.positions.push_back(position);
     goal_msg.trajectory.points.push_back(p);
 
-    std::string id;
-    std::stringstream error;
-    return setGoal(goal_msg, id, error);
+    return setGoal(goal_msg, info.id, info.s_error);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-bool ReferenceGenerator::setGoal(const std::vector<std::string>& joint_names, const std::vector<double>& positions)
+bool ReferenceGenerator::setGoal(const std::vector<std::string>& joint_names, const std::vector<double>& positions,
+                                 JointGoalInfo& info)
 {
     if (joint_names.empty() || joint_names.size() != positions.size())
         return false;
@@ -301,9 +300,7 @@ bool ReferenceGenerator::setGoal(const std::vector<std::string>& joint_names, co
     p.positions = positions;
     goal_msg.trajectory.points.push_back(p);
 
-    std::string id;
-    std::stringstream error;
-    return setGoal(goal_msg, id, error);
+    return setGoal(goal_msg, info.id, info.s_error);
 }
 
 // ----------------------------------------------------------------------------------------------------
