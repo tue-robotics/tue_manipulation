@@ -100,6 +100,9 @@ add_dependencies(torso_server ${catkin_EXPORTED_TARGETS})
 #                                              TESTS
 # ------------------------------------------------------------------------------------------------
 
+add_executable(test_refgen test/test_refgen.cpp)
+target_link_libraries(test_refgen tue_manipulation)
+
 add_executable(test_robot_ik test/test_robot_ik.cpp)
 target_link_libraries(test_robot_ik tue_manipulation)
 

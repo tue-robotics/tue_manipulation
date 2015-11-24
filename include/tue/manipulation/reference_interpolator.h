@@ -6,18 +6,11 @@ namespace tue
 namespace manipulation
 {
 
-// ----------------------------------------------------------------------------------------------------
-
-struct ReferencePoint
+enum RefState
 {
-    ReferencePoint() {}
-
-    ReferencePoint(double pos_, double vel_, double acc_)
-        : pos(pos_), vel(vel_), acc(acc_) {}
-
-    double pos;
-    double vel;
-    double acc;
+    ACCELERATE,
+    DECELERATE,
+    IDLE
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -31,20 +24,37 @@ public:
 
     ~ReferenceInterpolator();
 
-    void reset(double pos, double vel);
+    void setState(double pos, double vel);
 
-    ReferencePoint generateReference(double x_desired, double max_vel, double max_acc, double dt, bool stop, double EPS);
+    void setGoal(double pos);
+
+
+    void setMaxVelocity(double max_vel) { max_vel_ = max_vel; }
+
+    void setMaxAcceleration(double max_acc) { max_acc_ = max_acc; }
+
+
+    void update(double dt);
+
+    void brake(double dt);
+
 
     double position() const { return x_; }
 
+    double velocity() const { return vel_; }
+
+    bool done() const { return state_ == IDLE; }
+
 private:
 
-    int dir_;
-    bool reset_;
     double x_;
     double vel_;
-    double vel_last_;
-    bool ready_;
+    double x_goal_;
+
+    RefState state_;
+
+    double max_acc_;
+    double max_vel_;
 
 };
 

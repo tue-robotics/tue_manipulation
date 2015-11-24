@@ -4,7 +4,7 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 
 #include "tue/manipulation/reference_interpolator.h"
-//#include "tue/manipulation/graph_viewer.h"
+#include "tue/manipulation/graph_viewer.h"
 
 namespace tue
 {
@@ -15,18 +15,22 @@ namespace manipulation
 
 struct JointGoal
 {
+    JointGoal() : is_done(false) {}
+
     double time_since_start;
 
-    unsigned int sub_goal_idx;
+    int sub_goal_idx;
 
     // Maps joint indices in the goal to indices in the internal representation
     std::vector<unsigned int> joint_index_mapping;
 
     control_msgs::FollowJointTrajectoryGoal goal_msg;
 
-    std::vector<bool> is_smooth_point;
-
     unsigned int num_goal_joints;
+
+    bool use_cubic_interpolation;
+
+    bool is_done;
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -71,16 +75,20 @@ public:
     void setMaxVelocity(unsigned int idx, double max_vel)
     {
         joint_info_[idx].max_vel = max_vel;
+        joint_info_[idx].interpolator.setMaxVelocity(max_vel);
     }
 
     void setMaxAcceleration(unsigned int idx, double max_acc)
     {
         joint_info_[idx].max_acc = max_acc;
+        joint_info_[idx].interpolator.setMaxAcceleration(max_acc);
     }
 
     bool setJointState(const std::string& joint_name, double pos, double vel);
 
-    bool setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::stringstream& ss);
+    bool setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::string& id, std::stringstream& ss);
+
+    void cancelGoal(const std::string& id);
 
     bool calculatePositionReferences(double dt, std::vector<double>& references);
 
@@ -100,13 +108,13 @@ public:
 
     const std::vector<std::string>& joint_names() const { return joint_names_; }
 
-    bool all_joints_idle() const
+    bool isActiveGoal(const std::string& id) const
     {
-        for(std::vector<JointInfo>::const_iterator it = joint_info_.begin(); it != joint_info_.end(); ++it)
-            if (!it->is_idle)
-                return false;
+        std::map<std::string, JointGoal>::const_iterator it = goals_.find(id);
+        if (it == goals_.end())
+            return false;
 
-        return true;
+        return !it->second.is_done;
     }
 
 private:
@@ -122,14 +130,22 @@ private:
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // Goal trajectory / set points
+    // Goals
 
-    std::vector<JointGoal> goals_;
+    std::map<std::string, JointGoal> goals_;
+
+    unsigned int next_goal_id_;
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-//    GraphViewer graph_viewer_;
+    void calculatePositionReferences(JointGoal& goal, double dt, std::vector<double>& references);
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    bool visualize_;
+    double time_;
+    GraphViewer graph_viewer_;
 
 };
 

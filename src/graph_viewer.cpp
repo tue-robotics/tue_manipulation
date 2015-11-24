@@ -50,8 +50,11 @@ void GraphViewer::clear()
 
 void GraphViewer::view()
 {
-    static cv::Scalar COLORS[] = { cv::Scalar(255, 0, 0), cv::Scalar(0, 0, 255) };
+    static cv::Scalar COLORS[] = { cv::Scalar(255, 0,   0), cv::Scalar(0, 0, 255),   cv::Scalar(0, 255, 0),
+                                   cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 255), cv::Scalar(255, 0, 255),
+                                   cv::Scalar(0, 0, 0),     cv::Scalar(128, 128, 128), cv::Scalar(100, 255, 0) };
 
+    static int NUM_COLORS = 9;
 
     if (redraw_)
     {
@@ -72,7 +75,7 @@ void GraphViewer::view()
 
         cv::Point2d p_canvas((p.x - x_min_) * width / (x_max_ - x_min_),
                              (p.y - y_min_) * height / (y_max_ - y_min_));
-        cv::circle(canvas, p_canvas, 2, COLORS[p.label], 1);
+        cv::circle(canvas, p_canvas, 2, COLORS[p.label % NUM_COLORS], 1);
 
         if (p.y_dot != 1e9)
         {
