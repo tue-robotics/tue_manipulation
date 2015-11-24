@@ -145,6 +145,17 @@ public:
         return !it->second.is_done;
     }
 
+    bool hasActiveGoals() const
+    {
+        for(std::map<std::string, JointGoal>::const_iterator it = goals_.begin(); it != goals_.end(); ++it)
+        {
+            if (!it->second.is_done)
+                return true;
+        }
+
+        return false;
+    }
+
 private:
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
