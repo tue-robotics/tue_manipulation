@@ -11,11 +11,19 @@ namespace tue
 namespace manipulation
 {
 
+enum JointGoalStatus
+{
+    JOINT_GOAL_CANCELED,
+    JOINT_GOAL_SUCCEEDED,
+    JOINT_GOAL_ACTIVE,
+    JOINT_GOAL_UNKNOWN
+};
+
 // ----------------------------------------------------------------------------------------------------
 
 struct JointGoal
 {
-    JointGoal() : is_done(false) {}
+    JointGoal() : status(JOINT_GOAL_ACTIVE) {}
 
     double time_since_start;
 
@@ -30,7 +38,7 @@ struct JointGoal
 
     bool use_cubic_interpolation;
 
-    bool is_done;
+    JointGoalStatus status;
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -46,14 +54,15 @@ struct JointGoalInfo
 
 struct JointInfo
 {
-    JointInfo() : max_vel(0), max_acc(0), min_pos(0), max_pos(0), is_idle(true), is_set(false) {}
+    JointInfo() : max_vel(0), max_acc(0), min_pos(0), max_pos(0), is_set(false) {}
 
     double max_vel;
     double max_acc;
     double min_pos;
     double max_pos;
-    bool is_idle;
     bool is_set;
+
+    std::string goal_id;
 
     ReferenceInterpolator interpolator;
 };
@@ -136,23 +145,26 @@ public:
 
     const std::vector<std::string>& joint_names() const { return joint_names_; }
 
-    bool isActiveGoal(const std::string& id) const
+    JointGoalStatus getGoalStatus(const std::string& id) const
     {
         std::map<std::string, JointGoal>::const_iterator it = goals_.find(id);
         if (it == goals_.end())
-            return false;
+            return JOINT_GOAL_UNKNOWN;
+        return it->second.status;
+    }
 
-        return !it->second.is_done;
+    bool isActiveGoal(const std::string& id) const
+    {
+        return getGoalStatus(id) == JOINT_GOAL_ACTIVE;
     }
 
     bool hasActiveGoals() const
     {
         for(std::map<std::string, JointGoal>::const_iterator it = goals_.begin(); it != goals_.end(); ++it)
         {
-            if (!it->second.is_done)
+            if (!it->second.status == JOINT_GOAL_ACTIVE)
                 return true;
         }
-
         return false;
     }
 

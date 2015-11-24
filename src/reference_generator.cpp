@@ -106,7 +106,7 @@ void ReferenceGenerator::initJoint(unsigned int idx, double max_vel, double max_
     j.max_pos = max_pos;
     j.interpolator.setMaxVelocity(max_vel);
     j.interpolator.setMaxAcceleration(max_acc);
-    j.is_idle = true;
+    j.goal_id.clear();
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
 
     JointInfo& j = joint_info_[idx];
     j.interpolator.setState(pos, vel);
-    j.is_idle = true;
+    j.goal_id.clear();
     j.is_set = true;
 
     return true;
@@ -176,6 +176,8 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Check feasibility of joint goals
 
+    std::set<std::string> goals_to_cancel;
+
     bool goal_ok = true;
     for (unsigned int i = 0; i < goal.num_goal_joints; ++i)
     {
@@ -192,11 +194,8 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
 
         const JointInfo& js = joint_info_[idx];
 
-        if (!js.is_idle)
-        {
-            ss << "Joint '" << joint_name << "' is busy.\n";
-            goal_ok = false;
-        }
+        if (!js.goal_id.empty())
+            goals_to_cancel.insert(js.goal_id);
 
         if (!js.is_set)
         {
@@ -250,8 +249,17 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
         return false;
     }
 
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    // Cancel overlapping goals
+
+    for(std::set<std::string>::const_iterator it = goals_to_cancel.begin(); it != goals_to_cancel.end(); ++it)
+        cancelGoal(*it);
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
-        joint_info_[goal.joint_index_mapping[i]].is_idle = false;
+        joint_info_[goal.joint_index_mapping[i]].goal_id = id;
 
     goal.sub_goal_idx = -1;
     goal.time_since_start = 0;
@@ -314,9 +322,9 @@ void ReferenceGenerator::cancelGoal(const std::string& id)
     JointGoal& goal = it->second;
 
     for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
-        joint_info_[goal.joint_index_mapping[i]].is_idle = true;
+        joint_info_[goal.joint_index_mapping[i]].goal_id.clear();
 
-    goal.is_done = true;
+    goal.status = JOINT_GOAL_CANCELED;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -367,9 +375,9 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
             if (goal.sub_goal_idx >= goal.goal_msg.trajectory.points.size())
             {
                 for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
-                    joint_info_[goal.joint_index_mapping[i]].is_idle = true;
+                    joint_info_[goal.joint_index_mapping[i]].goal_id.clear();
 
-                goal.is_done = true;
+                goal.status = JOINT_GOAL_SUCCEEDED;
                 return;
             }
 
@@ -455,7 +463,7 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
     {
         JointGoal& goal = it->second;
 
-        if (goal.is_done)
+        if (goal.status != JOINT_GOAL_ACTIVE)
             continue;
 
         calculatePositionReferences(goal, dt, references);
@@ -466,7 +474,7 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
     for(unsigned int i = 0; i < joint_info_.size(); ++i)
     {
         JointInfo& j = joint_info_[i];
-        if (j.is_idle)
+        if (j.goal_id.empty())
         {
             ReferenceInterpolator& r = j.interpolator;
             if (std::abs(r.velocity()) > 0)
