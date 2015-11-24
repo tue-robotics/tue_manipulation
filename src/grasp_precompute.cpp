@@ -7,6 +7,8 @@
 
 const double EPS = 1e-6;
 
+////////////////////////////////////////////////////////////////////////////////
+
 GraspPrecompute::GraspPrecompute()
 {
 	ROS_INFO("Starting GraspPrecompute");
@@ -58,6 +60,8 @@ GraspPrecompute::GraspPrecompute()
 
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 GraspPrecompute::~GraspPrecompute()
 {
     delete as_;
@@ -65,6 +69,8 @@ GraspPrecompute::~GraspPrecompute()
     delete listener_;
     delete moveit_group_;
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal)
 {
@@ -291,6 +297,7 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
 
 }
 
+////////////////////////////////////////////////////////////////////////////////
 
 void GraspPrecompute::joint_execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal)
 {
@@ -316,7 +323,17 @@ void GraspPrecompute::joint_execute(const control_msgs::FollowJointTrajectoryGoa
     bool feasible = moveit_group_->plan(my_plan);
 
     /// Plan the rest of the points
-    // ToDo
+    // ToDo: plan the rest of the points...
+//    if (goal->trajectory.points.size() > 1)
+//    {
+//        // Set robot start state
+
+//        // Set target
+
+//        // Plan
+
+//        // Append
+//    }
 
     if (!feasible)
     {
@@ -337,3 +354,5 @@ void GraspPrecompute::joint_execute(const control_msgs::FollowJointTrajectoryGoa
     }
 
 }
+
+////////////////////////////////////////////////////////////////////////////////
