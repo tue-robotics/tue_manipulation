@@ -206,7 +206,9 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
 
         if (js.max_vel == 0 || js.max_acc == 0 || (js.min_pos == js.max_pos))
         {
-            ss << "Joint '" << joint_name << "' limits not initialized.\n";
+            ss << "Joint '" << joint_name << "' limits not initialized: "
+               << "max vel = " << js.max_vel << ", max acc = " << js.max_acc
+               << ", min pos = " << js.min_pos << ", max pos = " << js.max_pos << "\n";
             goal_ok = false;
         }
 
