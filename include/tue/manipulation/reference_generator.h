@@ -86,9 +86,15 @@ public:
 
     bool setJointState(const std::string& joint_name, double pos, double vel);
 
+
     bool setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::string& id, std::stringstream& ss);
 
+    bool setGoal(const std::string& joint_name, double position);
+
+    bool setGoal(const std::vector<std::string>& joint_names, const std::vector<double>& positions);
+
     void cancelGoal(const std::string& id);
+
 
     bool calculatePositionReferences(double dt, std::vector<double>& references);
 
