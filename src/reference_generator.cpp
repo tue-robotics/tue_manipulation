@@ -134,7 +134,7 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
     JointInfo& j = joint_info_[idx];
     j.interpolator.setState(pos, vel);
     j.is_idle = true;
-    j.is_initialized = true;
+    j.is_set = true;
 
     return true;
 }
@@ -143,13 +143,13 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
 
 bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& goal_msg, std::string& id, std::stringstream& ss)
 {
-    std::cout << "ReferenceGenerator::setGoal" << std::endl;
+//    std::cout << "ReferenceGenerator::setGoal" << std::endl;
 
-    for (unsigned int i = 0; i < goal_msg.trajectory.points.size(); ++i)
-    {
-        const trajectory_msgs::JointTrajectoryPoint& p = goal_msg.trajectory.points[i];
-        std::cout << "  " << i << ": t = " << p.time_from_start.toSec() << ", pos = " << p.positions << ", vel = " << p.velocities << std::endl;
-    }
+//    for (unsigned int i = 0; i < goal_msg.trajectory.points.size(); ++i)
+//    {
+//        const trajectory_msgs::JointTrajectoryPoint& p = goal_msg.trajectory.points[i];
+//        std::cout << "  " << i << ": t = " << p.time_from_start.toSec() << ", pos = " << p.positions << ", vel = " << p.velocities << std::endl;
+//    }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -161,6 +161,12 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if (goals_.find(id) != goals_.end())
+    {
+        ss << "Goal with id '" << id << " already exists.\n";
+        return false;
+    }
 
     JointGoal& goal = goals_[id];
     goal.goal_msg = goal_msg;
@@ -175,23 +181,32 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     {
         const std::string& joint_name = goal_msg.trajectory.joint_names[i];
 
-        int idx = joint_index(joint_name);
+        int idx = joint_index(joint_name);        
 
         if (idx < 0)
         {
             ss << "Unknown joint: '" << joint_name << "'.\n";
             goal_ok = false;
+            continue;
         }
 
-        if (!joint_info_[idx].is_idle)
+        const JointInfo& js = joint_info_[idx];
+
+        if (!js.is_idle)
         {
             ss << "Joint '" << joint_name << "' is busy.\n";
             goal_ok = false;
         }
 
-        if (!joint_info_[idx].is_initialized)
+        if (!js.is_set)
         {
-            ss << "Joint '" << joint_name << "' is not initialized.\n";
+            ss << "Joint '" << joint_name << "' initial position and velocity is not set.\n";
+            goal_ok = false;
+        }
+
+        if (js.max_vel == 0 || js.max_acc == 0 || (js.min_pos == js.max_pos))
+        {
+            ss << "Joint '" << joint_name << "' limits not initialized.\n";
             goal_ok = false;
         }
 
@@ -201,7 +216,35 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     if (!goal_ok)
     {
         goals_.erase(id);
-        std::cout << "NUM GOALS: " << goals_.size() << std::endl;
+        return false;
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Check if joint goals go out of limits
+
+    for (unsigned int i = 0; i < goal_msg.trajectory.points.size(); ++i)
+    {
+        const trajectory_msgs::JointTrajectoryPoint& p = goal_msg.trajectory.points[i];
+
+        for(unsigned int j = 0; j < goal.num_goal_joints; ++j)
+        {
+            const JointInfo& js = joint_info_[goal.joint_index_mapping[j]];
+
+            double pos = p.positions[j];
+            if (pos < js.min_pos || pos > js.max_pos)
+            {
+                ss << "Joint '" << joint_name(j) << "' goes out of limits in point " << i << " "
+                   << "(min = " << js.min_pos << ", max = " << js.max_pos << ", requested goal = " << pos << ").\n";
+                goal_ok = false;
+            }
+        }
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if (!goal_ok)
+    {
+        goals_.erase(id);
         return false;
     }
 

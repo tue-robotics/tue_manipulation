@@ -37,14 +37,14 @@ struct JointGoal
 
 struct JointInfo
 {
-    JointInfo() : max_vel(0), max_acc(0), min_pos(0), max_pos(0), is_idle(true), is_initialized(false) {}
+    JointInfo() : max_vel(0), max_acc(0), min_pos(0), max_pos(0), is_idle(true), is_set(false) {}
 
     double max_vel;
     double max_acc;
     double min_pos;
     double max_pos;
     bool is_idle;
-    bool is_initialized;
+    bool is_set;
 
     ReferenceInterpolator interpolator;
 };
