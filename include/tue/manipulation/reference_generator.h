@@ -36,8 +36,6 @@ struct JointGoal
 
     unsigned int num_goal_joints;
 
-    bool use_cubic_interpolation;
-
     JointGoalStatus status;
 };
 
@@ -54,10 +52,10 @@ struct JointGoalInfo
 
 struct JointInfo
 {
-    JointInfo() : max_vel(0), max_acc(0), min_pos(0), max_pos(0), is_set(false) {}
+    JointInfo() : min_pos(0), max_pos(0), is_set(false) {}
 
-    double max_vel;
-    double max_acc;
+//    double max_vel;
+//    double max_acc;
     double min_pos;
     double max_pos;
     bool is_set;
@@ -92,13 +90,11 @@ public:
 
     void setMaxVelocity(unsigned int idx, double max_vel)
     {
-        joint_info_[idx].max_vel = max_vel;
         joint_info_[idx].interpolator.setMaxVelocity(max_vel);
     }
 
     void setMaxAcceleration(unsigned int idx, double max_acc)
     {
-        joint_info_[idx].max_acc = max_acc;
         joint_info_[idx].interpolator.setMaxAcceleration(max_acc);
     }
 

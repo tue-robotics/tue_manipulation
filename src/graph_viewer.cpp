@@ -48,7 +48,7 @@ void GraphViewer::clear()
 
 // ----------------------------------------------------------------------------------------------------
 
-void GraphViewer::view()
+void GraphViewer::view(bool wait)
 {
     static cv::Scalar COLORS[] = { cv::Scalar(255, 0,   0), cv::Scalar(0, 0, 255),   cv::Scalar(0, 255, 0),
                                    cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 255), cv::Scalar(255, 0, 255),
@@ -88,8 +88,15 @@ void GraphViewer::view()
         }
     }
 
+    int y0 = (0 - y_min_) * height / (y_max_ - y_min_);
+    cv::line(canvas, cv::Point(0, y0), cv::Point(canvas.cols, y0), cv::Scalar(0, 0, 0), 1);
+
     cv::imshow("graph", canvas);
-    cv::waitKey(3);
+
+    if (wait)
+        cv::waitKey();
+    else
+        cv::waitKey(3);
 }
 
 // ----------------------------------------------------------------------------------------------------

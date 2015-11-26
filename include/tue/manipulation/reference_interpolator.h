@@ -24,34 +24,77 @@ public:
 
     ~ReferenceInterpolator();
 
+
+    // State and goal specification
+
     void setState(double pos, double vel);
 
-    void setGoal(double pos);
+    bool setGoal(double pos, double vel = 0, double t = -1);
 
+    void brake(double dt);
+
+
+    // Calculation methods
+
+    double calculateTime(double x1, double v1)
+    {
+        return calculateTime(x_, v_, x1, v1);
+    }
+
+    double calculateTime(double x0, double v0, double x1, double v1);
+
+
+    // Update
+
+    void update(double dt);
+
+
+    // Setters limits
 
     void setMaxVelocity(double max_vel) { max_vel_ = max_vel; }
 
     void setMaxAcceleration(double max_acc) { max_acc_ = max_acc; }
 
 
-    void update(double dt);
+    // Query methods
 
-    void brake(double dt);
+    double max_velocity() const { return max_vel_; }
 
+    double max_acceleration() const { return max_acc_; }
 
     double position() const { return x_; }
 
-    double velocity() const { return vel_; }
+    double velocity() const { return v_; }
 
-    bool done() const { return state_ == IDLE; }
+    bool done() const { return t_ > t_goal_; }
 
 private:
 
-    double x_;
-    double vel_;
-    double x_goal_;
+    // Current state
 
-    RefState state_;
+    double t_;
+    double x_;
+    double v_;
+
+    // Trajectory
+
+    double x0_;
+    double x1_;
+    double x2_;
+
+    double v0_;
+    double vc_;
+
+    double t1_;
+    double t2_;
+
+    // Goal
+
+    double x_goal_;
+    double v_goal_;
+    double t_goal_;
+
+    // Limits
 
     double max_acc_;
     double max_vel_;

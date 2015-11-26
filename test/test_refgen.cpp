@@ -13,13 +13,17 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    std::vector<double> goals(argc - 1);
-    for(int i = 1; i < argc; ++i)
-        goals[i - 1] = atof(argv[i]);
+    std::vector<double> goals((argc - 1) / 2);
+    std::vector<double> vels((argc - 1) / 2);
+    for(int i = 0; i < argc - 1;)
+    {
+        goals[i / 2] = atof(argv[1 + i++]);
+        vels[i / 2]  = atof(argv[1 + i++]);
+    }
 
     tue::manipulation::ReferenceInterpolator r;
-    r.setState(0, 0);
-    r.setMaxAcceleration(0.2);
+    r.setState(goals[0], vels[0]);
+    r.setMaxAcceleration(1);
     r.setMaxVelocity(1);
 
     GraphViewer viewer;
@@ -27,19 +31,26 @@ int main(int argc, char **argv)
     double dt = 0.01;
     double time = 0;
 
-    for(unsigned int i = 0; i < goals.size(); ++i)
+    for(unsigned int i = 1; i < goals.size(); ++i)
     {
-        r.setGoal(goals[i]);
+        std::cout << "Goal: x = " << goals[i] << ", v = " << vels[i] << std::endl;
+
+        double t_needed = r.calculateTime(goals[i], vels[i]);
+        std::cout << "t_needed = " << t_needed << std::endl;
+
+        r.setGoal(goals[i], vels[i], t_needed);
 
         while(!r.done())
         {
             time += dt;
             r.update(dt);
             viewer.addPoint(0, 0, time, r.position());
+            viewer.addPoint(0, 2, time, r.velocity());
             viewer.addPoint(0, 1, time, goals[i]);
-            viewer.view();
         }
     }
+
+    viewer.view(true);
 
     return 0;
 }
