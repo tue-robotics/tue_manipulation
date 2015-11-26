@@ -23,8 +23,8 @@ int main(int argc, char **argv)
 
     tue::manipulation::ReferenceInterpolator r;
     r.setState(goals[0], vels[0]);
-    r.setMaxAcceleration(1);
-    r.setMaxVelocity(1);
+    r.setMaxAcceleration(0.2);
+    r.setMaxVelocity(0.4);
 
     GraphViewer viewer;
 

@@ -79,8 +79,6 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
     double x0 = x_;
     double x1 = pos;
 
-    std::cout << "x0 = " << x0 << ", x1 = " << x1 << ", v0 = " << v0 << ", v1 = " << v1 << std::endl;
-
     bool mirrored = false;
     if (x1 < x0)
     {
@@ -94,8 +92,6 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
     if (v0 > v1)
         swap(v0, v1);
 
-    std::cout << "v0 = " << v0 << ", v1 = " << v1 << std::endl;
-
     // - - - - - - - - - - - - - - - - - - - - - - - - -
 
     double k = (v1 - v0) / max_acc_;
@@ -107,13 +103,9 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
         return false;
     }
 
-    std::cout << "k = " << k << ", l = " << l << std::endl;
-
     double X = x1 - x0;
     double U = l * v1 + k * (v0 + v1) / 2;
     double L = l * v0 + k * (v0 + v1) / 2;
-
-    std::cout << "X = " << X << ", L = " << L << ", U = " << U << std::endl;
 
     if (X > U)
     {
@@ -154,8 +146,6 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
     if (mirrored)
         vc_ = -vc_;
 
-    std::cout << "vc = " << vc_ << std::endl;
-
     t_goal_ = t;
     v0_ = v_;
     v_goal_ = vel;
@@ -170,7 +160,7 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
 
     t_ = 0;
 
-    std::cout << "(0, " << v_ << "), (" << t1_ << ", " << vc_ << "), (" << t2_ << ", " << vc_ << "), (" << t_goal_ << ", " << vel << ")" << std::endl;
+//    std::cout << "(0, " << v_ << "), (" << t1_ << ", " << vc_ << "), (" << t2_ << ", " << vc_ << "), (" << t_goal_ << ", " << vel << ")" << std::endl;
     return true;
 }
 
@@ -229,6 +219,8 @@ void ReferenceInterpolator::brake(double dt)
 
 double ReferenceInterpolator::calculateTime(double x0, double v0, double x1, double v1)
 {    
+    std::cout << "calculateTime" << std::endl;
+
     // Check velocity limits
     if (v0 < -max_vel_ || v0 > max_vel_ || v1 < -max_vel_ || v1 > max_vel_)
         return -1;

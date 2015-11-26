@@ -82,13 +82,13 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
 
 bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& goal_msg, std::string& id, std::stringstream& ss)
 {
-//    std::cout << "ReferenceGenerator::setGoal" << std::endl;
+    std::cout << "ReferenceGenerator::setGoal" << std::endl;
 
-//    for (unsigned int i = 0; i < goal_msg.trajectory.points.size(); ++i)
-//    {
-//        const trajectory_msgs::JointTrajectoryPoint& p = goal_msg.trajectory.points[i];
-//        std::cout << "  " << i << ": t = " << p.time_from_start.toSec() << ", pos = " << p.positions << ", vel = " << p.velocities << std::endl;
-//    }
+    for (unsigned int i = 0; i < goal_msg.trajectory.points.size(); ++i)
+    {
+        const trajectory_msgs::JointTrajectoryPoint& p = goal_msg.trajectory.points[i];
+        std::cout << "  " << i << ": t = " << p.time_from_start.toSec() << std::endl;//", pos = " << p.positions << ", vel = " << p.velocities << std::endl;
+    }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -306,24 +306,35 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
             return;
         }
 
-        const trajectory_msgs::JointTrajectoryPoint& p_prev = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1];
+        std::cout << "--------------------- POINT " << goal.sub_goal_idx << " -------------------" << std::endl;
+
         const trajectory_msgs::JointTrajectoryPoint& p_next = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
 
         bool vels_defined = (p_next.velocities.size() == goal.num_goal_joints);
 
-        double time = p_next.time_from_start.toSec() - p_prev.time_from_start.toSec();
-
-        if (time <= 0)
+        double time = 0;
+        for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
-            for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+            JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
+            ReferenceInterpolator& r = js.interpolator;
+
+            double x_goal = p_next.positions[i];
+            double v_goal = vels_defined ? p_next.velocities[i] : 0;
+
+            time = std::max(time, r.calculateTime(x_goal, v_goal));
+        }
+
+        if (goal.sub_goal_idx > 0)
+        {
+            const trajectory_msgs::JointTrajectoryPoint& p_prev = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1];
+            double requested_time = p_next.time_from_start.toSec() - p_prev.time_from_start.toSec();
+            if (requested_time < time)
             {
-                JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
-                ReferenceInterpolator& r = js.interpolator;
-
-                double x_goal = p_next.positions[i];
-                double v_goal = vels_defined ? p_next.velocities[i] : 0;
-
-                time = std::max(time, r.calculateTime(x_goal, v_goal));
+                std::cout << "WARNING: cannot reach requested time: requested time = " << requested_time << ", possible time = " << time << std::endl;
+            }
+            else
+            {
+                time = requested_time;
             }
         }
 
@@ -335,8 +346,26 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
             double x_goal = p_next.positions[i];
             double v_goal = vels_defined ? p_next.velocities[i] : 0;
 
-            r.setGoal(x_goal, v_goal, time);
+            if (!r.setGoal(x_goal, v_goal, time))
+            {
+                std::cout << "----------------------------------" << std::endl;
+
+                if (goal.sub_goal_idx > 0)
+                {
+                    const trajectory_msgs::JointTrajectoryPoint& p_prev = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1];
+                    std::cout << "Last goal: " << p_prev.positions[i] << ", " << p_prev.velocities[i] << std::endl;
+                }
+
+                std::cout << std::endl;
+
+                std::cout << "Cannot reach this:" << std::endl;
+                std::cout << "Joint " << i << ": x = " << r.position() << ", v = " << r.velocity() << ", x_goal = " << x_goal
+                          << ", v_goal = " << v_goal << ", t_goal = " << time << std::endl;
+                std::cout << "max vel = " << r.max_velocity() << ", max acc = " << r.max_acceleration() << std::endl;
+                std::cout << "----------------------------------" << std::endl;
+            }
         }
+
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
