@@ -48,7 +48,7 @@ void GraphViewer::clear()
 
 // ----------------------------------------------------------------------------------------------------
 
-void GraphViewer::view()
+void GraphViewer::view(bool wait)
 {
     static cv::Scalar COLORS[] = { cv::Scalar(255, 0,   0), cv::Scalar(0, 0, 255),   cv::Scalar(0, 255, 0),
                                    cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 255), cv::Scalar(255, 0, 255),
@@ -89,7 +89,11 @@ void GraphViewer::view()
     }
 
     cv::imshow("graph", canvas);
-    cv::waitKey(3);
+
+    if (wait)
+        cv::waitKey();
+    else
+        cv::waitKey(3);
 }
 
 // ----------------------------------------------------------------------------------------------------
