@@ -68,7 +68,7 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
 
     if (t < 0)
     {
-        t = calculateTime(pos, vel);
+        t = calculateTimeNeeded(pos, vel);
         if (t < 0)
             return false;
     }
@@ -217,7 +217,7 @@ void ReferenceInterpolator::brake(double dt)
 
 // ----------------------------------------------------------------------------------------------------
 
-double ReferenceInterpolator::calculateTime(double x0, double v0, double x1, double v1)
+double ReferenceInterpolator::calculateTimeNeeded(double x0, double v0, double x1, double v1)
 {
     // Check velocity limits
     if (v0 < -max_vel_ || v0 > max_vel_ || v1 < -max_vel_ || v1 > max_vel_)

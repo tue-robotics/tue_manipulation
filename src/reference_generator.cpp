@@ -388,11 +388,21 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
             else
             {
                 goal.use_cubic_interpolation = false;
+                const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
 
+                // Calculate time needed for each joint to reach the sub goal, and remember the longest time
+                double time = 0;
                 for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
                 {
-                    unsigned int joint_idx = goal.joint_index_mapping[i];
-                    joint_info_[joint_idx].interpolator.setGoal(goal.goal_msg.trajectory.points[goal.sub_goal_idx].positions[i]);
+                    JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
+                    time = std::max<double>(time, js.interpolator.calculateTimeNeeded(sub_goal.positions[i], 0));
+                }
+
+                // Set the joint goals, with the time calculate above as goal time
+                for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+                {
+                    JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
+                    js.interpolator.setGoal(sub_goal.positions[i], 0, time);
                 }
             }
         }

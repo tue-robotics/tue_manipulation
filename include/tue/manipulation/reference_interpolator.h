@@ -29,12 +29,12 @@ public:
 
     // Calculation methods
 
-    double calculateTime(double x1, double v1)
+    double calculateTimeNeeded(double x1, double v1)
     {
-        return calculateTime(x_, v_, x1, v1);
+        return calculateTimeNeeded(x_, v_, x1, v1);
     }
 
-    double calculateTime(double x0, double v0, double x1, double v1);
+    double calculateTimeNeeded(double x0, double v0, double x1, double v1);
 
 
     // Update
