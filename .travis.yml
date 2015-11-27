@@ -8,6 +8,9 @@ compiler:
   - clang
 env:
   - ROS_DISTRO=hydro
+branches:
+  only:
+    - master
 
 before_install:
   - CI_SOURCE_PATH=$(pwd)
