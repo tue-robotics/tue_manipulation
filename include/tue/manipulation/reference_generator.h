@@ -162,7 +162,7 @@ public:
     {
         for(std::map<std::string, JointGoal>::const_iterator it = goals_.begin(); it != goals_.end(); ++it)
         {
-            if (!it->second.status == JOINT_GOAL_ACTIVE)
+            if (it->second.status == JOINT_GOAL_ACTIVE)
                 return true;
         }
         return false;
