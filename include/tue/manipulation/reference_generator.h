@@ -65,6 +65,9 @@ struct JointInfo
     std::string goal_id;
 
     ReferenceInterpolator interpolator;
+
+    double position() const { return interpolator.position(); }
+    double velocity() const { return interpolator.velocity(); }
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -167,6 +170,8 @@ public:
         }
         return false;
     }
+
+    const JointInfo& joint_state(unsigned int idx) { return joint_info_[idx]; }
 
 private:
 
