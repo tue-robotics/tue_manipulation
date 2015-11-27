@@ -69,6 +69,13 @@ void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
 ReferenceGenerator::ReferenceGenerator() : next_goal_id_(0)
 {
     visualize_ = false;
+
+    if (visualize_)
+    {
+        time_ = 0;
+        graph_vis_pos_.setName("position");
+        graph_vis_vel_.setName("velocity");
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -265,17 +272,6 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
     goal.time_since_start = 0;
     goal.use_cubic_interpolation = false;
 
-//    // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
-//    // Determine which points are smooth
-
-//    std::cout << goal.goal_msg << std::endl;
-
-//    for(unsigned int i = 1; i < goal.goal_msg.trajectory.points.size(); ++i)
-//        std::cout << i << ": " << isSmoothPoint(goal, i) << std::endl;
-
-    graph_viewer_.clear();
-    time_ = 0;
-
     return true;
 }
 
@@ -445,7 +441,8 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
         for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
             unsigned int joint_idx = goal.joint_index_mapping[i];
-            graph_viewer_.addPoint(0, i, time_, joint_info_[joint_idx].interpolator.position());
+            graph_vis_pos_.addPoint(0, joint_idx, time_, joint_info_[joint_idx].interpolator.position());
+            graph_vis_vel_.addPoint(0, joint_idx, time_, joint_info_[joint_idx].interpolator.velocity());
         }
     }
 }
@@ -485,7 +482,10 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
     }
 
     if (visualize_)
-        graph_viewer_.view();
+    {
+        graph_vis_pos_.view();
+        graph_vis_vel_.view();
+    }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

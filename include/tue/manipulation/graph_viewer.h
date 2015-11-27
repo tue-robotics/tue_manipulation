@@ -2,15 +2,18 @@
 #define _GRAPH_VIEWER_H_
 
 #include <vector>
+#include <string>
 
 class GraphViewer
 {
 
 public:
 
-    GraphViewer();
+    GraphViewer(const std::string& name = "");
 
     ~GraphViewer();
+
+    void setName(const std::string& name) { name_ = name; }
 
     void addPoint(int graph_id, int label, double x, double y, double y_dot = 1e9);
 
@@ -29,6 +32,8 @@ private:
         double y;
         double y_dot;
     };
+
+    std::string name_;
 
     unsigned int num_points_;
 

@@ -201,7 +201,8 @@ private:
 
     bool visualize_;
     double time_;
-    GraphViewer graph_viewer_;
+    GraphViewer graph_vis_pos_;
+    GraphViewer graph_vis_vel_;
 
 };
 

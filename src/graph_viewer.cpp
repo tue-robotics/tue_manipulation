@@ -4,7 +4,7 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-GraphViewer::GraphViewer() : num_points_(0), redraw_(true)
+GraphViewer::GraphViewer(const std::string& name) : name_(name), num_points_(0), redraw_(true)
 {
 }
 
@@ -88,12 +88,16 @@ void GraphViewer::view(bool wait)
         }
     }
 
-    cv::imshow("graph", canvas);
+    cv::imshow(name_.c_str(), canvas);
 
+    char key;
     if (wait)
-        cv::waitKey();
+        key = cv::waitKey();
     else
-        cv::waitKey(3);
+        key = cv::waitKey(3);
+
+    if (key == 'c')
+        clear();
 }
 
 // ----------------------------------------------------------------------------------------------------

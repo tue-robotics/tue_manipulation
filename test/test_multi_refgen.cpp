@@ -82,7 +82,8 @@ int main(int argc, char **argv)
     double dt = 0.01;
     double time = 0;
 
-    GraphViewer g;
+    GraphViewer g_pos("position");
+    GraphViewer g_vel("velocity");
 
     std::vector<double> positions;
     std::vector<double> velocities;
@@ -118,13 +119,15 @@ int main(int argc, char **argv)
 
             }
 
-            g.addPoint(0, i, time, js.position());
+            g_pos.addPoint(0, i, time, js.position());
+            g_vel.addPoint(0, i, time, js.velocity());
         }
     }
 
     std::cout << "Total trajectory time: " << time << " seconds" << std::endl;
 
-    g.view(true);
+    g_vel.view();
+    g_pos.view(true);
 
     return 0;
 }
