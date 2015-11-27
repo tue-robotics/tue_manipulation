@@ -6,8 +6,6 @@
 
 int main(int argc, char **argv)
 {
-    std::cout << "DFGFDG" << std::endl;
-
     if (argc == 1)
     {
         std::cout << "Please provide trajectory file" << std::endl;
@@ -86,15 +84,45 @@ int main(int argc, char **argv)
 
     GraphViewer g;
 
-    while(!refgen.hasActiveGoals())
+    std::vector<double> positions;
+    std::vector<double> velocities;
+
+    while(refgen.hasActiveGoals())
     {
         refgen.calculatePositionReferences(0.01, references);
         time += dt;
 
 //        std::cout << time << ": " << references[0] << std::endl;
 
-        g.addPoint(0, 0, time, references[0]);
+        for(unsigned int i = 0; i < num_joints; ++i)
+        {
+            const tue::manipulation::JointInfo& js = refgen.joint_state(i);
+            if (positions.size() < i + 1)
+            {
+                positions.push_back(js.position());
+                velocities.push_back(js.velocity());
+            }
+            else
+            {
+                double dx = js.position() - positions[i];
+                double v = std::abs(dx / dt);
+                if (v > js.max_vel + 1e-6)
+                    std::cout << "Joint " << i << " exceeded velocity: v = " << v << ", max v = " << js.max_vel << std::endl;
+                positions[i] = js.position();
+
+                double dv = js.velocity() - velocities[i];
+                double a = std::abs(dv / dt);
+                if (a > js.max_acc + 1e-6)
+                    std::cout << "Joint " << i << " exceeded acceleration: a = " << a << ", max a = " << js.max_acc << std::endl;
+                velocities[i] = js.velocity();
+
+            }
+
+            g.addPoint(0, i, time, js.position());
+        }
     }
+
+    std::cout << "Total trajectory time: " << time << " seconds" << std::endl;
 
     g.view(true);
 
