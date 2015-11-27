@@ -29,6 +29,8 @@ int main(int argc, char **argv)
     int num_joints;
     file >> num_joints;
 
+    control_msgs::FollowJointTrajectoryGoal goal;
+
     double v;
     for(unsigned int i = 0; i < num_joints; ++i)
     {
@@ -36,7 +38,9 @@ int main(int argc, char **argv)
         ss << "joint-" << (i-1);
 
         file >> v;
-        refgen.initJoint(ss.str(), v, -10000, 10000, 0);
+        refgen.initJoint(ss.str(), v, 0, -10000, 10000);
+        refgen.setJointState(ss.str(), 0, 0);
+        goal.trajectory.joint_names.push_back(ss.str());
     }
 
     for(unsigned int i = 0; i < num_joints; ++i)
@@ -44,8 +48,6 @@ int main(int argc, char **argv)
         file >> v;
         refgen.setMaxAcceleration(i, v);
     }
-
-    control_msgs::FollowJointTrajectoryGoal goal;
 
     while(file >> v)
     {
