@@ -88,6 +88,9 @@ void GraphViewer::view(bool wait)
         }
     }
 
+    int y0 = (0 - y_min_) * height / (y_max_ - y_min_);
+    cv::line(canvas, cv::Point(0, y0), cv::Point(canvas.cols, y0), cv::Scalar(0, 0, 0), 1);
+
     cv::imshow(name_.c_str(), canvas);
 
     char key;

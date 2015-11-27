@@ -99,7 +99,7 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
 
     if (l < 0)
     {
-        std::cout << "ReferenceInterpolator::setGoal: Cannot do this! (l < 0): l = " << l << std::endl;
+//        std::cout << "ReferenceInterpolator::setGoal: Cannot do this! (l < 0): l = " << l << std::endl;
         return false;
     }
 
@@ -114,7 +114,7 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
 
         if (r < -1e-9)
         {
-            std::cout << "ReferenceInterpolator::setGoal: Cannot do this! (X > U): " << r << std::endl;
+//            std::cout << "ReferenceInterpolator::setGoal: Cannot do this! (X > U): " << r << std::endl;
             return false;
         }
 
@@ -133,7 +133,7 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
 
         if (r < -1e-9)
         {
-            std::cout << "ReferenceInterpolator::setGoal: Cannot do this! (X < L): " << r << std::endl;
+//            std::cout << "ReferenceInterpolator::setGoal: Cannot do this! (X < L): " << r << std::endl;
             return false;
         }
 
@@ -161,6 +161,7 @@ bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
     t_ = 0;
 
 //    std::cout << "(0, " << v_ << "), (" << t1_ << ", " << vc_ << "), (" << t2_ << ", " << vc_ << "), (" << t_goal_ << ", " << vel << ")" << std::endl;
+
     return true;
 }
 

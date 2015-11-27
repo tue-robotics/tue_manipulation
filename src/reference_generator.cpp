@@ -150,14 +150,6 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
 
 bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& goal_msg, std::string& id, std::stringstream& ss)
 {
-//    std::cout << "ReferenceGenerator::setGoal" << std::endl;
-
-//    for (unsigned int i = 0; i < goal_msg.trajectory.points.size(); ++i)
-//    {
-//        const trajectory_msgs::JointTrajectoryPoint& p = goal_msg.trajectory.points[i];
-//        std::cout << "  " << i << ": t = " << p.time_from_start.toSec() << ", pos = " << p.positions << ", vel = " << p.velocities << std::endl;
-//    }
-
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     if (id.empty())
@@ -327,83 +319,158 @@ void ReferenceGenerator::cancelGoal(const std::string& id)
 
 void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt, std::vector<double>& references)
 {
-    goal.time_since_start += dt;
     time_ += dt;
+    goal.time_since_start += dt;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - - -
-    // Go to next unreached sub goal
+    // Check if the sub goal is reached
 
-    for(bool sub_goal_reached = true; sub_goal_reached; )
+    bool sub_goal_reached = false;
+    if (goal.sub_goal_idx < 0)
     {
-        if (goal.sub_goal_idx < 0)
+        sub_goal_reached = true;
+    }
+    else
+    {
+        const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
+
+        if (goal.use_cubic_interpolation)
         {
-            sub_goal_reached = true;
+            sub_goal_reached = (goal.time_since_start >= sub_goal.time_from_start.toSec());
         }
         else
         {
-            const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
+            sub_goal_reached = true;
+            for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+            {
+                unsigned int joint_idx = goal.joint_index_mapping[i];
 
-            if (goal.use_cubic_interpolation)
-            {
-                sub_goal_reached = (goal.time_since_start >= sub_goal.time_from_start.toSec());
-            }
-            else
-            {
-                sub_goal_reached = true;
-                for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+                if (!joint_info_[joint_idx].interpolator.done())
                 {
-                    unsigned int joint_idx = goal.joint_index_mapping[i];
-
-                    if (!joint_info_[joint_idx].interpolator.done())
-                    {
-                        sub_goal_reached = false;
-                        break;
-                    }
+                    sub_goal_reached = false;
+                    break;
                 }
             }
         }
+    }
 
-        if (sub_goal_reached)
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // If so, go to next unreached sub goal
+
+    if (sub_goal_reached)
+    {
+        // If it has been reached, go to the next one
+        ++goal.sub_goal_idx;
+
+        // Check if this was the last trajectory point. If so, this goal is finished!
+        if (goal.sub_goal_idx >= goal.goal_msg.trajectory.points.size())
         {
-            // If it has been reached, go to the next one
-            ++goal.sub_goal_idx;
+            for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+                joint_info_[goal.joint_index_mapping[i]].goal_id.clear();
 
-            if (goal.sub_goal_idx >= goal.goal_msg.trajectory.points.size())
+            std::cout << "Goal reached in " << goal.time_since_start << " seconds" << std::endl;
+
+            goal.status = JOINT_GOAL_SUCCEEDED;
+            return;
+        }
+
+        // If the velocities for the next and previous point are defined, use cubic interpolation
+        if (goal.sub_goal_idx > 0
+                && goal.goal_msg.trajectory.points[goal.sub_goal_idx].velocities.size() == goal.num_goal_joints
+                && goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].velocities.size() == goal.num_goal_joints)
+        {
+            goal.use_cubic_interpolation = true;
+            goal.time_since_start = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].time_from_start.toSec();
+        }
+        else
+        {
+            goal.use_cubic_interpolation = false;
+            const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
+
+            // Let's do some smoothing! We don't want to decelerate to 0 for each sub goal. However, we did not receive any
+            // intermediate velocities or timestamps in the given goal, so we have to do some calculation of our own.
+
+            // First determine for each joint the maximum velocity we are allowed to have when reaching the next sub goal,
+            // such that we can still fully brake to 0 velocity in the goal after that.
+
+            std::vector<double> sub_goal_velocities(goal.num_goal_joints, 0);
+            if (goal.sub_goal_idx + 1 < goal.goal_msg.trajectory.points.size())
             {
-                for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
-                    joint_info_[goal.joint_index_mapping[i]].goal_id.clear();
-
-                goal.status = JOINT_GOAL_SUCCEEDED;
-                return;
-            }
-
-            // If the velocities for the next and previous point are defined, use cubic interpolation
-            if (goal.sub_goal_idx > 0
-                    && goal.goal_msg.trajectory.points[goal.sub_goal_idx].velocities.size() == goal.num_goal_joints
-                    && goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].velocities.size() == goal.num_goal_joints)
-            {
-                goal.use_cubic_interpolation = true;
-                goal.time_since_start = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].time_from_start.toSec();
-            }
-            else
-            {
-                goal.use_cubic_interpolation = false;
-                const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
-
-                // Calculate time needed for each joint to reach the sub goal, and remember the longest time
-                double time = 0;
                 for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
                 {
-                    JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
-                    time = std::max<double>(time, js.interpolator.calculateTimeNeeded(sub_goal.positions[i], 0));
-                }
+                    const JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
 
-                // Set the joint goals, with the time calculate above as goal time
-                for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+                    double v0 = js.velocity();          // Current velocity
+                    double x0 = js.position();          // Current position
+                    double x1 = sub_goal.positions[i];  // Next sub goal position
+                    double x2 = goal.goal_msg.trajectory.points[goal.sub_goal_idx + 1].positions[i];  // Sub goal position after that
+
+                    // Check if x0, x1 and x2 are going in the same direction. If not, the velocity has to be 0 in x1 because
+                    // we have to change direction there.
+                    if ((x0 < x1) == (x1 < x2))
+                    {
+                        // Calculate the maximum velocity we can reach from x0 to x1
+                        double v_max_01 = sqrt(2 * js.max_acc * std::abs(x1 - x0) + v0 * v0);
+
+                        // Calculate the maximum velocity we are allowed to have such that we can still reach x2 with 0 velocity
+                        double v_max_12 = sqrt(2 * js.max_acc * std::abs(x2 - x1));
+
+                        sub_goal_velocities[i] = std::min(js.max_vel, std::min(v_max_01, v_max_12));
+
+                        if (x2 < x1)
+                            sub_goal_velocities[i] = -sub_goal_velocities[i];
+                    }
+                }
+            }
+
+            // Now given our current joint positions and velocities, the sub goal positions and the sub goal velocities we
+            // just calculated, calculate the time needed for each joint to reach the sub goal position and velocity, and
+            // remember the longest time.
+
+            double time = 0;
+            for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+            {
+                JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
+                time = std::max<double>(time, js.interpolator.calculateTimeNeeded(sub_goal.positions[i], sub_goal_velocities[i]));
+            }
+
+            // Now just give each individual joint the calculated sub goal velocity and position and goal time calculated above.
+            // There is one problem: it might be the case that the max time calculated is too long for the joint to reach the
+            // given sub goal position and velocity. For example, it might have to brake to take more time, but then not have enough
+            // position margin left to accerelate to the sub goal velocity (maybe a bit hard to grasp, but think about it for a
+            // while...). Therefore we need to check for each joint if the calculated sub goal and time is still feasible. If not,
+            // we do a dirty trick: we lower the sub goal velocity a bit, see if that alters the max time, and try again. We do this
+            // in an iterative fashion until all joint goals are reachable.
+            // Don't worry: in most cases repetition is not needed and if it is, the number of iterations will be quite low.
+            while (true)
+            {
+                bool all_goals_ok = true;
+
+                for(unsigned int i = 0; i < goal.num_goal_joints && all_goals_ok; ++i)
                 {
                     JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
-                    js.interpolator.setGoal(sub_goal.positions[i], 0, time);
+
+                    while(!js.interpolator.setGoal(sub_goal.positions[i], sub_goal_velocities[i], time))
+                    {
+                        // Whoops, we can't reach the goal in the time given! Let's lower the sub goal velocity and try again
+                        sub_goal_velocities[i] *= 0.9;
+
+                        // Before trying again, we check if the time needed has changed.
+                        double new_joint_time = js.interpolator.calculateTimeNeeded(sub_goal.positions[i], sub_goal_velocities[i]);
+
+                        if (new_joint_time > time)
+                        {
+                            // If now the joint needs longer than the current max time, we have to recalculate the max time
+                            // and repeat the process for all joints
+                            time = std::max(new_joint_time, time);
+                            all_goals_ok = false;
+                            break;
+                        }
+                    }
                 }
+
+                if (all_goals_ok)
+                    break;
             }
         }
     }
@@ -415,10 +482,6 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
 
     if (goal.use_cubic_interpolation)
     {
-        // Use cubic interpolation
-
-//        std::cout << "cubic: " << goal.sub_goal_idx << ": " << goal.time_since_start << " / " << sub_goal.time_from_start.toSec() << std::endl;
-
         const trajectory_msgs::JointTrajectoryPoint& prev_sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1];
 
         trajectory_msgs::JointTrajectoryPoint p_interpolated;
@@ -433,8 +496,6 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
     }
     else
     {
-//        std::cout << "normal: " << goal.sub_goal_idx << ": " << goal.time_since_start << " / " << sub_goal.time_from_start.toSec() << std::endl;
-
         for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
             unsigned int joint_idx = goal.joint_index_mapping[i];

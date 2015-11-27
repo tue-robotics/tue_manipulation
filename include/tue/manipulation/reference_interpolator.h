@@ -59,6 +59,10 @@ public:
 
     double velocity() const { return v_; }
 
+    double goal_position() const { return x_goal_; }
+
+    double goal_velocity() const { return v_goal_; }
+
     bool done() const { return t_ > t_goal_; }
 
 private:
