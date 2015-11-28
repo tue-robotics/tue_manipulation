@@ -55,8 +55,8 @@ GraspPrecompute::GraspPrecompute()
     as_->start();
 
     /// Start joint action server
-    jas_ = new actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>(nh, "joint_trajectory", boost::bind(&GraspPrecompute::joint_execute, this, _1), false);
-    jas_->start();
+//    jas_ = new actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>(nh, "joint_trajectory", boost::bind(&GraspPrecompute::joint_execute, this, _1), false);
+//    jas_->start();
 
 }
 
@@ -184,7 +184,8 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
 
         // ToDo: reverse vector for clarity???
 
-        /// Compute a plan to the first waypoint        
+        /// Compute a plan to the first waypoint
+        ros::Duration(0.05).sleep(); // Make sure the robot is at the robot state before setStartState is called
         moveit_group_->setStartStateToCurrentState();
         moveit_group_->setPoseTarget(waypoints[num_grasp_points-1]);
         moveit_group_->setGoalTolerance(0.01);
