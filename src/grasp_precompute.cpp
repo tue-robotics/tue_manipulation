@@ -185,7 +185,7 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
         // ToDo: reverse vector for clarity???
 
         /// Compute a plan to the first waypoint
-        ros::Duration(0.05).sleep(); // Make sure the robot is at the robot state before setStartState is called
+        ros::Duration(0.1).sleep(); // Make sure the robot is at the robot state before setStartState is called
         moveit_group_->setStartStateToCurrentState();
         moveit_group_->setPoseTarget(waypoints[num_grasp_points-1]);
         moveit_group_->setGoalTolerance(0.01);
@@ -256,7 +256,7 @@ void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPt
             {
                 rt.getRobotTrajectoryMsg(cartesian_moveit_trajectory);
                 my_second_plan.trajectory_ = cartesian_moveit_trajectory;
-                for (unsigned int i = 0; i < my_second_plan.trajectory_.joint_trajectory.points.size(); i++)
+                for (unsigned int i = 1; i < my_second_plan.trajectory_.joint_trajectory.points.size(); i++)
                 {
                     my_second_plan.trajectory_.joint_trajectory.points[i].time_from_start += my_plan.trajectory_.joint_trajectory.points[size-1].time_from_start;
                     my_plan.trajectory_.joint_trajectory.points.push_back(my_second_plan.trajectory_.joint_trajectory.points[i]);
