@@ -229,12 +229,13 @@ bool ReferenceGenerator::setGoal(const control_msgs::FollowJointTrajectoryGoal& 
 
         for(unsigned int j = 0; j < goal.num_goal_joints; ++j)
         {
-            const JointInfo& js = joint_info_[goal.joint_index_mapping[j]];
+            unsigned int joint_idx = goal.joint_index_mapping[j];
+            const JointInfo& js = joint_info_[joint_idx];
 
             double pos = p.positions[j];
             if (pos < js.min_pos || pos > js.max_pos)
             {
-                ss << "Joint '" << joint_name(j) << "' goes out of limits in point " << i << " "
+                ss << "Joint '" << joint_name(joint_idx) << "' goes out of limits in point " << i << " "
                    << "(min = " << js.min_pos << ", max = " << js.max_pos << ", requested goal = " << pos << ").\n";
                 goal_ok = false;
             }
