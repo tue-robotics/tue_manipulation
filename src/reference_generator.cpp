@@ -317,7 +317,7 @@ void ReferenceGenerator::cancelGoal(const std::string& id)
 
 // ----------------------------------------------------------------------------------------------------
 
-void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt, std::vector<double>& references)
+void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
 {
     time_ += dt;
     goal.time_since_start += dt;
@@ -490,7 +490,6 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
         for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
             unsigned int joint_idx = goal.joint_index_mapping[i];
-            references[joint_idx] = p_interpolated.positions[i];
             joint_info_[joint_idx].interpolator.setState(p_interpolated.positions[i], p_interpolated.velocities[i]);
         }
     }
@@ -499,11 +498,8 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt,
         for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
             unsigned int joint_idx = goal.joint_index_mapping[i];
-
             JointInfo& j = joint_info_[joint_idx];
-
             j.interpolator.update(dt);
-            references[joint_idx] = j.interpolator.position();
         }
     }
 
@@ -534,7 +530,7 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
         if (goal.status != JOINT_GOAL_ACTIVE)
             continue;
 
-        calculatePositionReferences(goal, dt, references);
+        calculatePositionReferences(goal, dt);
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -547,9 +543,9 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
             ReferenceInterpolator& r = j.interpolator;
             if (std::abs(r.velocity()) > 0)
                 r.brake(dt);
-
-            references[i] = j.interpolator.position();
         }
+
+        references[i] = j.interpolator.position();
     }
 
     if (visualize_)

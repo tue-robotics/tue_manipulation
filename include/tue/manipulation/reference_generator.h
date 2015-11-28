@@ -195,7 +195,7 @@ private:
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    void calculatePositionReferences(JointGoal& goal, double dt, std::vector<double>& references);
+    void calculatePositionReferences(JointGoal& goal, double dt);
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
