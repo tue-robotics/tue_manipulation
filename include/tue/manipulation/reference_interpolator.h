@@ -20,7 +20,7 @@ public:
 
     // State and goal specification
 
-    void setState(double pos, double vel);
+    void setState(double pos, double vel, double acc = 0);
 
     bool setGoal(double pos, double vel = 0, double t = -1);
 
@@ -59,6 +59,8 @@ public:
 
     double velocity() const { return v_; }
 
+    double acceleration() const { return a_; }
+
     double goal_position() const { return x_goal_; }
 
     double goal_velocity() const { return v_goal_; }
@@ -72,6 +74,7 @@ private:
     double t_;
     double x_;
     double v_;
+    double a_;
 
     // Trajectory
 

@@ -49,10 +49,11 @@ ReferenceInterpolator::~ReferenceInterpolator()
 
 // ----------------------------------------------------------------------------------------------------
 
-void ReferenceInterpolator::setState(double pos, double vel)
+void ReferenceInterpolator::setState(double pos, double vel, double acc)
 {
     v_ = vel;
     x_ = pos;
+    a_ = acc;
 
     if (!done())
         setGoal(x_goal_);
@@ -175,6 +176,7 @@ void ReferenceInterpolator::update(double dt)
     {
         x_ = x_goal_;
         v_ = v_goal_;
+        a_ = 0;
         return;
     }
 
@@ -183,17 +185,20 @@ void ReferenceInterpolator::update(double dt)
         double f = (t_ / t1_);
         v_ = (1 - f) * v0_ + f * vc_;
         x_ = x0_ + t_ * (v0_ + v_) / 2;
+        a_ = max_acc_ * signum(vc_ - v0_);
     }
     else if (t_ <= t2_)
     {
         v_ = vc_;
         x_ = x1_ + (t_ - t1_) * vc_;
+        a_ = 0;
     }
     else
     {
         double f = (t_ - t2_) / (t_goal_ - t2_);
         v_ = (1 - f) * vc_ + f * v_goal_;
         x_ = x2_ + (t_ - t2_) * (vc_ + v_) / 2;
+        a_ = max_acc_ * signum(v_goal_ - vc_);
     }
 }
 

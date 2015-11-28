@@ -75,6 +75,7 @@ ReferenceGenerator::ReferenceGenerator() : next_goal_id_(0)
         time_ = 0;
         graph_vis_pos_.setName("position");
         graph_vis_vel_.setName("velocity");
+        graph_vis_acc_.setName("acceleration");
     }
 }
 
@@ -508,8 +509,9 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
         for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
             unsigned int joint_idx = goal.joint_index_mapping[i];
-            graph_vis_pos_.addPoint(0, joint_idx, time_, joint_info_[joint_idx].interpolator.position());
-            graph_vis_vel_.addPoint(0, joint_idx, time_, joint_info_[joint_idx].interpolator.velocity());
+            graph_vis_pos_.addPoint(0, joint_idx, time_, joint_info_[joint_idx].position());
+            graph_vis_vel_.addPoint(0, joint_idx, time_, joint_info_[joint_idx].velocity());
+            graph_vis_acc_.addPoint(0, joint_idx, time_, joint_info_[joint_idx].acceleration());
         }
     }
 }
@@ -552,6 +554,7 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
     {
         graph_vis_pos_.view();
         graph_vis_vel_.view();
+        graph_vis_acc_.view();
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

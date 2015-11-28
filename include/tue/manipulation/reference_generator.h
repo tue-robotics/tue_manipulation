@@ -68,6 +68,7 @@ struct JointInfo
 
     double position() const { return interpolator.position(); }
     double velocity() const { return interpolator.velocity(); }
+    double acceleration() const { return interpolator.acceleration(); }
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -203,6 +204,7 @@ private:
     double time_;
     GraphViewer graph_vis_pos_;
     GraphViewer graph_vis_vel_;
+    GraphViewer graph_vis_acc_;
 
 };
 

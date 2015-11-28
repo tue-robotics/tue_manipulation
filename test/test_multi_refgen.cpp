@@ -84,6 +84,7 @@ int main(int argc, char **argv)
 
     GraphViewer g_pos("position");
     GraphViewer g_vel("velocity");
+    GraphViewer g_acc("acceleration");
 
     std::vector<double> positions;
     std::vector<double> velocities;
@@ -121,6 +122,7 @@ int main(int argc, char **argv)
 
             g_pos.addPoint(0, i, time, js.position());
             g_vel.addPoint(0, i, time, js.velocity());
+            g_acc.addPoint(0, i, time, js.acceleration());
         }
     }
 
