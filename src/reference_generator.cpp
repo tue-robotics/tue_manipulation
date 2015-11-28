@@ -395,7 +395,11 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
             // such that we can still fully brake to 0 velocity in the goal after that.
 
             std::vector<double> sub_goal_velocities(goal.num_goal_joints, 0);
-            if (goal.sub_goal_idx + 1 < goal.goal_msg.trajectory.points.size())
+            if (sub_goal.velocities.size() == goal.num_goal_joints)
+            {
+                sub_goal_velocities = sub_goal.velocities;
+            }
+            else if (goal.sub_goal_idx + 1 < goal.goal_msg.trajectory.points.size())
             {
                 for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
                 {
