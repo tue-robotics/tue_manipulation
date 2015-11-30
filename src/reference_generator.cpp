@@ -55,10 +55,10 @@ void interpolateCubic(trajectory_msgs::JointTrajectoryPoint& p_out,
                 + (-6 * f2 + 6 * f) * p1.positions[k] / T
                 + (3 * f2 - 2 * f) * p1.velocities[k];
 
-        p_out.accelerations[k] = ((12 * f - 6) * p0.positions[k]
-                                  + (6 * f - 4) * (p0.velocities[k] * T)
-                                  + (-12 * f + 6) * p1.positions[k]
-                                  + (6 * f - 2) * (p1.velocities[k] * T) / T); // Not sure this is right!
+        p_out.accelerations[k] = ((12 * f - 6) * p0.positions[k] / T
+                                  + (6 * f - 4) * p0.velocities[k]
+                                  + (-12 * f + 6) * p1.positions[k] / T
+                                  + (6 * f - 2) * p1.velocities[k]) / T;
     }
 
     p_out.time_from_start = ros::Duration(t_abs);
@@ -500,7 +500,8 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
         for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
             unsigned int joint_idx = goal.joint_index_mapping[i];
-            joint_info_[joint_idx].interpolator.setState(p_interpolated.positions[i], p_interpolated.velocities[i]);
+            joint_info_[joint_idx].interpolator.setState(p_interpolated.positions[i], p_interpolated.velocities[i],
+                                                         p_interpolated.accelerations[i]);
         }
     }
     else

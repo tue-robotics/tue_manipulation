@@ -107,17 +107,16 @@ int main(int argc, char **argv)
             else
             {
                 double dx = js.position() - positions[i];
-                double v = std::abs(dx / dt);
-                if (v > js.max_vel + 1e-6)
+                double v = dx / dt;
+                if (std::abs(v) > js.max_vel + 1e-6)
                     std::cout << "Joint " << i << " exceeded velocity: v = " << v << ", max v = " << js.max_vel << std::endl;
                 positions[i] = js.position();
 
                 double dv = js.velocity() - velocities[i];
-                double a = std::abs(dv / dt);
-                if (a > js.max_acc + 1e-6)
+                double a = dv / dt;
+                if (std::abs(a) > js.max_acc + 1e-6)
                     std::cout << "Joint " << i << " exceeded acceleration: a = " << a << ", max a = " << js.max_acc << std::endl;
                 velocities[i] = js.velocity();
-
             }
 
             g_pos.addPoint(0, i, time, js.position());
@@ -129,6 +128,7 @@ int main(int argc, char **argv)
     std::cout << "Total trajectory time: " << time << " seconds" << std::endl;
 
     g_vel.view();
+    g_acc.view();
     g_pos.view(true);
 
     return 0;
