@@ -370,16 +370,20 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
             for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
                 joint_info_[goal.joint_index_mapping[i]].goal_id.clear();
 
-            std::cout << "Goal reached in " << goal.time_since_start << " seconds" << std::endl;
+//            std::cout << "Goal reached in " << goal.time_since_start << " seconds" << std::endl;
 
             goal.status = JOINT_GOAL_SUCCEEDED;
             return;
         }
 
-        // If the velocities for the next and previous point are defined, use cubic interpolation
+        const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
+
+        // If the velocities for the next and previous point are defined and the time needed in between is more than 0,
+        // use cubic interpolation
         if (goal.sub_goal_idx > 0
-                && goal.goal_msg.trajectory.points[goal.sub_goal_idx].velocities.size() == goal.num_goal_joints
-                && goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].velocities.size() == goal.num_goal_joints)
+                && sub_goal.velocities.size() == goal.num_goal_joints
+                && goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].velocities.size() == goal.num_goal_joints
+                && (sub_goal.time_from_start - goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].time_from_start).toSec() > 0)
         {
             goal.use_cubic_interpolation = true;
             goal.time_since_start = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].time_from_start.toSec();
@@ -387,7 +391,6 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
         else
         {
             goal.use_cubic_interpolation = false;
-            const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
 
             // Let's do some smoothing! We don't want to decelerate to 0 for each sub goal. However, we did not receive any
             // intermediate velocities or timestamps in the given goal, so we have to do some calculation of our own.
@@ -493,6 +496,7 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
         trajectory_msgs::JointTrajectoryPoint p_interpolated;
         interpolateCubic(p_interpolated, prev_sub_goal, sub_goal, goal.time_since_start);
 
+        // Update the state of the interpolators (otherwise we'll have a problem if we switch to non-cubic interpolation)
         for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
             unsigned int joint_idx = goal.joint_index_mapping[i];
