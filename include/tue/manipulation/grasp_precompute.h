@@ -4,7 +4,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 
-#include <tue_manipulation/GraspPrecomputeAction.h>
+#include <tue_manipulation_msgs/GraspPrecomputeAction.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 
 #include <tf/transform_listener.h>
@@ -25,10 +25,10 @@ public:
 private:
 
     /** Cartesian goal Action server */
-    actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction>* as_;
+    actionlib::SimpleActionServer<tue_manipulation_msgs::GraspPrecomputeAction>* as_;
 
     /** Cartesian goal callback function */
-    void execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal);
+    void execute(const tue_manipulation_msgs::GraspPrecomputeGoalConstPtr& goal);
 
     /** Joint goal action server */
     actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>* jas_;

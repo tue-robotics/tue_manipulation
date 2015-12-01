@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
     tf_conversions
     control_msgs
     tue_msgs
+    tue_manipulation_msgs
     diagnostic_msgs
     visualization_msgs
     geolib2 # Temp
@@ -17,23 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
     moveit_ros_planning_interface
     sensor_msgs
     std_msgs
-)
-
-add_message_files(
-  FILES
-    cart_pos.msg
-)
-
-add_action_files(
-  FILES
-    GraspPrecompute.action
-    GripperCommand.action
-)
-
-generate_messages(
-  DEPENDENCIES
-    actionlib_msgs
-    tue_msgs
 )
 
 catkin_package(
@@ -50,6 +34,7 @@ catkin_package(
     std_msgs
     tf
     tue_msgs
+    tue_manipulation_msgs
     urdf
     visualization_msgs
 )
