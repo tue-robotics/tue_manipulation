@@ -4,11 +4,11 @@
 #include <actionlib/client/simple_action_client.h>
 #include <moveit/move_group_interface/move_group.h>
 
-#include <tue_manipulation/GraspPrecomputeAction.h>
+#include <tue_manipulation_msgs/GraspPrecomputeAction.h>
 
 using namespace std;
 
-typedef actionlib::SimpleActionClient<tue_manipulation::GraspPrecomputeAction> Client;
+typedef actionlib::SimpleActionClient<tue_manipulation_msgs::GraspPrecomputeAction> Client;
 
 void spinThread()
 {

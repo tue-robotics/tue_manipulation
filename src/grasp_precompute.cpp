@@ -51,7 +51,7 @@ GraspPrecompute::GraspPrecompute()
     moveit_group_->setEndEffectorLink(tip_link_);
 
     /// Start Cartesian action server
-    as_ = new actionlib::SimpleActionServer<tue_manipulation::GraspPrecomputeAction>(nh, "grasp_precompute", boost::bind(&GraspPrecompute::execute, this, _1), false);
+    as_ = new actionlib::SimpleActionServer<tue_manipulation_msgs::GraspPrecomputeAction>(nh, "grasp_precompute", boost::bind(&GraspPrecompute::execute, this, _1), false);
     as_->start();
 
     /// Start joint action server
@@ -72,7 +72,7 @@ GraspPrecompute::~GraspPrecompute()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraspPrecompute::execute(const tue_manipulation::GraspPrecomputeGoalConstPtr& goal)
+void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalConstPtr& goal)
 {
     /// Initialize variables
     unsigned int num_grasp_points = 1;

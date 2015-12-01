@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
-#include <tue_manipulation/GripperCommandAction.h>
+#include <tue_manipulation_msgs/GripperCommandAction.h>
 
 int main (int argc, char **argv) {
   ros::init(argc, argv, "test_client");
@@ -17,11 +17,11 @@ int main (int argc, char **argv) {
   // create the action client
   std::stringstream server_name;
   server_name << "/gripper_server_" << side;
-  actionlib::SimpleActionClient<tue_manipulation::GripperCommandAction> ac(server_name.str());
+  actionlib::SimpleActionClient<tue_manipulation_msgs::GripperCommandAction> ac(server_name.str());
   ac.waitForServer();
 
   // send a goal to the action
-  tue_manipulation::GripperCommandGoal goal;
+  tue_manipulation_msgs::GripperCommandGoal goal;
 
   if (cmd == "open") {
       goal.command.direction = tue_msgs::GripperCommand::OPEN;

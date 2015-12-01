@@ -10,9 +10,9 @@ find_package(catkin REQUIRED COMPONENTS
     tf_conversions
     control_msgs
     tue_msgs
+    tue_manipulation_msgs
     diagnostic_msgs
     visualization_msgs
-    roslib # For testing
     geolib2 # Temp
     message_generation
     moveit_ros_planning_interface
@@ -20,36 +20,23 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
 )
 
-add_message_files(
-  FILES
-    cart_pos.msg
-)
-
-add_action_files(
-  FILES
-    GraspPrecompute.action
-    GripperCommand.action
-)
-
-generate_messages(
-  DEPENDENCIES
-    actionlib_msgs
-    tue_msgs
-)
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tue_manipulation
-  CATKIN_DEPENDS  
+  CATKIN_DEPENDS
     actionlib_msgs
     control_msgs
     diagnostic_msgs
+    kdl_parser
     message_runtime
+    moveit_msgs
     sensor_msgs
     std_msgs
+    tf
     tue_msgs
+    tue_manipulation_msgs
+    urdf
     visualization_msgs
-#  DEPENDS
 )
 
 include_directories(
