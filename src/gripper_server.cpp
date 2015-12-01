@@ -1,12 +1,12 @@
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
 
-#include <tue_manipulation/GripperCommandAction.h>
+#include <tue_manipulation_msgs/GripperCommandAction.h>
 //#include <tue_msgs/GripperMeasurement.h>
 
 //std::string gripper_measurement_topic_;
 
-actionlib::SimpleActionServer<tue_manipulation::GripperCommandAction>* as_;
+actionlib::SimpleActionServer<tue_manipulation_msgs::GripperCommandAction>* as_;
 
 ros::Publisher gripper_pub_;
 
@@ -23,7 +23,7 @@ void gripperMeasurementCb(const tue_msgs::GripperMeasurementConstPtr& meas) {
     }
 }
 
-void executeCB(const tue_manipulation::GripperCommandGoalConstPtr& gripper_goal) {
+void executeCB(const tue_manipulation_msgs::GripperCommandGoalConstPtr& gripper_goal) {
     ros::NodeHandle n;
 
     //std::stringstream meas_topic;
@@ -55,18 +55,18 @@ void executeCB(const tue_manipulation::GripperCommandGoalConstPtr& gripper_goal)
         {
             if (gripper_meas_.end_position_reached) {
                 ROS_DEBUG("Gripper server reports: End position reached");
-                tue_manipulation::GripperCommandResult result;
+                tue_manipulation_msgs::GripperCommandResult result;
                 result.measurement = gripper_meas_;
                 as_->setSucceeded(result, "End position reached.");
                 break;
             } else if (gripper_meas_.max_torque_reached) {
                 ROS_DEBUG("Gripper server reports: Max torque reached");
-                tue_manipulation::GripperCommandResult result;
+                tue_manipulation_msgs::GripperCommandResult result;
                 result.measurement = gripper_meas_;
                 as_->setSucceeded(result, "Max torque reached.");
                 break;
             } else {
-                tue_manipulation::GripperCommandFeedback feedback;
+                tue_manipulation_msgs::GripperCommandFeedback feedback;
                 feedback.measurement = gripper_meas_;
                 as_->publishFeedback(feedback);
             }
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 
     //std::stringstream as_name;
     //as_name << "/gripper_server_" << side_;
-    as_ = new actionlib::SimpleActionServer<tue_manipulation::GripperCommandAction>(nh, "action", &executeCB, false);
+    as_ = new actionlib::SimpleActionServer<tue_manipulation_msgs::GripperCommandAction>(nh, "action", &executeCB, false);
 
     //std::stringstream cmd_topic;
     //cmd_topic << "/arm_" << side_ << "_controller/gripper_command";
