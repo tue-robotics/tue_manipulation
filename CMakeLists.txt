@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
     tue_msgs
     diagnostic_msgs
     visualization_msgs
-    roslib # For testing
     geolib2 # Temp
     message_generation
     moveit_ros_planning_interface
@@ -40,16 +39,19 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tue_manipulation
-  CATKIN_DEPENDS  
+  CATKIN_DEPENDS
     actionlib_msgs
     control_msgs
     diagnostic_msgs
+    kdl_parser
     message_runtime
+    moveit_msgs
     sensor_msgs
     std_msgs
+    tf
     tue_msgs
+    urdf
     visualization_msgs
-#  DEPENDS
 )
 
 include_directories(
