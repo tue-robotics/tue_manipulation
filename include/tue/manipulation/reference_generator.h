@@ -106,6 +106,8 @@ public:
         joint_info_[idx].interpolator.setMaxAcceleration(max_acc);
     }
 
+    bool setJointState(unsigned int idx, double pos, double vel);
+
     bool setJointState(const std::string& joint_name, double pos, double vel);
 
 

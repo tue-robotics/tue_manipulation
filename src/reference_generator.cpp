@@ -133,18 +133,25 @@ void ReferenceGenerator::setJointNames(const std::vector<std::string>& joint_nam
 
 // ----------------------------------------------------------------------------------------------------
 
-bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos, double vel)
+bool ReferenceGenerator::setJointState(unsigned int idx, double pos, double vel)
 {
-    int idx = this->joint_index(joint_name);
-    if (idx < 0)
-        return false;
-
     JointInfo& j = joint_info_[idx];
     j.interpolator.setState(pos, vel);
     j.goal_id.clear();
     j.is_set = true;
 
     return true;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos, double vel)
+{
+    int idx = this->joint_index(joint_name);
+    if (idx < 0)
+        return false;
+
+    return setJointState(idx, pos, vel);
 }
 
 // ----------------------------------------------------------------------------------------------------
