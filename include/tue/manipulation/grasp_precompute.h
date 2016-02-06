@@ -54,6 +54,13 @@ private:
     /** MoveIt group */
     moveit::planning_interface::MoveGroup* moveit_group_;
 
+    /** Map with joint limits */
+    struct limits {
+        double lower;
+        double upper;
+    };
+    std::map<std::string, limits> joint_limits_;
+
 };
 
 #endif

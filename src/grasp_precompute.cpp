@@ -5,6 +5,8 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 
+#include <moveit/robot_model/joint_model.h>
+
 const double EPS = 1e-6;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,6 +51,22 @@ GraspPrecompute::GraspPrecompute()
     moveit_group_ = new moveit::planning_interface::MoveGroup(options);
     moveit_group_->setPoseReferenceFrame(root_link_);
     moveit_group_->setEndEffectorLink(tip_link_);
+
+    /// Read the joint limits
+    const std::vector<const moveit::core::JointModel*> joint_models = moveit_group_->getCurrentState()->getRobotModel()->getJointModels();
+    for (std::vector<const moveit::core::JointModel*>::const_iterator it = joint_models.begin(); it != joint_models.end(); ++it)
+    {
+        const std::string name = (*it)->getName();
+        const std::vector<moveit::core::VariableBounds> bounds = (*it)->getVariableBounds();
+        if (bounds.size() > 0)
+        {
+            limits climits;
+            climits.lower = bounds[0].min_position_;
+            climits.upper = bounds[0].max_position_;
+//            ROS_INFO("Joint %s: lower: %f, upper: %f", name.c_str(), lower, upper);
+            joint_limits_[name] = climits;
+        }
+    }
 
     /// Start Cartesian action server
     as_ = new actionlib::SimpleActionServer<tue_manipulation_msgs::GraspPrecomputeAction>(nh, "grasp_precompute", boost::bind(&GraspPrecompute::execute, this, _1), false);
@@ -283,6 +301,22 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
     }
 
     // ToDo: make nice
+
+    /// Double check joint limits (MoveIt might provide trajectories that are just outside the bounds
+    // Loop over all joints
+    for (unsigned int i = 0; i < my_plan.trajectory_.joint_trajectory.joint_names.size(); i++)
+    {
+        std::string joint_name = my_plan.trajectory_.joint_trajectory.joint_names[i];
+        limits climits = joint_limits_[joint_name];
+
+        // Loop over all trajectory points
+        for (unsigned int j = 0; j < my_plan.trajectory_.joint_trajectory.points.size(); j++)
+        {
+            my_plan.trajectory_.joint_trajectory.points[j].positions[i] = std::min(std::max(climits.lower,
+                                                                                  my_plan.trajectory_.joint_trajectory.points[j].positions[i]),
+                                                                         climits.upper);
+        }
+    }
 
     /// Planning succeeded, so execute it!
     grasp_feasible = moveit_group_->execute(my_plan);
