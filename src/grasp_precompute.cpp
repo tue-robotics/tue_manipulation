@@ -201,6 +201,12 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
         }
 
         // ToDo: reverse vector for clarity???
+        
+        /// Test: put the first point 5 cm higher
+        if (waypoints.size() > 1)
+        {
+            waypoints[num_grasp_points-1].position.z += 0.05;
+        }
 
         /// Compute a plan to the first waypoint
         ros::Duration(0.1).sleep(); // Make sure the robot is at the robot state before setStartState is called
