@@ -61,6 +61,21 @@ void ReferenceInterpolator::setState(double pos, double vel, double acc)
 
 // ----------------------------------------------------------------------------------------------------
 
+void ReferenceInterpolator::resetState(double pos, double vel, double acc)
+{
+	v_ = vel;
+	x_ = pos;
+	a_ = acc;
+	
+	t_goal_ = -1.0;
+	t_ = 0.0;
+	x_goal_ = x_;
+	v_goal_ = v_;
+    
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 bool ReferenceInterpolator::setGoal(double pos, double vel, double t)
 {
     // Check velocity limits
@@ -174,6 +189,7 @@ void ReferenceInterpolator::update(double dt)
 
     if (t_ >= t_goal_)
     {
+		//std::cout << "(t_ >= t_goal_)" << std::endl;
         x_ = x_goal_;
         v_ = v_goal_;
         a_ = 0;
