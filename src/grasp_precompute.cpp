@@ -183,6 +183,14 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
     /// Try to determine a trajectory
     while(ros::ok() && !grasp_feasible && !sampling_boundaries_reached )
     {
+
+        /// Check if a cancel has been requested
+        if (as_->isPreemptRequested()) {
+            ROS_INFO("Goal cancelled");
+            as_->setPreempted();
+            return;
+        }
+
         // Define new_grasp_pose
         ROS_INFO("Computing new grasp pose...");
         tf::Transform yaw_offset(tf::createQuaternionFromYaw(yaw_sampling_direction * yaw_delta),tf::Point(0,0,0));
