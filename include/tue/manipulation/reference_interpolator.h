@@ -22,7 +22,7 @@ public:
 
     void setState(double pos, double vel, double acc = 0);
     
-    void resetState(double pos, double vel, double acc = 0); // Reset state for resetting to initial position upon startup
+    void resetState(double pos); // Reset state for resetting to initial position upon startup
 
     bool setGoal(double pos, double vel = 0, double t = -1);
 

@@ -110,7 +110,7 @@ public:
 
     bool setJointState(const std::string& joint_name, double pos, double vel);
     
-    bool resetJointState(const std::string& joint_name, double pos, double vel); // Separate Reset state for resetting to initial position upon startup
+    bool resetJointState(const std::string& joint_name, double pos); // Separate Reset state for resetting to initial position upon startup
 
     bool setGoal(const control_msgs::FollowJointTrajectoryGoal& goal, std::string& id, std::stringstream& ss);
 

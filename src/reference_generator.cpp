@@ -156,14 +156,14 @@ bool ReferenceGenerator::setJointState(const std::string& joint_name, double pos
 
 // ----------------------------------------------------------------------------------------------------
 
-bool ReferenceGenerator::resetJointState(const std::string& joint_name, double pos, double vel)
+bool ReferenceGenerator::resetJointState(const std::string& joint_name, double pos)
 {
     int idx = this->joint_index(joint_name);
     if (idx < 0)
         return false;
    
 	JointInfo& j = joint_info_[idx];
-    j.interpolator.resetState(pos, vel);
+    j.interpolator.resetState(pos);
     j.goal_id.clear();
     j.is_set = true;
     

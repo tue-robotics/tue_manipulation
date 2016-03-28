@@ -61,17 +61,16 @@ void ReferenceInterpolator::setState(double pos, double vel, double acc)
 
 // ----------------------------------------------------------------------------------------------------
 
-void ReferenceInterpolator::resetState(double pos, double vel, double acc)
+void ReferenceInterpolator::resetState(double pos)
 {
-	v_ = vel;
 	x_ = pos;
-	a_ = acc;
+	v_ = 0.0;
+	a_ = 0.0;
 	
 	t_goal_ = -1.0;
 	t_ = 0.0;
 	x_goal_ = x_;
 	v_goal_ = v_;
-    
 }
 
 // ----------------------------------------------------------------------------------------------------
