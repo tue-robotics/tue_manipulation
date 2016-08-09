@@ -30,12 +30,6 @@ private:
     /** Cartesian goal callback function */
     void execute(const tue_manipulation_msgs::GraspPrecomputeGoalConstPtr& goal);
 
-    /** Joint goal action server */
-    actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>* jas_;
-
-    /** Joint goal callback function */
-    void joint_execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal);
-
     /** TF listener */
     tf::TransformListener* listener_;
 
