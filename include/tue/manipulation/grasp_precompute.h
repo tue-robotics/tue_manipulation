@@ -9,7 +9,7 @@
 
 #include <tf/transform_listener.h>
 
-#include <moveit/move_group_interface/move_group.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 
 class GraspPrecompute
 {
@@ -46,7 +46,7 @@ private:
     double max_yaw_;
 
     /** MoveIt group */
-    moveit::planning_interface::MoveGroup* moveit_group_;
+    moveit::planning_interface::MoveGroupInterface* moveit_group_;
 
     /** Map with joint limits */
     struct limits {

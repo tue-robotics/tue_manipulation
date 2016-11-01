@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tue_manipulation)
+add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
     kdl_parser
@@ -78,9 +79,7 @@ add_dependencies(gripper_server ${PROJECT_NAME}_generate_messages_cpp)
 
 # Torso server
 add_executable(torso_server src/torso_server.cpp)
-target_link_libraries(torso_server
-  ${catkin_LIBRARIES}
-)
+target_link_libraries(torso_server ${catkin_LIBRARIES})
 add_dependencies(torso_server ${catkin_EXPORTED_TARGETS})
 
 # ------------------------------------------------------------------------------------------------
@@ -109,9 +108,7 @@ add_executable(test_gripper_server test/test_gripper_server.cpp)
 target_link_libraries(test_gripper_server tue_manipulation)
 
 add_executable(torso_server_test_client test/test_torso_server.cpp)
-target_link_libraries(torso_server_test_client
-  ${catkin_LIBRARIES}
-)
+target_link_libraries(torso_server_test_client ${catkin_LIBRARIES})
 add_dependencies(torso_server_test_client ${catkin_EXPORTED_TARGETS})
 
 add_executable(move_group_interface_tutorial src/move_group_interface_tutorial.cpp)

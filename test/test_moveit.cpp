@@ -2,7 +2,7 @@
 
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
-#include <moveit/move_group_interface/move_group.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 
 #include <tue_manipulation_msgs/GraspPrecomputeAction.h>
 
@@ -29,10 +29,10 @@ int main(int argc, char** argv)
 
   /// MoveIt
   ROS_INFO("Step 1");
-  moveit::planning_interface::MoveGroup::Options options(side+"_arm", "/amigo/robot_description", nh);
+  moveit::planning_interface::MoveGroupInterface::Options options(side+"_arm", "/amigo/robot_description", nh);
 
   ROS_INFO("Step 2");
-  moveit::planning_interface::MoveGroup group(options);
+  moveit::planning_interface::MoveGroupInterface group(options);
   ROS_INFO("Step 3");
 
   geometry_msgs::PoseStamped target_pose = group.getRandomPose();
