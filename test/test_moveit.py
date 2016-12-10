@@ -1,3 +1,5 @@
+#!/usr/bin/python2
+
 import sys
 import copy
 import rospy
@@ -5,7 +7,7 @@ import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 
-print("============ Start testing. First run: export ROS_NAMESPACE=amigo")
+print("============ Start testing. First run: export ROS_NAMESPACE=amigo && sudo sed -i 's:load, load_mem:load_mem:g' /usr/lib/python2.7/dist-packages/pyassimp/core.py")
 
 moveit_commander.roscpp_initialize(sys.argv)
 rospy.init_node('move_group_python_interface_tutorial',
