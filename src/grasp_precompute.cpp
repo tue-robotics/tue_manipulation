@@ -47,8 +47,8 @@ GraspPrecompute::GraspPrecompute()
     nh_private.param("yaw_sampling_step", yaw_sampling_step_, 0.2);
 
     /// MoveIt
-    moveit::planning_interface::MoveGroup::Options options(side+"_arm", "/amigo/robot_description", nh);
-    moveit_group_ = new moveit::planning_interface::MoveGroup(options);
+    moveit::planning_interface::MoveGroupInterface::Options options(side+"_arm", "/amigo/robot_description", nh);
+    moveit_group_ = new moveit::planning_interface::MoveGroupInterface(options);
     moveit_group_->setPoseReferenceFrame(root_link_);
     moveit_group_->setEndEffectorLink(tip_link_);
 
@@ -90,7 +90,7 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
     /// Initialize variables
     unsigned int num_grasp_points = 1;
     unsigned int pre_grasp_inbetween_sampling_steps = 20; // Hardcoded, we might not need this... //PRE_GRASP_INBETWEEN_SAMPLING_STEPS
-    moveit::planning_interface::MoveGroup::Plan my_plan;
+    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
     /// Check for absolute or delta (and ambiqious goals)
     bool absolute_requested=false, delta_requested=false;
@@ -229,7 +229,7 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
             start_state.joint_state.position = my_plan.trajectory_.joint_trajectory.points[size-1].positions;
             moveit_group_->setStartState(start_state);
 
-            moveit::planning_interface::MoveGroup::Plan my_second_plan;
+            moveit::planning_interface::MoveGroupInterface::Plan my_second_plan;
 
             /*
             Currently, we have two approaches to make sure we follow the approach vector.

@@ -34,7 +34,7 @@
 
 /* Author: Sachin Chitta */
 
-#include <moveit/move_group_interface/move_group.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 
 #include <moveit_msgs/DisplayRobotState.h>
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "move_group_interface_tutorial");
   ros::NodeHandle node_handle;  
 
-  moveit::planning_interface::MoveGroup group("right_arm");
+  moveit::planning_interface::MoveGroupInterface group("right_arm");
 
   geometry_msgs::Pose target_pose1;
 
