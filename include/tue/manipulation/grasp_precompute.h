@@ -11,27 +11,29 @@
 
 #include <moveit/move_group_interface/move_group_interface.h>
 
+#include <memory>
+
 class GraspPrecompute
 {
 
 public:
 
-    /** Constructor */
-    GraspPrecompute();
-
-    /** Destructor */
-    virtual ~GraspPrecompute();
+    //!
+    //! \brief initialize Initialize component
+    //! \return True if success, false otherwise
+    //!
+    bool initialize();
 
 private:
 
     /** Cartesian goal Action server */
-    actionlib::SimpleActionServer<tue_manipulation_msgs::GraspPrecomputeAction>* as_;
+    std::shared_ptr<actionlib::SimpleActionServer<tue_manipulation_msgs::GraspPrecomputeAction>> as_;
 
     /** Cartesian goal callback function */
     void execute(const tue_manipulation_msgs::GraspPrecomputeGoalConstPtr& goal);
 
     /** TF listener */
-    tf::TransformListener* listener_;
+    std::shared_ptr<tf::TransformListener> listener_;
 
     /** Root and tip link */
     std::string root_link_, tip_link_;
@@ -46,7 +48,7 @@ private:
     double max_yaw_;
 
     /** MoveIt group */
-    moveit::planning_interface::MoveGroupInterface* moveit_group_;
+    std::shared_ptr<moveit::planning_interface::MoveGroupInterface> moveit_group_;
 
     /** Map with joint limits */
     struct limits {

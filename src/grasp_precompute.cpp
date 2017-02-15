@@ -11,12 +11,12 @@ const double EPS = 1e-6;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GraspPrecompute::GraspPrecompute()
+bool GraspPrecompute::initialize()
 {
 	ROS_INFO("Starting GraspPrecompute");
 
     /// TF listener
-    listener_ = new tf::TransformListener();
+    listener_ = std::shared_ptr<tf::TransformListener>(new tf::TransformListener());
 
     /// Nodehandles
     ros::NodeHandle nh;
@@ -27,19 +27,19 @@ GraspPrecompute::GraspPrecompute()
     nh_private.param<std::string>("side", side, ""); //determine for which side this node operates
     if (side.empty()){
         ROS_ERROR("Missing parameter 'side'.");
-        return;
+        return false;
     }
 
     nh_private.param<std::string>("root_link", root_link_, "");
     if (root_link_.empty()){
         ROS_ERROR("Missing parameter 'root_link'.");
-        return;
+        return false;
     }
 
     nh_private.param<std::string>("tip_link", tip_link_, "");
     if (tip_link_.empty()){
         ROS_ERROR("Missing parameter 'tip_link'.");
-        return;
+        return false;
     }
 
     nh_private.param("pre_grasp_delta", pre_grasp_delta_, 0.05);
@@ -48,12 +48,27 @@ GraspPrecompute::GraspPrecompute()
 
     /// MoveIt
     moveit::planning_interface::MoveGroupInterface::Options options(side+"_arm", "/amigo/robot_description", nh);
-    moveit_group_ = new moveit::planning_interface::MoveGroupInterface(options);
+    moveit_group_ = std::shared_ptr<moveit::planning_interface::MoveGroupInterface>(
+          new moveit::planning_interface::MoveGroupInterface(options));
     moveit_group_->setPoseReferenceFrame(root_link_);
     moveit_group_->setEndEffectorLink(tip_link_);
 
+    // try to fetch the robot state
+    robot_state::RobotModelConstPtr robot_model = 0;
+    while (!robot_model)
+    {
+      ROS_INFO_DELAYED_THROTTLE(1, "Waiting for robot model for group '%s' and description '%s'..",
+                                options.group_name_.c_str(), options.robot_description_.c_str());
+      robot_state::RobotStateConstPtr state = moveit_group_->getCurrentState();
+      if (state)
+      {
+        robot_model = state->getRobotModel();
+      }
+      ros::Duration(0.1).sleep();
+    }
+
     /// Read the joint limits
-    const std::vector<const moveit::core::JointModel*> joint_models = moveit_group_->getCurrentState()->getRobotModel()->getJointModels();
+    const std::vector<const moveit::core::JointModel*> joint_models = robot_model->getJointModels();
     for (std::vector<const moveit::core::JointModel*>::const_iterator it = joint_models.begin(); it != joint_models.end(); ++it)
     {
         const std::string name = (*it)->getName();
@@ -69,18 +84,14 @@ GraspPrecompute::GraspPrecompute()
     }
 
     /// Start Cartesian action server
-    as_ = new actionlib::SimpleActionServer<tue_manipulation_msgs::GraspPrecomputeAction>(nh, "grasp_precompute", boost::bind(&GraspPrecompute::execute, this, _1), false);
+    as_ = std::shared_ptr<actionlib::SimpleActionServer<tue_manipulation_msgs::GraspPrecomputeAction>>(
+          new actionlib::SimpleActionServer<tue_manipulation_msgs::GraspPrecomputeAction>(nh, "grasp_precompute",
+                    boost::bind(&GraspPrecompute::execute, this, _1), false));
     as_->start();
 
-}
+    ROS_INFO("Grasp precompute action server started");
 
-////////////////////////////////////////////////////////////////////////////////
-
-GraspPrecompute::~GraspPrecompute()
-{
-    delete as_;
-    delete listener_;
-    delete moveit_group_;
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
