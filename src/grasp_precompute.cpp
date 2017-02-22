@@ -65,6 +65,11 @@ bool GraspPrecompute::initialize()
         robot_model = state->getRobotModel();
       }
       ros::Duration(0.1).sleep();
+
+      if (!ros::ok())
+      {
+        return false;
+      }
     }
 
     /// Read the joint limits
