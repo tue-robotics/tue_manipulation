@@ -12,7 +12,14 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "grasp_precompute_server");
 
     GraspPrecompute gp;
-    ros::spin();
+    if (gp.initialize())
+    {
+      ros::spin();
+    }
+    else
+    {
+      return 1;
+    }
     return 0;
 
 }
