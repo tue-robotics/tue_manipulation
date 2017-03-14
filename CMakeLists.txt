@@ -70,12 +70,10 @@ target_link_libraries(joint_trajectory_action tue_manipulation)
 add_executable(grasp_precompute_action src/grasp_precompute_action.cpp
                                        src/grasp_precompute.cpp)
 target_link_libraries(grasp_precompute_action tue_manipulation)
-add_dependencies(grasp_precompute_action ${PROJECT_NAME}_generate_messages_cpp)
 
 # Gripper server
 add_executable(gripper_server src/gripper_server.cpp)
 target_link_libraries(gripper_server tue_manipulation)
-add_dependencies(gripper_server ${PROJECT_NAME}_generate_messages_cpp)
 
 # Torso server
 add_executable(torso_server src/torso_server.cpp)
