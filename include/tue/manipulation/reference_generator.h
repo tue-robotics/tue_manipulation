@@ -6,6 +6,17 @@
 #include "tue/manipulation/reference_interpolator.h"
 #include "tue/manipulation/graph_viewer.h"
 
+template <typename T>
+inline std::string vectorToString(std::vector<T> vector)
+{
+  std::stringstream ss;
+  for (const T& e : vector)
+  {
+    ss << e << ", ";
+  }
+  return ss.str();
+}
+
 namespace tue
 {
 namespace manipulation
@@ -40,6 +51,16 @@ struct JointGoal
 
     JointGoalStatus status;
 };
+std::ostream& operator<< (std::ostream& os, const JointGoal& j) {
+    os << "time_since_start(" << j.time_since_start << "), " <<
+          "sub_goal_idx(" << j.sub_goal_idx << "), " <<
+          "joint_index_mapping(" << vectorToString(j.joint_index_mapping) << "), " <<
+          "goal_msg(" << j.goal_msg << "), " <<
+          "num_goal_joints(" << j.num_goal_joints << "), " <<
+          "use_cubic_interpolation(" << j.use_cubic_interpolation << "), " <<
+          "status(" << j.status << ")";
+    return os;
+}
 
 // ----------------------------------------------------------------------------------------------------
 

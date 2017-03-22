@@ -1,5 +1,7 @@
 #include "tue/manipulation/reference_generator.h"
 
+#include <ros/console.h>
+
 namespace tue
 {
 namespace manipulation
@@ -344,6 +346,7 @@ void ReferenceGenerator::cancelGoal(const std::string& id)
 
 void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
 {
+    ROS_INFO_STREAM_NAMED("ReferenceGenerator", "calculatePositionReferencesStart goal: " << goal << ", dt: " << dt);
     time_ += dt;
     goal.time_since_start += dt;
 
@@ -353,10 +356,12 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
     bool sub_goal_reached = false;
     if (goal.sub_goal_idx < 0)
     {
+        ROS_INFO_NAMED("ReferenceGenerator", "goal.sub_goal_idx < 0");
         sub_goal_reached = true;
     }
     else
     {
+        ROS_INFO_NAMED("ReferenceGenerator", "goal.sub_goal_idx >= 0");
         const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
 
         if (goal.use_cubic_interpolation)
@@ -384,6 +389,8 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
 
     if (sub_goal_reached)
     {
+        ROS_INFO_NAMED("ReferenceGenerator", "Subgoal reached");
+
         // If it has been reached, go to the next one
         ++goal.sub_goal_idx;
 
@@ -395,6 +402,7 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
 
 //            std::cout << "Goal reached in " << goal.time_since_start << " seconds" << std::endl;
 
+            ROS_INFO_NAMED("ReferenceGenerator", "JOINT_GOAL_SUCCEEDED");
             goal.status = JOINT_GOAL_SUCCEEDED;
             return;
         }
@@ -408,11 +416,13 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
                 && goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].velocities.size() == goal.num_goal_joints
                 && (sub_goal.time_from_start - goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].time_from_start).toSec() > 0)
         {
+            ROS_INFO_NAMED("ReferenceGenerator", "Using cubic interpolation");
             goal.use_cubic_interpolation = true;
             goal.time_since_start = goal.goal_msg.trajectory.points[goal.sub_goal_idx - 1].time_from_start.toSec();
         }
         else
         {
+            ROS_INFO_NAMED("ReferenceGenerator", "Not using cubic interpolation");
             goal.use_cubic_interpolation = false;
 
             // Let's do some smoothing! We don't want to decelerate to 0 for each sub goal. However, we did not receive any
@@ -424,12 +434,15 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
             std::vector<double> sub_goal_velocities(goal.num_goal_joints, 0);
             if (sub_goal.velocities.size() == goal.num_goal_joints)
             {
+                ROS_INFO_NAMED("ReferenceGenerator", "subgoal velocities equals num goal joints");
                 sub_goal_velocities = sub_goal.velocities;
             }
             else if (goal.sub_goal_idx + 1 < goal.goal_msg.trajectory.points.size())
             {
+                ROS_INFO_NAMED("ReferenceGenerator", "subgoal velocities not equal to num goal joints");
                 for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
                 {
+                    ROS_INFO_NAMED("ReferenceGenerator", "Looping over num goal joints to determine sub goal velocities");
                     const JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
 
                     double v0 = js.velocity();          // Current velocity
@@ -459,11 +472,14 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
             // just calculated, calculate the time needed for each joint to reach the sub goal position and velocity, and
             // remember the longest time.
 
+            ROS_INFO_NAMED("ReferenceGenerator", "Done calculating sub goal velocities");
+
             double time = 0;
             for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
             {
                 JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
                 time = std::max<double>(time, js.interpolator.calculateTimeNeeded(sub_goal.positions[i], sub_goal_velocities[i]));
+                ROS_INFO_NAMED("ReferenceGenerator", "Loop to calculate time for each subgoal position with velocity");
             }
 
             // Now just give each individual joint the calculated sub goal velocity and position and goal time calculated above.
@@ -476,6 +492,7 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
             // Don't worry: in most cases repetition is not needed and if it is, the number of iterations will be quite low.
             while (true)
             {
+                ROS_INFO_NAMED("ReferenceGenerator", "First while loop!");
                 bool all_goals_ok = true;
 
                 for(unsigned int i = 0; i < goal.num_goal_joints && all_goals_ok; ++i)
@@ -484,6 +501,7 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
 
                     while(!js.interpolator.setGoal(sub_goal.positions[i], sub_goal_velocities[i], time))
                     {
+                        ROS_INFO_NAMED("ReferenceGenerator", "Second while loop!");
                         // Whoops, we can't reach the goal in the time given! Let's lower the sub goal velocity and try again
                         sub_goal_velocities[i] *= 0.9;
 
