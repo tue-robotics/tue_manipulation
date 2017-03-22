@@ -6,17 +6,6 @@
 #include "tue/manipulation/reference_interpolator.h"
 #include "tue/manipulation/graph_viewer.h"
 
-template <typename T>
-inline std::string vectorToString(std::vector<T> vector)
-{
-  std::stringstream ss;
-  for (const T& e : vector)
-  {
-    ss << e << ", ";
-  }
-  return ss.str();
-}
-
 namespace tue
 {
 namespace manipulation
@@ -25,6 +14,7 @@ namespace manipulation
 enum JointGoalStatus
 {
     JOINT_GOAL_CANCELED,
+    JOINT_GOAL_ABORTED,
     JOINT_GOAL_SUCCEEDED,
     JOINT_GOAL_ACTIVE,
     JOINT_GOAL_UNKNOWN
@@ -51,16 +41,6 @@ struct JointGoal
 
     JointGoalStatus status;
 };
-std::ostream& operator<< (std::ostream& os, const JointGoal& j) {
-    os << "time_since_start(" << j.time_since_start << "), " <<
-          "sub_goal_idx(" << j.sub_goal_idx << "), " <<
-          "joint_index_mapping(" << vectorToString(j.joint_index_mapping) << "), " <<
-          "goal_msg(" << j.goal_msg << "), " <<
-          "num_goal_joints(" << j.num_goal_joints << "), " <<
-          "use_cubic_interpolation(" << j.use_cubic_interpolation << "), " <<
-          "status(" << j.status << ")";
-    return os;
-}
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -152,8 +132,10 @@ public:
     bool setGoal(const std::vector<std::string>& joint_names, const std::vector<double>& positions,
                  JointGoalInfo& info);
 
-    void cancelGoal(const std::string& id);
+    void cancelGoal(const std::string& id, JointGoalStatus joint_goal_status = JOINT_GOAL_CANCELED);
 
+    void cancelAllGoals();
+    void abortAllGoals();
 
     bool calculatePositionReferences(double dt, std::vector<double>& references);
 
@@ -220,7 +202,7 @@ private:
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    void calculatePositionReferences(JointGoal& goal, double dt);
+    bool calculatePositionReferencesInternal(JointGoal& goal, double dt);
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
