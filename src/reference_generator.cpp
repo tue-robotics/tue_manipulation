@@ -625,7 +625,7 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
         if (goal.status != JOINT_GOAL_ACTIVE)
             continue;
 
-        success = calculatePositionReferencesInternal(goal, dt) && succes;
+        succes = calculatePositionReferencesInternal(goal, dt) && succes;
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
