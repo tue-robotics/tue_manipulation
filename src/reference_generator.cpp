@@ -19,6 +19,27 @@ std::ostream& operator<<(std::ostream& out, const std::vector<double>& v)
     return out;
 }
 
+template <typename T>
+inline std::string vectorToString(std::vector<T> vector)
+{
+  std::stringstream ss;
+  for (const T& e : vector)
+  {
+    ss << e << ", ";
+  }
+  return ss.str();
+}
+std::ostream& operator<< (std::ostream& os, const JointGoal& j) {
+    os << "time_since_start(" << j.time_since_start << "), " <<
+          "sub_goal_idx(" << j.sub_goal_idx << "), " <<
+          "joint_index_mapping(" << vectorToString(j.joint_index_mapping) << "), " <<
+          "goal_msg(" << j.goal_msg << "), " <<
+          "num_goal_joints(" << j.num_goal_joints << "), " <<
+          "use_cubic_interpolation(" << j.use_cubic_interpolation << "), " <<
+          "status(" << j.status << ")";
+    return os;
+}
+
 // ----------------------------------------------------------------------------------------------------
 
 // Interpolate using Hermite curve
@@ -326,7 +347,27 @@ bool ReferenceGenerator::setGoal(const std::vector<std::string>& joint_names, co
 
 // ----------------------------------------------------------------------------------------------------
 
-void ReferenceGenerator::cancelGoal(const std::string& id)
+void ReferenceGenerator::cancelAllGoals()
+{
+  for (auto& goal : goals_)
+  {
+    cancelGoal(goal.first);
+  }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void ReferenceGenerator::abortAllGoals()
+{
+  for (auto& goal : goals_)
+  {
+    cancelGoal(goal.first, JOINT_GOAL_ABORTED);
+  }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void ReferenceGenerator::cancelGoal(const std::string& id, JointGoalStatus joint_goal_status)
 {
     std::map<std::string, JointGoal>::iterator it = goals_.find(id);
     if (it == goals_.end())
@@ -337,12 +378,12 @@ void ReferenceGenerator::cancelGoal(const std::string& id)
     for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
         joint_info_[goal.joint_index_mapping[i]].goal_id.clear();
 
-    goal.status = JOINT_GOAL_CANCELED;
+    goal.status = joint_goal_status;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
+bool ReferenceGenerator::calculatePositionReferencesInternal(JointGoal& goal, double dt)
 {
     time_ += dt;
     goal.time_since_start += dt;
@@ -382,6 +423,9 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // If so, go to next unreached sub goal
 
+    size_t MAX_ITERS = 100;
+    size_t ITER = 0;
+
     if (sub_goal_reached)
     {
         // If it has been reached, go to the next one
@@ -396,7 +440,7 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
 //            std::cout << "Goal reached in " << goal.time_since_start << " seconds" << std::endl;
 
             goal.status = JOINT_GOAL_SUCCEEDED;
-            return;
+            return true;
         }
 
         const trajectory_msgs::JointTrajectoryPoint& sub_goal = goal.goal_msg.trajectory.points[goal.sub_goal_idx];
@@ -476,6 +520,12 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
             // Don't worry: in most cases repetition is not needed and if it is, the number of iterations will be quite low.
             while (true)
             {
+                ++ITER;
+                if (ITER > MAX_ITERS)
+                {
+                    break;
+                }
+
                 bool all_goals_ok = true;
 
                 for(unsigned int i = 0; i < goal.num_goal_joints && all_goals_ok; ++i)
@@ -484,6 +534,13 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
 
                     while(!js.interpolator.setGoal(sub_goal.positions[i], sub_goal_velocities[i], time))
                     {
+                        ++ITER;
+
+                        if (ITER > MAX_ITERS)
+                        {
+                            break;
+                        }
+
                         // Whoops, we can't reach the goal in the time given! Let's lower the sub goal velocity and try again
                         sub_goal_velocities[i] *= 0.9;
 
@@ -529,7 +586,7 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
     }
     else
     {
-        for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
+        for (unsigned int i = 0; i < goal.num_goal_joints; ++i)
         {
             unsigned int joint_idx = goal.joint_index_mapping[i];
             JointInfo& j = joint_info_[joint_idx];
@@ -547,6 +604,8 @@ void ReferenceGenerator::calculatePositionReferences(JointGoal& goal, double dt)
             graph_vis_acc_.addPoint(0, joint_idx, time_, joint_info_[joint_idx].acceleration());
         }
     }
+
+    return (ITER < MAX_ITERS);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -565,7 +624,10 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
         if (goal.status != JOINT_GOAL_ACTIVE)
             continue;
 
-        calculatePositionReferences(goal, dt);
+        if (!calculatePositionReferencesInternal(goal, dt))
+        {
+          return false;
+        }
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -14,6 +14,7 @@ namespace manipulation
 enum JointGoalStatus
 {
     JOINT_GOAL_CANCELED,
+    JOINT_GOAL_ABORTED,
     JOINT_GOAL_SUCCEEDED,
     JOINT_GOAL_ACTIVE,
     JOINT_GOAL_UNKNOWN
@@ -131,8 +132,10 @@ public:
     bool setGoal(const std::vector<std::string>& joint_names, const std::vector<double>& positions,
                  JointGoalInfo& info);
 
-    void cancelGoal(const std::string& id);
+    void cancelGoal(const std::string& id, JointGoalStatus joint_goal_status = JOINT_GOAL_CANCELED);
 
+    void cancelAllGoals();
+    void abortAllGoals();
 
     bool calculatePositionReferences(double dt, std::vector<double>& references);
 
@@ -199,7 +202,7 @@ private:
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    void calculatePositionReferences(JointGoal& goal, double dt);
+    bool calculatePositionReferencesInternal(JointGoal& goal, double dt);
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
