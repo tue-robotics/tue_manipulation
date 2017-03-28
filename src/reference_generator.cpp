@@ -617,6 +617,7 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+    bool succes = true;
     for(std::map<std::string, JointGoal>::iterator it = goals_.begin(); it != goals_.end(); ++it)
     {
         JointGoal& goal = it->second;
@@ -624,10 +625,7 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
         if (goal.status != JOINT_GOAL_ACTIVE)
             continue;
 
-        if (!calculatePositionReferencesInternal(goal, dt))
-        {
-          return false;
-        }
+        success = calculatePositionReferencesInternal(goal, dt) && succes;
     }
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -654,7 +652,7 @@ bool ReferenceGenerator::calculatePositionReferences(double dt, std::vector<doub
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    return true;
+    return succes;
 }
 
 // ----------------------------------------------------------------------------------------------------
