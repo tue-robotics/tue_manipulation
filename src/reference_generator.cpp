@@ -423,6 +423,9 @@ bool ReferenceGenerator::calculatePositionReferencesInternal(JointGoal& goal, do
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // If so, go to next unreached sub goal
 
+    size_t MAX_ITERS = 100;
+    size_t ITER = 0;
+
     if (sub_goal_reached)
     {
         // If it has been reached, go to the next one
@@ -506,9 +509,6 @@ bool ReferenceGenerator::calculatePositionReferencesInternal(JointGoal& goal, do
                 JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
                 time = std::max<double>(time, js.interpolator.calculateTimeNeeded(sub_goal.positions[i], sub_goal_velocities[i]));
             }
-
-            size_t MAX_ITERS = 100;
-            size_t ITER = 0;
 
             // Now just give each individual joint the calculated sub goal velocity and position and goal time calculated above.
             // There is one problem: it might be the case that the max time calculated is too long for the joint to reach the
@@ -605,7 +605,7 @@ bool ReferenceGenerator::calculatePositionReferencesInternal(JointGoal& goal, do
         }
     }
 
-    return true;
+    return (ITER < MAX_ITERS);
 }
 
 // ----------------------------------------------------------------------------------------------------
