@@ -507,15 +507,59 @@ bool ReferenceGenerator::calculatePositionReferencesInternal(JointGoal& goal, do
                 time = std::max<double>(time, js.interpolator.calculateTimeNeeded(sub_goal.positions[i], sub_goal_velocities[i]));
             }
 
-            // Check if we can reach anything within that time, if not, return false
-            for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
-            {
-                JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
+            size_t MAX_ITERS = 100;
+            size_t ITER = 0;
 
-                if (!js.interpolator.setGoal(sub_goal.positions[i], sub_goal_velocities[i], time))
+            // Now just give each individual joint the calculated sub goal velocity and position and goal time calculated above.
+            // There is one problem: it might be the case that the max time calculated is too long for the joint to reach the
+            // given sub goal position and velocity. For example, it might have to brake to take more time, but then not have enough
+            // position margin left to accerelate to the sub goal velocity (maybe a bit hard to grasp, but think about it for a
+            // while...). Therefore we need to check for each joint if the calculated sub goal and time is still feasible. If not,
+            // we do a dirty trick: we lower the sub goal velocity a bit, see if that alters the max time, and try again. We do this
+            // in an iterative fashion until all joint goals are reachable.
+            // Don't worry: in most cases repetition is not needed and if it is, the number of iterations will be quite low.
+            while (true)
+            {
+                ++ITER;
+                if (ITER > MAX_ITERS)
                 {
-                    return false;
+                    break;
                 }
+
+                bool all_goals_ok = true;
+
+                for(unsigned int i = 0; i < goal.num_goal_joints && all_goals_ok; ++i)
+                {
+                    JointInfo& js = joint_info_[goal.joint_index_mapping[i]];
+
+                    while(!js.interpolator.setGoal(sub_goal.positions[i], sub_goal_velocities[i], time))
+                    {
+                        ++ITER;
+
+                        if (ITER > MAX_ITERS)
+                        {
+                            break;
+                        }
+
+                        // Whoops, we can't reach the goal in the time given! Let's lower the sub goal velocity and try again
+                        sub_goal_velocities[i] *= 0.9;
+
+                        // Before trying again, we check if the time needed has changed.
+                        double new_joint_time = js.interpolator.calculateTimeNeeded(sub_goal.positions[i], sub_goal_velocities[i]);
+
+                        if (new_joint_time > time)
+                        {
+                            // If now the joint needs longer than the current max time, we have to recalculate the max time
+                            // and repeat the process for all joints
+                            time = std::max(new_joint_time, time);
+                            all_goals_ok = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (all_goals_ok)
+                    break;
             }
         }
     }
