@@ -232,6 +232,7 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
         /// Sanity check if it is feasible at all
         bool found_ik = kinematic_state.setFromIK(joint_model_group, waypoints[num_grasp_points-1], 10, 0.1);
         ROS_DEBUG("FOUND IK: %d",found_ik);
+        found_ik = true;
 
         if (found_ik)
         {
