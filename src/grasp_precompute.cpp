@@ -107,6 +107,8 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
     unsigned int num_grasp_points = 1;
     unsigned int pre_grasp_inbetween_sampling_steps = 20; // Hardcoded, we might not need this... //PRE_GRASP_INBETWEEN_SAMPLING_STEPS
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+    robot_state::RobotState kinematic_state(moveit_group_->getRobotModel());
+    const moveit::core::JointModelGroup* joint_model_group = kinematic_state.getJointModelGroup(moveit_group_->getName());
 
     /// Check for absolute or delta (and ambiqious goals)
     bool absolute_requested=false, delta_requested=false;
@@ -227,14 +229,27 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
             waypoints[num_grasp_points-1].position.z += 0.05;
         }
 
-        /// Compute a plan to the first waypoint
-        ros::Duration(0.1).sleep(); // Make sure the robot is at the robot state before setStartState is called
-        moveit_group_->setStartStateToCurrentState();
-        moveit_group_->setPoseTarget(waypoints[num_grasp_points-1]);
-        moveit_group_->setGoalTolerance(0.01);
-//        ROS_INFO("x: %f, y: %f, z: %f", waypoints[num_grasp_points-1].position.x, waypoints[num_grasp_points-1].position.y, waypoints[num_grasp_points-1].position.z);
-        grasp_feasible = moveit_group_->plan(my_plan);
-//        ROS_INFO("Grasp feasible: %i", grasp_feasible);
+        /// Sanity check if it is feasible at all
+        bool found_ik = kinematic_state.setFromIK(joint_model_group, waypoints[num_grasp_points-1], 10, 0.1);
+        ROS_DEBUG("FOUND IK: %d",found_ik);
+        found_ik = true;
+
+        if (found_ik)
+        {
+            /// Compute a plan to the first waypoint
+            ros::Duration(0.1).sleep(); // Make sure the robot is at the robot state before setStartState is called
+            moveit_group_->setStartStateToCurrentState();
+            moveit_group_->setPoseTarget(waypoints[num_grasp_points-1]);
+            moveit_group_->setGoalPositionTolerance(0.01);
+            moveit_group_->setGoalOrientationTolerance(0.1);
+//          ROS_INFO("x: %f, y: %f, z: %f", waypoints[num_grasp_points-1].position.x, waypoints[num_grasp_points-1].position.y, waypoints[num_grasp_points-1].position.z);
+            grasp_feasible = moveit_group_->plan(my_plan);
+//          ROS_INFO("Grasp feasible: %i", grasp_feasible);
+        }
+        else
+        {
+            grasp_feasible = false;
+        }
 
         /// If we have a pre-grasp vector, compute the rest of the path
         if (num_grasp_points > 1 && grasp_feasible)
@@ -308,10 +323,13 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
         }
 
         /// If grasp not feasible, resample yaw
-        if (grasp_feasible != 1)
+        if (!grasp_feasible)
         {
             ROS_DEBUG("Not all grasp points feasible: resampling yaw");
-            yaw_delta = yaw_delta + yaw_sampling_step_;
+            if (yaw_sampling_direction > 0)
+            {
+                yaw_delta = yaw_delta + yaw_sampling_step_;
+            }
             yaw_sampling_direction = -1 * yaw_sampling_direction;
 
             if(yaw_delta > max_yaw_)
