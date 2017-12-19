@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
     sensor_msgs
     std_msgs
 )
+find_package(OpenCV REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -42,7 +43,7 @@ catkin_package(
 
 include_directories(
     include
-    ${catkin_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
 )
 
 # Constrained IK solver
@@ -60,7 +61,7 @@ add_library(tue_manipulation
     src/reference_interpolator.cpp   include/tue/manipulation/reference_interpolator.h
     src/graph_viewer.cpp include/tue/manipulation/graph_viewer.h
 )
-target_link_libraries(tue_manipulation constrained_ik_solver ${catkin_LIBRARIES})
+target_link_libraries(tue_manipulation constrained_ik_solver ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 # Joint trajectory action
 add_executable(joint_trajectory_action src/joint_trajectory_action.cpp)
