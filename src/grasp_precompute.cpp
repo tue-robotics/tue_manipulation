@@ -243,7 +243,14 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
             moveit_group_->setGoalPositionTolerance(0.01);
             moveit_group_->setGoalOrientationTolerance(0.1);
 //          ROS_INFO("x: %f, y: %f, z: %f", waypoints[num_grasp_points-1].position.x, waypoints[num_grasp_points-1].position.y, waypoints[num_grasp_points-1].position.z);
-            grasp_feasible = bool(moveit_group_->plan(my_plan));
+            if (moveit_group_->plan(my_plan) == moveit_msgs::MoveItErrorCodes::SUCCESS)
+            {
+                grasp_feasible = true;
+            }
+            else
+            {
+                grasp_feasible = false;
+            }
 //          ROS_INFO("Grasp feasible: %i", grasp_feasible);
         }
         else
@@ -362,7 +369,14 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
     }
 
     /// Planning succeeded, so execute it!
-    grasp_feasible = bool(moveit_group_->execute(my_plan));
+    if (moveit_group_->execute(my_plan) == moveit_msgs::MoveItErrorCodes::SUCCESS)
+    {
+        grasp_feasible = true;
+    }
+    else
+    {
+        grasp_feasible = false;
+    }
 
     if (grasp_feasible)
     {
