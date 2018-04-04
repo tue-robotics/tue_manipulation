@@ -46,8 +46,8 @@ namespace KDL {
          * kinematics solver for that chain.
          *
          * @param chain the chain to calculate the inverse position for
-         * @param q_max the maximum joint positions
          * @param q_min the minimum joint positions
+         * @param q_max the maximum joint positions
          * @param fksolver a forward position kinematics solver
          * @param iksolver an inverse velocity kinematics solver
          * @param maxiter the maximum Newton-Raphson iterations,
@@ -62,19 +62,21 @@ namespace KDL {
 
         virtual int CartToJnt(const JntArray& q_init, const Frame& p_in, JntArray& q_out);
 
+        virtual void updateInternalDataStructures();
     private:
-        const Chain chain;
+        const Chain& chain;
+        unsigned int nj;
         JntArray q_min;
         JntArray q_max;
-        //ChainIkSolverVel& iksolver;
         ChainFkSolverPos& fksolver;
         ChainIkSolverVel& iksolver;
         JntArray delta_q;
+        unsigned int maxiter;
+        double eps;
+
         Frame f;
         Twist delta_twist;
 
-        unsigned int maxiter;
-        double eps;
     };
 
 }

@@ -27,18 +27,35 @@ namespace KDL
 {
     ConstrainedChainIkSolverVel_pinv::ConstrainedChainIkSolverVel_pinv(const Chain& _chain,double _eps,int _maxiter,uint _n_constraints):
         chain(_chain),
+        nj(chain.getNrOfJoints()),
+        n_constraints(_n_constraints),
         jnt2jac(chain),
-        qdot_out_reduced(chain.getNrOfJoints() - _n_constraints),
-        jac(chain.getNrOfJoints()),
-        jac_reduced(chain.getNrOfJoints()-_n_constraints),
+        qdot_out_reduced(nj - n_constraints),
+        jac(nj),
+        jac_reduced(nj - n_constraints),
         svd(jac),
-        U(6,JntArray(chain.getNrOfJoints() - _n_constraints)),
-        S(chain.getNrOfJoints() - _n_constraints),
-        V(chain.getNrOfJoints() - _n_constraints, JntArray(chain.getNrOfJoints() - _n_constraints)),
-        tmp(chain.getNrOfJoints() - _n_constraints),
+        U(6,JntArray(nj - n_constraints)),
+        S(nj - n_constraints),
+        V(nj - n_constraints,JntArray(nj - n_constraints)),
+        tmp(nj - n_constraints),
         eps(_eps),
         maxiter(_maxiter)
     {
+    }
+
+    void ConstrainedChainIkSolverVel_pinv::updateInternalDataStructures() {
+        jnt2jac.updateInternalDataStructures();
+        nj = chain.getNrOfJoints();
+        jac.resize(nj);
+        jac_reduced.resize(nj - n_constraints);
+        svd = SVD_HH(jac);
+        for(unsigned int i = 0 ; i < U.size(); i++)
+            U[i].resize(nj);
+        S.resize(nj - n_constraints);
+        V.resize(nj - n_constraints);
+        for(unsigned int i = 0 ; i < V.size(); i++)
+            V[i].resize(nj - n_constraints);
+        tmp.resize(nj - n_constraints);
     }
 
     ConstrainedChainIkSolverVel_pinv::~ConstrainedChainIkSolverVel_pinv()
