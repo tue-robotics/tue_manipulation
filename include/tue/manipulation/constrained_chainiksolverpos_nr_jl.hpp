@@ -57,7 +57,7 @@ namespace KDL {
          *
          * @return
          */
-        ConstrainedChainIkSolverPos_NR_JL(const Chain& chain,const JntArray& q_min, const JntArray& q_max, ChainFkSolverPos& fksolver,ChainIkSolverVel& iksolver,unsigned int maxiter=100,double eps=1e-6);
+        ConstrainedChainIkSolverPos_NR_JL(const Chain& chain, const JntArray& q_min, const JntArray& q_max, ChainFkSolverPos& fksolver, ChainIkSolverVel& iksolver, unsigned int maxiter=100, double eps=1e-6);
         ~ConstrainedChainIkSolverPos_NR_JL();
 
         virtual int CartToJnt(const JntArray& q_init, const Frame& p_in, JntArray& q_out);
