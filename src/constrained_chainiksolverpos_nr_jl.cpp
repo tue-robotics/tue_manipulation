@@ -41,26 +41,37 @@ namespace KDL
         //}
     }
 
+    void ConstrainedChainIkSolverPos_NR_JL::updateInternalDataStructures()
+    {
+        nj = chain.getNrOfJoints();
+        q_min.data.conservativeResizeLike(Eigen::VectorXd::Constant(nj, std::numeric_limits<double>::min()));
+        q_max.data.conservativeResizeLike(Eigen::VectorXd::Constant(nj, std::numeric_limits<double>::max()));
+        iksolver.updateInternalDataStructures();
+        fksolver.updateInternalDataStructures();
+        delta_q.resize(nj);
+    }
+
+
     int ConstrainedChainIkSolverPos_NR_JL::CartToJnt(const JntArray& q_init, const Frame& p_in, JntArray& q_out)
     {
             q_out = q_init;
 
             unsigned int i;
-            for(i=0;i<maxiter;i++){
-                fksolver.JntToCart(q_out,f);
-                delta_twist = diff(f,p_in);
+            for(i=0; i<maxiter; i++){
+                fksolver.JntToCart(q_out, f);
+                delta_twist = diff(f, p_in);
 
 				if(Equal(delta_twist,Twist::Zero(),eps))
 					break;
 
                 // ToDo: modify iksolver
-				iksolver.CartToJnt(q_out,delta_twist,delta_q);
-                Add(q_out,delta_q,q_out);
+                iksolver.CartToJnt(q_out, delta_twist, delta_q);
+                Add(q_out, delta_q, q_out);
 
                 /// Apply constraints
                 // ToDo: don't hardcode
                 // ToDo: use polynomials
-                q_out(1) = 1.3365*q_out(0)*q_out(0)*q_out(0) -1.9862*q_out(0)*q_out(0) + 2.6392*q_out(0) + 0.001;
+                q_out(1) = 1.3365*q_out(0)*q_out(0)*q_out(0) - 1.9862*q_out(0)*q_out(0) + 2.6392*q_out(0) + 0.001;
 
                 for(unsigned int j=0; j<q_min.rows(); j++) {
                   if(q_out(j) < q_min(j))

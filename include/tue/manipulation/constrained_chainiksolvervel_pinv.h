@@ -67,9 +67,12 @@ namespace KDL
          *
          */
         virtual int CartToJnt(const JntArray& q_init, const FrameVel& v_in, JntArrayVel& q_out){return -1;};
+
+        virtual void updateInternalDataStructures();
     private:
-        const Chain chain;
+        const Chain& chain;
         ChainJntToJacSolver jnt2jac;
+        unsigned int nj, n_constraints;
         JntArray qdot_out_reduced;
         Jacobian jac, jac_reduced;
         SVD_HH svd;
