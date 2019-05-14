@@ -82,7 +82,7 @@ bool IKSolver::initFromURDF(const std::string& urdf, const std::string root_name
         {
 //            std::cout << chain_.getSegment(i).getName() << " -> " << kdl_joint.getName() << " -> " << chain_.getSegment(i + 1).getName() << std::endl;
 
-            boost::shared_ptr<const urdf::Joint> joint = robot_model.getJoint(kdl_joint.getName());
+            urdf::JointConstSharedPtr joint = robot_model.getJoint(kdl_joint.getName());
             if (joint && joint->limits)
             {
                 q_min_(j) = joint->limits->lower;

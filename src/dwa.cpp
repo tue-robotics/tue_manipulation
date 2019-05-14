@@ -91,7 +91,7 @@ bool DWA::initFromURDF(const std::string& urdf, const std::string root_name,
         const KDL::Joint& kdl_joint = chain_.getSegment(i).getJoint();
         if (kdl_joint.getType() != KDL::Joint::None)
         {
-            boost::shared_ptr<const urdf::Joint> joint = robot_model.getJoint(kdl_joint.getName());
+            urdf::JointConstSharedPtr joint = robot_model.getJoint(kdl_joint.getName());
             if (joint && joint->limits)
             {
                 q_min_(j) = joint->limits->lower;
