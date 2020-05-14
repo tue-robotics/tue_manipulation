@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
     geolib2 # Temp
     message_generation
     moveit_ros_planning_interface
+    orocos_kdl
     sensor_msgs
     std_msgs
 )
