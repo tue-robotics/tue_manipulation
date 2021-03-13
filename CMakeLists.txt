@@ -1,45 +1,46 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(tue_manipulation)
-add_definitions(-std=c++11)
+
 
 find_package(catkin REQUIRED COMPONENTS
-    kdl_parser
-    urdf
     actionlib
     actionlib_msgs
-    tf
-    tf_conversions
     control_msgs
-    tue_msgs
-    tue_manipulation_msgs
     diagnostic_msgs
-    visualization_msgs
-    geolib2 # Temp
-    message_generation
+    geolib2
+    kdl_parser
+    moveit_msgs
     moveit_ros_planning_interface
-    orocos_kdl
     sensor_msgs
     std_msgs
+    tf
+    tf_conversions
+    tue_manipulation_msgs
+    tue_msgs
+    urdf
+    visualization_msgs
 )
 find_package(OpenCV REQUIRED)
+find_package(orocos_kdl REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tue_manipulation
   CATKIN_DEPENDS
+    actionlib
     actionlib_msgs
     control_msgs
     diagnostic_msgs
     kdl_parser
-    message_runtime
     moveit_msgs
     sensor_msgs
     std_msgs
     tf
-    tue_msgs
     tue_manipulation_msgs
+    tue_msgs
     urdf
     visualization_msgs
+  DEPENDS orocos_kdl
 )
 
 include_directories(
