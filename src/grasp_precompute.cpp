@@ -145,7 +145,7 @@ void GraspPrecompute::execute(const tue_manipulation_msgs::GraspPrecomputeGoalCo
             {
                 listener_->lookupTransform(goal->delta.header.frame_id, tip_link_, goal->delta.header.stamp, tmp);
             }
-            catch (tf::TransformException ex)
+            catch (const tf::TransformException& ex)
             {
                 as_->setAborted();
                 ROS_ERROR("%s",ex.what());
