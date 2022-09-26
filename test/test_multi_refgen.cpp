@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 
     tue::manipulation::ReferenceGenerator refgen;
 
-    int num_joints;
+    uint num_joints;
     file >> num_joints;
 
     control_msgs::FollowJointTrajectoryGoal goal;

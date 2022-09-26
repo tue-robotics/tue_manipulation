@@ -13,7 +13,7 @@
 tue::manipulation::DWA dwa;
 KDL::JntArray q_current(8);
 std::vector<bool> q_set(8, false);
-int num_joints_set = 0;
+uint num_joints_set = 0;
 
 ros::Publisher pub_torso, pub_arm;
 
