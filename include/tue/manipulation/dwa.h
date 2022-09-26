@@ -22,6 +22,10 @@ class Constraint
 
 public:
 
+    Constraint() = default;
+
+    virtual ~Constraint() = default;
+
     // Returns cost to fullfil constrained. 0 means that constraint is fullfilled.
     virtual double test(const geo::Pose3D& pose) const = 0;
 };
