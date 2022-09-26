@@ -183,7 +183,7 @@ bool ReferenceGenerator::resetJointState(const std::string& joint_name, double p
     if (idx < 0)
         return false;
    
-	JointInfo& j = joint_info_[idx];
+    JointInfo& j = joint_info_[idx];
     j.interpolator.resetState(pos);
     j.goal_id.clear();
     j.is_set = true;
