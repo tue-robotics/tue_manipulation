@@ -27,9 +27,9 @@ namespace KDL
 {
     ConstrainedChainIkSolverVel_pinv::ConstrainedChainIkSolverVel_pinv(const Chain& _chain, double _eps, int _maxiter, uint _n_constraints):
         chain(_chain),
+        jnt2jac(chain),
         nj(chain.getNrOfJoints()),
         n_constraints(_n_constraints),
-        jnt2jac(chain),
         qdot_out_reduced(nj - n_constraints),
         jac(nj),
         jac_reduced(nj - n_constraints),
