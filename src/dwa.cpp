@@ -25,7 +25,7 @@ geo::Pose3D toGeo(const KDL::Frame& f)
 
 // ----------------------------------------------------------------------------------------------------
 
-DWA::DWA() : constraint_(NULL)
+DWA::DWA() : constraint_(nullptr)
 {
 }
 
