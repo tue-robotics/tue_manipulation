@@ -28,17 +28,17 @@ public:
 
     virtual double test(const geo::Pose3D& pose) const
     {
-        double dx = goal_.t.x - pose.t.x;
-        double dy = goal_.t.y - pose.t.y;
+//        double dx = goal_.t.x - pose.t.x;
+//        double dy = goal_.t.y - pose.t.y;
 
-        double plane_dist = sqrt(dx * dx + dy * dy);
+//        double plane_dist = sqrt(dx * dx + dy * dy);
 
-        double wanted_dist = 0;
-        double plane_err = std::abs(plane_dist - wanted_dist);
+//        double wanted_dist = 0;
+//        double plane_err = std::abs(plane_dist - wanted_dist);
 
-        double z_err = std::abs(goal_.t.z - pose.t.z);
+//        double z_err = std::abs(goal_.t.z - pose.t.z);
 
-        double rot_err1 = std::abs((pose.R * geo::Vector3(0.1, 0, 0)).z);
+//        double rot_err1 = std::abs((pose.R * geo::Vector3(0.1, 0, 0)).z);
         double rot_err2 = std::abs((pose.R * geo::Vector3(0, 0.1, 0)).z);
 
 //        return plane_err * plane_err + z_err + rot_err1;
