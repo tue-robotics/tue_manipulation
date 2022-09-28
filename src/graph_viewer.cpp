@@ -17,7 +17,7 @@ GraphViewer::~GraphViewer()
 
 // ----------------------------------------------------------------------------------------------------
 
-void GraphViewer::addPoint(int graph_id, int label, double x, double y, double y_dot)
+void GraphViewer::addPoint(int /*graph_id*/, int label, double x, double y, double y_dot)
 {
     if (num_points_ == 0)
     {

@@ -28,10 +28,10 @@ void torsoMeasurementCb(const sensor_msgs::JointStateConstPtr& meas) {
 }
 
 void setGoalTolerance(const control_msgs::FollowJointTrajectoryGoalConstPtr goal, std::vector<double>& goal_tolerance) {
-    int n_joints = goal->trajectory.joint_names.size();
+    uint n_joints = goal->trajectory.joint_names.size();
     goal_tolerance.resize(n_joints, EPSILON);
-    for (unsigned int i = 0; i < n_joints; i++) {
-        for (unsigned int j = 0; j < goal->goal_tolerance.size(); j++) {
+    for (uint i = 0; i < n_joints; i++) {
+        for (uint j = 0; j < goal->goal_tolerance.size(); j++) {
             if (goal->trajectory.joint_names[i] == goal->goal_tolerance[j].name) {
                 goal_tolerance[i] = goal->goal_tolerance[j].position;
             }
@@ -47,8 +47,8 @@ void goalCb(const control_msgs::FollowJointTrajectoryGoalConstPtr& torso_goal) {
     control_msgs::FollowJointTrajectoryFeedback feedback;
     sensor_msgs::JointState torso_ref;
 
-    int goal_index = 0;
-    int n_joints = goal->trajectory.joint_names.size();
+    uint goal_index = 0;
+    uint n_joints = goal->trajectory.joint_names.size();
     torso_ref.name = goal->trajectory.joint_names;
     feedback.joint_names = goal->trajectory.joint_names;
     std::vector<double> goal_tolerance;
@@ -97,8 +97,8 @@ void goalCb(const control_msgs::FollowJointTrajectoryGoalConstPtr& torso_goal) {
             as_->publishFeedback(feedback);
 
             // Count number of converged joints
-            unsigned int n_converged = 0;
-            for (unsigned int i = 0; i < n_joints; i++) {
+            uint n_converged = 0;
+            for (uint i = 0; i < n_joints; i++) {
                 if (fabs(torso_ref.position[i] - torso_meas_.position[i]) < goal_tolerance[i]) {
                     ++n_converged;
                 }

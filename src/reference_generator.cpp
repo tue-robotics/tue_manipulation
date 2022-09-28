@@ -183,7 +183,7 @@ bool ReferenceGenerator::resetJointState(const std::string& joint_name, double p
     if (idx < 0)
         return false;
    
-	JointInfo& j = joint_info_[idx];
+    JointInfo& j = joint_info_[idx];
     j.interpolator.resetState(pos);
     j.goal_id.clear();
     j.is_set = true;
@@ -432,7 +432,7 @@ bool ReferenceGenerator::calculatePositionReferencesInternal(JointGoal& goal, do
         ++goal.sub_goal_idx;
 
         // Check if this was the last trajectory point. If so, this goal is finished!
-        if (goal.sub_goal_idx >= goal.goal_msg.trajectory.points.size())
+        if (goal.sub_goal_idx >= static_cast<long>(goal.goal_msg.trajectory.points.size()))
         {
             for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
                 joint_info_[goal.joint_index_mapping[i]].goal_id.clear();
@@ -470,7 +470,7 @@ bool ReferenceGenerator::calculatePositionReferencesInternal(JointGoal& goal, do
             {
                 sub_goal_velocities = sub_goal.velocities;
             }
-            else if (goal.sub_goal_idx + 1 < goal.goal_msg.trajectory.points.size())
+            else if (goal.sub_goal_idx + 1 < static_cast<long>(goal.goal_msg.trajectory.points.size()))
             {
                 for(unsigned int i = 0; i < goal.num_goal_joints; ++i)
                 {

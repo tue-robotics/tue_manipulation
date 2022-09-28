@@ -66,7 +66,7 @@ namespace KDL
          * not (yet) implemented.
          *
          */
-        virtual int CartToJnt(const JntArray& q_init, const FrameVel& v_in, JntArrayVel& q_out){return -1;};
+        virtual int CartToJnt(const JntArray& /*q_init*/, const FrameVel& /*v_in*/, JntArrayVel& /*q_out*/){return -1;};
 
         virtual void updateInternalDataStructures();
     private:
